@@ -1,17 +1,16 @@
 package io.vertx.blog.first;
 
-import io.vertx.ext.web.RoutingContext;
+import java.util.Collection;
+import java.util.Optional;
 
 interface WhiskyService {
+	
+	Whisky addOne(Whisky whisky);
 
-	void addOne(RoutingContext routingContext);
+	Optional<Whisky> getOne(int id);
 
-	void getOne(RoutingContext routingContext);
+	Optional<Whisky> deleteOne(int id);
 
-	void updateOne(RoutingContext routingContext);
-
-	void deleteOne(RoutingContext routingContext);
-
-	void getAll(RoutingContext routingContext);
+	Collection<Whisky> getAll();
 
 }

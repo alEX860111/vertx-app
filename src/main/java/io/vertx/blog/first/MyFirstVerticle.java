@@ -29,14 +29,14 @@ public final class MyFirstVerticle extends AbstractVerticle {
 
 		router.route("/assets/*").handler(StaticHandler.create("assets"));
 
-		final WhiskyService service = new WhiskyServiceImpl();
+		final WhiskyHandler handler = new WhiskyHandlerImpl(new WhiskyServiceImpl());
 
-		router.get("/api/whiskies").handler(service::getAll);
+		router.get("/api/whiskies").handler(handler::getAll);
 		router.route("/api/whiskies*").handler(BodyHandler.create());
-		router.post("/api/whiskies").handler(service::addOne);
-		router.get("/api/whiskies/:id").handler(service::getOne);
-		router.put("/api/whiskies/:id").handler(service::updateOne);
-		router.delete("/api/whiskies/:id").handler(service::deleteOne);
+		router.post("/api/whiskies").handler(handler::addOne);
+		router.get("/api/whiskies/:id").handler(handler::getOne);
+		router.put("/api/whiskies/:id").handler(handler::updateOne);
+		router.delete("/api/whiskies/:id").handler(handler::deleteOne);
 
 		return router;
 	}
