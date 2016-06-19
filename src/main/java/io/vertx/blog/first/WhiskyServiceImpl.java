@@ -28,6 +28,16 @@ final class WhiskyServiceImpl implements WhiskyService {
 	}
 
 	@Override
+	public Optional<Whisky> updateOne(int id, String name, String origin) {
+		final Optional<Whisky> whiskyOptional = getOne(id);
+		whiskyOptional.ifPresent(whisky -> {
+			whisky.setName(name);
+			whisky.setOrigin(origin);
+		});
+		return whiskyOptional;
+	}
+
+	@Override
 	public Optional<Whisky> deleteOne(final int id) {
 		return Optional.ofNullable(whiskies.remove(id));
 	}

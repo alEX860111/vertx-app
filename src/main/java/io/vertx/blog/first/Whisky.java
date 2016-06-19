@@ -2,7 +2,7 @@ package io.vertx.blog.first;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class Whisky {
+public final class Whisky {
 
 	private static final AtomicInteger COUNTER = new AtomicInteger();
 

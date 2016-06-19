@@ -1,13 +1,21 @@
 package io.vertx.blog.first;
 
+import javax.inject.Inject;
+
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.StaticHandler;
 
-public final class MyFirstVerticle extends AbstractVerticle {
+final class HttpServerVerticle extends AbstractVerticle {
+
+	private final WhiskyHandler handler;
+
+	@Inject
+	public HttpServerVerticle(final WhiskyHandler handler) {
+		this.handler = handler;
+	}
 
 	@Override
 	public void start(final Future<Void> fut) {
@@ -25,11 +33,7 @@ public final class MyFirstVerticle extends AbstractVerticle {
 	private Router createRouter() {
 		final Router router = Router.router(vertx);
 
-		router.route("/").handler(this::handleRoot);
-
 		router.route("/assets/*").handler(StaticHandler.create("assets"));
-
-		final WhiskyHandler handler = new WhiskyHandlerImpl(new WhiskyServiceImpl());
 
 		router.get("/api/whiskies").handler(handler::getAll);
 		router.route("/api/whiskies*").handler(BodyHandler.create());
@@ -39,11 +43,6 @@ public final class MyFirstVerticle extends AbstractVerticle {
 		router.delete("/api/whiskies/:id").handler(handler::deleteOne);
 
 		return router;
-	}
-
-	private void handleRoot(RoutingContext routingContext) {
-		routingContext.response().putHeader("content-type", "text/html")
-				.end("<h1>Hello from my first Vert.x 3 application!!!</h1>");
 	}
 
 }
