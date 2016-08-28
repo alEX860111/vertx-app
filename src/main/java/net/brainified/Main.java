@@ -1,4 +1,4 @@
-package io.vertx.blog.first;
+package net.brainified;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -9,7 +9,8 @@ public final class Main {
 
 	public static void main(String[] args) {
 		final Injector injector = Guice.createInjector(new ApplicationModule());
-		Vertx.vertx().deployVerticle(injector.getInstance(HttpServerVerticle.class));
+		final Vertx vertx = injector.getInstance(Vertx.class);
+		vertx.deployVerticle(injector.getInstance(HttpServerVerticle.class));
 	}
 
 }
