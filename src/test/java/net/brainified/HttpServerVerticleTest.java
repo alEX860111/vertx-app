@@ -1,7 +1,5 @@
 package net.brainified;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -15,6 +13,7 @@ import org.mockito.Mockito;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -41,7 +40,7 @@ public class HttpServerVerticleTest {
   }
 
   @Test
-  public void testGetProducts_200(TestContext context) {
+  public void testGetProducts(TestContext context) {
     when(serviceMock.getProducts()).thenReturn(Future.succeededFuture(Collections.emptyList()));
 
     final Async async = context.async();
@@ -50,27 +49,25 @@ public class HttpServerVerticleTest {
       context.assertEquals(200, response.statusCode());
       response.handler(body -> {
         context.assertTrue(body.toJsonArray().getList().isEmpty());
-        verify(serviceMock).getProducts();
         async.complete();
       });
     });
   }
 
   @Test
-  public void testGetProducts_500(TestContext context) {
+  public void testGetProducts_serverError(TestContext context) {
     when(serviceMock.getProducts()).thenReturn(Future.failedFuture(""));
 
     final Async async = context.async();
 
     vertx.createHttpClient().getNow(8080, "localhost", "/api/products", response -> {
       context.assertEquals(500, response.statusCode());
-      verify(serviceMock).getProducts();
       async.complete();
     });
   }
 
   @Test
-  public void testGetProduct_200(TestContext context) {
+  public void testGetProduct(TestContext context) {
     final Product product = new Product();
     product.setId(1);
     product.setName("name");
@@ -86,33 +83,205 @@ public class HttpServerVerticleTest {
         context.assertEquals(1, resultProduct.getId());
         context.assertEquals("name", resultProduct.getName());
         context.assertEquals(100, resultProduct.getPrice());
-        verify(serviceMock).getProduct(1);
         async.complete();
       });
     });
   }
 
   @Test
-  public void testGetProduct_400(TestContext context) {
+  public void testGetProduct_sendInvalidProductId(TestContext context) {
     final Async async = context.async();
 
     vertx.createHttpClient().getNow(8080, "localhost", "/api/products/x", response -> {
       context.assertEquals(400, response.statusCode());
-      verifyZeroInteractions(serviceMock);
-      async.complete();
+      response.handler(body -> {
+        context.assertEquals("Invalid product id", body.toString());
+        async.complete();
+      });
     });
   }
 
   @Test
-  public void testGetProduct_404(TestContext context) {
+  public void testGetProduct_notFound(TestContext context) {
     when(serviceMock.getProduct(1)).thenReturn(Future.failedFuture("not found"));
 
     final Async async = context.async();
 
     vertx.createHttpClient().getNow(8080, "localhost", "/api/products/1", response -> {
       context.assertEquals(404, response.statusCode());
-      verify(serviceMock).getProduct(1);
       async.complete();
     });
+  }
+
+  @Test
+  public void testAddProduct(TestContext context) {
+    final JsonObject json = new JsonObject();
+    json.put("name", "myProduct");
+    json.put("price", 100);
+
+    final Product product = new Product();
+    product.setId(1);
+    product.setName(json.getString("name"));
+    product.setPrice(json.getInteger("price"));
+    when(serviceMock.addProduct(json.getString("name"), json.getInteger("price"))).thenReturn(Future.succeededFuture(product));
+
+    final Async async = context.async();
+
+    vertx.createHttpClient().post(8080, "localhost", "/api/products", response -> {
+      context.assertEquals(201, response.statusCode());
+      response.handler(body -> {
+        final Product resultProduct = Json.decodeValue(body.toString(), Product.class);
+        context.assertEquals(product.getId(), resultProduct.getId());
+        context.assertEquals(json.getString("name"), resultProduct.getName());
+        context.assertEquals(json.getInteger("price"), resultProduct.getPrice());
+        async.complete();
+      });
+    }).end(json.encode());
+  }
+
+  @Test
+  public void testAddProduct_sendInvalidBody(TestContext context) {
+    final Async async = context.async();
+
+    vertx.createHttpClient().post(8080, "localhost", "/api/products", response -> {
+      context.assertEquals(400, response.statusCode());
+      response.handler(body -> {
+        context.assertEquals("Invalid JSON in body", body.toString());
+        async.complete();
+      });
+    }).end();
+  }
+
+  @Test
+  public void testAddProduct_serverError(TestContext context) {
+    final JsonObject json = new JsonObject();
+    json.put("name", "myProduct");
+    json.put("price", 100);
+
+    when(serviceMock.addProduct(json.getString("name"), json.getInteger("price"))).thenReturn(Future.failedFuture("failed"));
+
+    final Async async = context.async();
+
+    vertx.createHttpClient().post(8080, "localhost", "/api/products", response -> {
+      context.assertEquals(500, response.statusCode());
+      async.complete();
+    }).end(json.encode());
+  }
+
+  @Test
+  public void testUpdateProduct(TestContext context) {
+    final int id = 1;
+
+    final JsonObject json = new JsonObject();
+    json.put("name", "myProduct");
+    json.put("price", 100);
+
+    final Product product = new Product();
+    product.setId(id);
+    product.setName(json.getString("name"));
+    product.setPrice(json.getInteger("price"));
+    when(serviceMock.updateProduct(id, json.getString("name"), json.getInteger("price"))).thenReturn(Future.succeededFuture(product));
+
+    final Async async = context.async();
+
+    vertx.createHttpClient().put(8080, "localhost", "/api/products/" + id, response -> {
+      context.assertEquals(200, response.statusCode());
+      response.handler(body -> {
+        final Product resultProduct = Json.decodeValue(body.toString(), Product.class);
+        context.assertEquals(product.getId(), resultProduct.getId());
+        context.assertEquals(json.getString("name"), resultProduct.getName());
+        context.assertEquals(json.getInteger("price"), resultProduct.getPrice());
+        async.complete();
+      });
+    }).end(json.encode());
+  }
+
+  @Test
+  public void testUpdateProduct_sendInvalidProductId(TestContext context) {
+    final JsonObject json = new JsonObject();
+    json.put("name", "myProduct");
+    json.put("price", 100);
+
+    final Async async = context.async();
+
+    vertx.createHttpClient().put(8080, "localhost", "/api/products/x", response -> {
+      context.assertEquals(400, response.statusCode());
+      response.handler(body -> {
+        context.assertEquals("Invalid product id", body.toString());
+        async.complete();
+      });
+    }).end(json.encode());
+  }
+
+  @Test
+  public void testUpdateProduct_sendInvalidBody(TestContext context) {
+    final Async async = context.async();
+
+    vertx.createHttpClient().put(8080, "localhost", "/api/products/1", response -> {
+      context.assertEquals(400, response.statusCode());
+      response.handler(body -> {
+        context.assertEquals("Invalid JSON in body", body.toString());
+        async.complete();
+      });
+    }).end();
+  }
+
+  @Test
+  public void testUpdateProduct_notFound(TestContext context) {
+    final int id = 1;
+
+    final JsonObject json = new JsonObject();
+    json.put("name", "myProduct");
+    json.put("price", 100);
+
+    when(serviceMock.updateProduct(id, json.getString("name"), json.getInteger("price"))).thenReturn(Future.failedFuture("not found"));
+
+    final Async async = context.async();
+
+    vertx.createHttpClient().put(8080, "localhost", "/api/products/" + id, response -> {
+      context.assertEquals(404, response.statusCode());
+      async.complete();
+    }).end(json.encode());
+  }
+
+  @Test
+  public void testDeleteProduct(TestContext context) {
+    final int id = 1;
+
+    when(serviceMock.deleteProduct(id)).thenReturn(Future.succeededFuture());
+
+    final Async async = context.async();
+
+    vertx.createHttpClient().delete(8080, "localhost", "/api/products/" + id, response -> {
+      context.assertEquals(204, response.statusCode());
+      async.complete();
+    }).end();
+  }
+
+  @Test
+  public void testDeleteProduct_sendInvalidProductId(TestContext context) {
+    final Async async = context.async();
+
+    vertx.createHttpClient().delete(8080, "localhost", "/api/products/x", response -> {
+      context.assertEquals(400, response.statusCode());
+      response.handler(body -> {
+        context.assertEquals("Invalid product id", body.toString());
+        async.complete();
+      });
+    }).end();
+  }
+
+  @Test
+  public void testDeleteProduct_notFound(TestContext context) {
+    final int id = 1;
+
+    when(serviceMock.deleteProduct(id)).thenReturn(Future.failedFuture(""));
+
+    final Async async = context.async();
+
+    vertx.createHttpClient().delete(8080, "localhost", "/api/products/" + id, response -> {
+      context.assertEquals(404, response.statusCode());
+      async.complete();
+    }).end();
   }
 }

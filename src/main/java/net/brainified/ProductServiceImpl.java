@@ -15,9 +15,9 @@ import io.vertx.core.Vertx;
 
 final class ProductServiceImpl implements ProductService {
 
-  private static final AtomicInteger COUNTER = new AtomicInteger();
-
   private static final int DELAY_IN_MS = 100;
+
+  private final AtomicInteger COUNTER = new AtomicInteger();
 
   private Vertx vertx;
 

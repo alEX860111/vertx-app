@@ -1,11 +1,11 @@
 package net.brainified;
 
 import java.util.List;
-import java.util.Objects;
 
 import javax.inject.Inject;
 
 import io.vertx.core.Future;
+import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
@@ -38,7 +38,7 @@ final class ProductHandlerImpl implements ProductHandler {
     try {
       id = Integer.valueOf(routingContext.request().getParam("id"));
     } catch (final NumberFormatException e) {
-      routingContext.response().setStatusCode(400).end();
+      routingContext.response().setStatusCode(400).end("Invalid product id");
       return;
     }
 
@@ -55,9 +55,11 @@ final class ProductHandlerImpl implements ProductHandler {
 
   @Override
   public void addProduct(final RoutingContext routingContext) {
-    final JsonObject json = routingContext.getBodyAsJson();
-    if (Objects.isNull(json)) {
-      routingContext.response().setStatusCode(400).end();
+    final JsonObject json;
+    try {
+      json = routingContext.getBodyAsJson();
+    } catch (final DecodeException e) {
+      routingContext.response().setStatusCode(400).end("Invalid JSON in body");
       return;
     }
 
@@ -78,13 +80,15 @@ final class ProductHandlerImpl implements ProductHandler {
     try {
       id = Integer.valueOf(routingContext.request().getParam("id"));
     } catch (final NumberFormatException e) {
-      routingContext.response().setStatusCode(400).end();
+      routingContext.response().setStatusCode(400).end("Invalid product id");
       return;
     }
 
-    final JsonObject json = routingContext.getBodyAsJson();
-    if (Objects.isNull(json)) {
-      routingContext.response().setStatusCode(400).end();
+    final JsonObject json;
+    try {
+      json = routingContext.getBodyAsJson();
+    } catch (final DecodeException e) {
+      routingContext.response().setStatusCode(400).end("Invalid JSON in body");
       return;
     }
 
@@ -106,7 +110,7 @@ final class ProductHandlerImpl implements ProductHandler {
     try {
       id = Integer.valueOf(routingContext.request().getParam("id"));
     } catch (final NumberFormatException e) {
-      routingContext.response().setStatusCode(400).end();
+      routingContext.response().setStatusCode(400).end("Invalid product id");
       return;
     }
 
