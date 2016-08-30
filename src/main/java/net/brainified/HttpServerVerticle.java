@@ -2,11 +2,15 @@ package net.brainified;
 
 import javax.inject.Inject;
 
+import com.google.common.collect.Sets;
+
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.ext.web.handler.CorsHandler;
 
 final class HttpServerVerticle extends AbstractVerticle {
 
@@ -35,6 +39,9 @@ final class HttpServerVerticle extends AbstractVerticle {
 
   private Router createRouter() {
     final Router router = Router.router(vertx);
+    router.route().handler(CorsHandler.create("http://localhost:3000")
+        .allowedMethods(Sets.newHashSet(HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE)));
+
     router.get("/api/products").handler(handler::getProducts);
     router.route("/api/products*").handler(BodyHandler.create());
     router.post("/api/products").handler(handler::addProduct);
