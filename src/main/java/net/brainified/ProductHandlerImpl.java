@@ -12,6 +12,10 @@ import io.vertx.ext.web.RoutingContext;
 
 final class ProductHandlerImpl implements ProductHandler {
 
+  private static final String INVALID_PRODUCT_ID = "Invalid product id";
+
+  private static final String INVALID_JSON_IN_BODY = "Invalid JSON in body";
+
   private final ProductService service;
 
   @Inject
@@ -38,7 +42,7 @@ final class ProductHandlerImpl implements ProductHandler {
     try {
       id = Integer.valueOf(routingContext.request().getParam("id"));
     } catch (final NumberFormatException e) {
-      routingContext.response().setStatusCode(400).end("Invalid product id");
+      routingContext.response().setStatusCode(400).end(INVALID_PRODUCT_ID);
       return;
     }
 
@@ -59,7 +63,7 @@ final class ProductHandlerImpl implements ProductHandler {
     try {
       json = routingContext.getBodyAsJson();
     } catch (final DecodeException e) {
-      routingContext.response().setStatusCode(400).end("Invalid JSON in body");
+      routingContext.response().setStatusCode(400).end(INVALID_JSON_IN_BODY);
       return;
     }
 
@@ -80,7 +84,7 @@ final class ProductHandlerImpl implements ProductHandler {
     try {
       id = Integer.valueOf(routingContext.request().getParam("id"));
     } catch (final NumberFormatException e) {
-      routingContext.response().setStatusCode(400).end("Invalid product id");
+      routingContext.response().setStatusCode(400).end(INVALID_PRODUCT_ID);
       return;
     }
 
@@ -88,7 +92,7 @@ final class ProductHandlerImpl implements ProductHandler {
     try {
       json = routingContext.getBodyAsJson();
     } catch (final DecodeException e) {
-      routingContext.response().setStatusCode(400).end("Invalid JSON in body");
+      routingContext.response().setStatusCode(400).end(INVALID_JSON_IN_BODY);
       return;
     }
 
@@ -110,7 +114,7 @@ final class ProductHandlerImpl implements ProductHandler {
     try {
       id = Integer.valueOf(routingContext.request().getParam("id"));
     } catch (final NumberFormatException e) {
-      routingContext.response().setStatusCode(400).end("Invalid product id");
+      routingContext.response().setStatusCode(400).end(INVALID_PRODUCT_ID);
       return;
     }
 
