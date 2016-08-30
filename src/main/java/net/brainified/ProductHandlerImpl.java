@@ -1,7 +1,5 @@
 package net.brainified;
 
-import java.util.List;
-
 import javax.inject.Inject;
 
 import io.vertx.core.Future;
@@ -25,11 +23,11 @@ final class ProductHandlerImpl implements ProductHandler {
 
   @Override
   public void getProducts(final RoutingContext routingContext) {
-    final Future<List<Product>> future = service.getProducts();
+    final Future<ProductContainer> future = service.getProducts();
     future.setHandler(productsResult -> {
       if (productsResult.succeeded()) {
-        final List<Product> products = productsResult.result();
-        routingContext.response().putHeader("content-type", "application/json; charset=utf-8").end(Json.encodePrettily(products));
+        final ProductContainer container = productsResult.result();
+        routingContext.response().putHeader("content-type", "application/json; charset=utf-8").end(Json.encodePrettily(container));
       } else {
         routingContext.response().setStatusCode(500).end();
       }

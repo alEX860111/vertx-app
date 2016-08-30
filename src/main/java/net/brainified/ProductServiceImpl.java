@@ -34,11 +34,13 @@ final class ProductServiceImpl implements ProductService {
   }
 
   @Override
-  public Future<List<Product>> getProducts() {
-    final Future<List<Product>> future = Future.future();
+  public Future<ProductContainer> getProducts() {
+    final Future<ProductContainer> future = Future.future();
     vertx.setTimer(DELAY_IN_MS, timerId -> {
+      final ProductContainer container = new ProductContainer();
       final List<Product> productList = Lists.newArrayList(products.values());
-      future.complete(productList);
+      container.setProducts(productList);
+      future.complete(container);
     });
     return future;
   }

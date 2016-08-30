@@ -41,14 +41,17 @@ public class HttpServerVerticleTest {
 
   @Test
   public void testGetProducts(TestContext context) {
-    when(serviceMock.getProducts()).thenReturn(Future.succeededFuture(Collections.emptyList()));
+    final ProductContainer container = new ProductContainer();
+    container.setProducts(Collections.emptyList());
+    when(serviceMock.getProducts()).thenReturn(Future.succeededFuture(container));
 
     final Async async = context.async();
 
     vertx.createHttpClient().getNow(8080, "localhost", "/api/products", response -> {
       context.assertEquals(200, response.statusCode());
       response.handler(body -> {
-        context.assertTrue(body.toJsonArray().getList().isEmpty());
+        final JsonObject json = body.toJsonObject();
+        context.assertTrue(json.getJsonArray("products").isEmpty());
         async.complete();
       });
     });

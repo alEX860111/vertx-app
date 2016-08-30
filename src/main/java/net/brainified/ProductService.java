@@ -1,12 +1,10 @@
 package net.brainified;
 
-import java.util.List;
-
 import io.vertx.core.Future;
 
 interface ProductService {
 
-  Future<List<Product>> getProducts();
+  Future<ProductContainer> getProducts();
 
   Future<Product> getProduct(int id);
 

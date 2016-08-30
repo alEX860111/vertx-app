@@ -40,7 +40,7 @@ public class ProductServiceImplTest {
     final Async async = context.async();
     service.getProducts().setHandler(productsResult -> {
       assertTrue(productsResult.succeeded());
-      final List<Product> products = productsResult.result();
+      final List<Product> products = productsResult.result().getProducts();
       assertEquals(2, products.size());
       assertEquals("iphone", products.get(0).getName());
       assertEquals(Integer.valueOf(100), products.get(0).getPrice());
@@ -54,7 +54,7 @@ public class ProductServiceImplTest {
   public void testGetProduct(final TestContext context) {
     final Async async = context.async();
     service.getProducts().setHandler(productsResult -> {
-      final List<Product> products = productsResult.result();
+      final List<Product> products = productsResult.result().getProducts();
       service.getProduct(products.get(0).getId()).setHandler(productResult -> {
         assertTrue(productResult.succeeded());
         final Product product = productResult.result();
@@ -94,7 +94,7 @@ public class ProductServiceImplTest {
   public void testUpdateProduct(final TestContext context) {
     final Async async = context.async();
     service.getProducts().setHandler(productsResult -> {
-      final List<Product> products = productsResult.result();
+      final List<Product> products = productsResult.result().getProducts();
       assertEquals(2, products.size());
       service.updateProduct(products.get(0).getId(), "myNewProduct", 900).setHandler(productResult -> {
         assertTrue(productResult.succeeded());
@@ -122,7 +122,7 @@ public class ProductServiceImplTest {
   public void testDeleteProduct(final TestContext context) {
     final Async async = context.async();
     service.getProducts().setHandler(productsResult -> {
-      final List<Product> products = productsResult.result();
+      final List<Product> products = productsResult.result().getProducts();
       assertEquals(2, products.size());
       service.deleteProduct(products.get(0).getId()).setHandler(productResult -> {
         assertTrue(productResult.succeeded());
