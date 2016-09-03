@@ -4,3 +4,4 @@
 .vertx
 /.gradle/
 /build/
+/bin/
