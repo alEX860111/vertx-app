@@ -249,15 +249,23 @@ public class HttpServerVerticleTest {
 
   @Test
   public void testDeleteProduct(TestContext context) {
-    final int id = 1;
-
-    when(serviceMock.deleteProduct(id)).thenReturn(Future.succeededFuture());
+    final Product product = new Product();
+    product.setId(1);
+    product.setName("name");
+    product.setPrice(100);
+    when(serviceMock.deleteProduct(product.getId())).thenReturn(Future.succeededFuture(product));
 
     final Async async = context.async();
 
-    vertx.createHttpClient().delete(8080, "localhost", "/api/products/" + id, response -> {
-      context.assertEquals(204, response.statusCode());
-      async.complete();
+    vertx.createHttpClient().delete(8080, "localhost", "/api/products/" + product.getId(), response -> {
+      context.assertEquals(200, response.statusCode());
+      response.handler(body -> {
+        final Product resultProduct = Json.decodeValue(body.toString(), Product.class);
+        context.assertEquals(product.getId(), resultProduct.getId());
+        context.assertEquals(product.getName(), resultProduct.getName());
+        context.assertEquals(product.getPrice(), resultProduct.getPrice());
+        async.complete();
+      });
     }).end();
   }
 

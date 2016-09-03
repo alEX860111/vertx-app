@@ -119,7 +119,8 @@ final class ProductHandlerImpl implements ProductHandler {
     final Future<Product> future = service.deleteProduct(id);
     future.setHandler(productResult -> {
       if (productResult.succeeded()) {
-        routingContext.response().setStatusCode(204).end();
+        final Product product = productResult.result();
+        routingContext.response().putHeader("content-type", "application/json; charset=utf-8").end(Json.encodePrettily(product));
       } else {
         routingContext.response().setStatusCode(404).end();
       }
