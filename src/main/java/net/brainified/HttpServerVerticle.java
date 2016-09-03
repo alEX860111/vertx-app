@@ -34,7 +34,7 @@ final class HttpServerVerticle extends AbstractVerticle {
 
     vertx.createHttpServer().requestHandler(router::accept).listen(config().getInteger("http.port", 8080), result -> {
       if (result.succeeded()) {
-        LOGGER.info("Listening of port " + result.result().actualPort());
+        LOGGER.info("Listening on port " + result.result().actualPort());
         fut.complete();
       } else {
         LOGGER.error(result.cause().getMessage());
