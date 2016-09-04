@@ -46,6 +46,7 @@ final class HttpServerVerticle extends AbstractVerticle {
   private Router createRouter() {
     final Router router = Router.router(vertx);
     router.route().handler(CorsHandler.create("*")
+        .allowedHeader("Content-Type")
         .allowedMethods(Sets.newHashSet(HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE)));
 
     router.get("/api/products").handler(handler::getProducts);
