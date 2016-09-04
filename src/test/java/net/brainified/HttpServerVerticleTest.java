@@ -1,6 +1,6 @@
 package net.brainified;
 
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.Collections;
 
@@ -82,8 +82,10 @@ public class HttpServerVerticleTest {
   public void testGetProduct(TestContext context) {
     final Product product = new Product();
     product.setId(1);
-    product.setName("name");
-    product.setPrice(100);
+    final ProductData data = new ProductData();
+    data.setName("name");
+    data.setPrice(100);
+    product.setData(data);
     when(serviceMock.getProduct(1)).thenReturn(Future.succeededFuture(product));
 
     final Async async = context.async();
@@ -93,8 +95,8 @@ public class HttpServerVerticleTest {
       response.handler(body -> {
         final Product resultProduct = Json.decodeValue(body.toString(), Product.class);
         context.assertEquals(1, resultProduct.getId());
-        context.assertEquals("name", resultProduct.getName());
-        context.assertEquals(100, resultProduct.getPrice());
+        context.assertEquals("name", resultProduct.getData().getName());
+        context.assertEquals(100, resultProduct.getData().getPrice());
         async.complete();
       });
     });
@@ -133,9 +135,11 @@ public class HttpServerVerticleTest {
 
     final Product product = new Product();
     product.setId(1);
-    product.setName(json.getString("name"));
-    product.setPrice(json.getInteger("price"));
-    when(serviceMock.addProduct(json.getString("name"), json.getInteger("price"))).thenReturn(Future.succeededFuture(product));
+    final ProductData data = new ProductData();
+    data.setName("myProduct");
+    data.setPrice(100);
+    product.setData(data);
+    when(serviceMock.addProduct(any(ProductData.class))).thenReturn(Future.succeededFuture(product));
 
     final Async async = context.async();
 
@@ -144,8 +148,8 @@ public class HttpServerVerticleTest {
       response.handler(body -> {
         final Product resultProduct = Json.decodeValue(body.toString(), Product.class);
         context.assertEquals(product.getId(), resultProduct.getId());
-        context.assertEquals(json.getString("name"), resultProduct.getName());
-        context.assertEquals(json.getInteger("price"), resultProduct.getPrice());
+        context.assertEquals(json.getString("name"), resultProduct.getData().getName());
+        context.assertEquals(json.getInteger("price"), resultProduct.getData().getPrice());
         async.complete();
       });
     }).end(json.encode());
@@ -170,7 +174,7 @@ public class HttpServerVerticleTest {
     json.put("name", "myProduct");
     json.put("price", 100);
 
-    when(serviceMock.addProduct(json.getString("name"), json.getInteger("price"))).thenReturn(Future.failedFuture("failed"));
+    when(serviceMock.addProduct(any(ProductData.class))).thenReturn(Future.failedFuture("failed"));
 
     final Async async = context.async();
 
@@ -190,9 +194,11 @@ public class HttpServerVerticleTest {
 
     final Product product = new Product();
     product.setId(id);
-    product.setName(json.getString("name"));
-    product.setPrice(json.getInteger("price"));
-    when(serviceMock.updateProduct(id, json.getString("name"), json.getInteger("price"))).thenReturn(Future.succeededFuture(product));
+    final ProductData data = new ProductData();
+    data.setName("myProduct");
+    data.setPrice(100);
+    product.setData(data);
+    when(serviceMock.updateProduct(eq(id), any(ProductData.class))).thenReturn(Future.succeededFuture(product));
 
     final Async async = context.async();
 
@@ -201,8 +207,8 @@ public class HttpServerVerticleTest {
       response.handler(body -> {
         final Product resultProduct = Json.decodeValue(body.toString(), Product.class);
         context.assertEquals(product.getId(), resultProduct.getId());
-        context.assertEquals(json.getString("name"), resultProduct.getName());
-        context.assertEquals(json.getInteger("price"), resultProduct.getPrice());
+        context.assertEquals(json.getString("name"), resultProduct.getData().getName());
+        context.assertEquals(json.getInteger("price"), resultProduct.getData().getPrice());
         async.complete();
       });
     }).end(json.encode());
@@ -246,7 +252,7 @@ public class HttpServerVerticleTest {
     json.put("name", "myProduct");
     json.put("price", 100);
 
-    when(serviceMock.updateProduct(id, json.getString("name"), json.getInteger("price"))).thenReturn(Future.failedFuture("not found"));
+    when(serviceMock.updateProduct(eq(id), any(ProductData.class))).thenReturn(Future.failedFuture("not found"));
 
     final Async async = context.async();
 
@@ -260,8 +266,10 @@ public class HttpServerVerticleTest {
   public void testDeleteProduct(TestContext context) {
     final Product product = new Product();
     product.setId(1);
-    product.setName("name");
-    product.setPrice(100);
+    final ProductData data = new ProductData();
+    data.setName("name");
+    data.setPrice(100);
+    product.setData(data);
     when(serviceMock.deleteProduct(product.getId())).thenReturn(Future.succeededFuture(product));
 
     final Async async = context.async();
@@ -271,8 +279,8 @@ public class HttpServerVerticleTest {
       response.handler(body -> {
         final Product resultProduct = Json.decodeValue(body.toString(), Product.class);
         context.assertEquals(product.getId(), resultProduct.getId());
-        context.assertEquals(product.getName(), resultProduct.getName());
-        context.assertEquals(product.getPrice(), resultProduct.getPrice());
+        context.assertEquals(product.getData().getName(), resultProduct.getData().getName());
+        context.assertEquals(product.getData().getPrice(), resultProduct.getData().getPrice());
         async.complete();
       });
     }).end();

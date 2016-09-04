@@ -27,9 +27,16 @@ final class ProductServiceImpl implements ProductService {
   public ProductServiceImpl(final Vertx vertx) {
     this.vertx = vertx;
 
-    final Product iphone = createProduct("iphone", 100);
+    final ProductData dataIphone = new ProductData();
+    dataIphone.setName("iphone");
+    dataIphone.setPrice(100);
+    final Product iphone = createProduct(dataIphone);
     products.put(iphone.getId(), iphone);
-    final Product razr = createProduct("razr", 200);
+
+    final ProductData dataRazr = new ProductData();
+    dataRazr.setName("razr");
+    dataRazr.setPrice(200);
+    final Product razr = createProduct(dataRazr);
     products.put(razr.getId(), razr);
   }
 
@@ -46,7 +53,7 @@ final class ProductServiceImpl implements ProductService {
   }
 
   @Override
-  public Future<Product> getProduct(final int id) {
+  public Future<Product> getProduct(final Integer id) {
     final Future<Product> future = Future.future();
     vertx.setTimer(DELAY_IN_MS, timerId -> {
       final Product product = products.get(id);
@@ -60,10 +67,10 @@ final class ProductServiceImpl implements ProductService {
   }
 
   @Override
-  public Future<Product> addProduct(final String name, final Integer price) {
+  public Future<Product> addProduct(final ProductData data) {
     final Future<Product> future = Future.future();
     vertx.setTimer(DELAY_IN_MS, timerId -> {
-      final Product product = createProduct(name, price);
+      final Product product = createProduct(data);
       products.put(product.getId(), product);
       future.complete(product);
     });
@@ -71,13 +78,12 @@ final class ProductServiceImpl implements ProductService {
   }
 
   @Override
-  public Future<Product> updateProduct(final int id, String name, final Integer price) {
+  public Future<Product> updateProduct(final Integer id, final ProductData data) {
     final Future<Product> future = Future.future();
     vertx.setTimer(DELAY_IN_MS, timerId -> {
       if (products.containsKey(id)) {
         final Product product = products.get(id);
-        product.setName(name);
-        product.setPrice(price);
+        product.setData(data);
         future.complete(product);
       } else {
         future.fail("not found");
@@ -87,7 +93,7 @@ final class ProductServiceImpl implements ProductService {
   }
 
   @Override
-  public Future<Product> deleteProduct(final int id) {
+  public Future<Product> deleteProduct(final Integer id) {
     final Future<Product> future = Future.future();
     vertx.setTimer(DELAY_IN_MS, timerId -> {
       final Product product = products.remove(id);
@@ -100,11 +106,10 @@ final class ProductServiceImpl implements ProductService {
     return future;
   }
 
-  private Product createProduct(final String name, final Integer price) {
+  private Product createProduct(final ProductData data) {
     final Product product = new Product();
     product.setId(COUNTER.incrementAndGet());
-    product.setName(name);
-    product.setPrice(price);
+    product.setData(data);
     return product;
   }
 

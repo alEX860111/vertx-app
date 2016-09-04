@@ -5,7 +5,6 @@ import javax.inject.Inject;
 import io.vertx.core.Future;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 
 final class ProductHandlerImpl implements ProductHandler {
@@ -48,15 +47,15 @@ final class ProductHandlerImpl implements ProductHandler {
 
   @Override
   public void addProduct(final RoutingContext routingContext) {
-    final JsonObject json;
+    final ProductData data;
     try {
-      json = routingContext.getBodyAsJson();
+      data = Json.decodeValue(routingContext.getBodyAsString(), ProductData.class);
     } catch (final DecodeException e) {
       routingContext.response().setStatusCode(400).end(INVALID_JSON_IN_BODY);
       return;
     }
 
-    final Future<Product> future = service.addProduct(json.getString("name"), json.getInteger("price"));
+    final Future<Product> future = service.addProduct(data);
     future.setHandler(productResult -> {
       if (productResult.succeeded()) {
         final Product product = productResult.result();
@@ -71,15 +70,15 @@ final class ProductHandlerImpl implements ProductHandler {
   public void updateProduct(final RoutingContext routingContext) {
     final Integer id = routingContext.get("id");
 
-    final JsonObject json;
+    final ProductData data;
     try {
-      json = routingContext.getBodyAsJson();
+      data = Json.decodeValue(routingContext.getBodyAsString(), ProductData.class);
     } catch (final DecodeException e) {
       routingContext.response().setStatusCode(400).end(INVALID_JSON_IN_BODY);
       return;
     }
 
-    final Future<Product> future = service.updateProduct(id, json.getString("name"), json.getInteger("price"));
+    final Future<Product> future = service.updateProduct(id, data);
     future.setHandler(productResult -> {
       if (productResult.succeeded()) {
         final Product product = productResult.result();
