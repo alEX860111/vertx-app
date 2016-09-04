@@ -5,13 +5,13 @@ import io.vertx.ext.web.RoutingContext;
 final class IdParameterHandlerImpl implements IdParameterHandler {
 
   @Override
-  public void handleIdParameter(final RoutingContext routingContext) {
+  public void handleIdParameter(final RoutingContext context) {
     try {
-      final Integer id = Integer.valueOf(routingContext.request().getParam("id"));
-      routingContext.put("id", id);
-      routingContext.next();
+      final Integer id = Integer.valueOf(context.request().getParam("id"));
+      context.put("id", id);
+      context.next();
     } catch (final NumberFormatException e) {
-      routingContext.response().setStatusCode(400).end("Invalid product id");
+      context.response().setStatusCode(400).end("Invalid id");
     }
   }
 

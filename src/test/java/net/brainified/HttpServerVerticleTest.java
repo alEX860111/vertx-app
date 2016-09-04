@@ -107,7 +107,7 @@ public class HttpServerVerticleTest {
     vertx.createHttpClient().getNow(8080, "localhost", "/api/products/x", response -> {
       context.assertEquals(400, response.statusCode());
       response.handler(body -> {
-        context.assertEquals("Invalid product id", body.toString());
+        context.assertEquals("Invalid id", body.toString());
         async.complete();
       });
     });
@@ -219,7 +219,7 @@ public class HttpServerVerticleTest {
     vertx.createHttpClient().put(8080, "localhost", "/api/products/x", response -> {
       context.assertEquals(400, response.statusCode());
       response.handler(body -> {
-        context.assertEquals("Invalid product id", body.toString());
+        context.assertEquals("Invalid id", body.toString());
         async.complete();
       });
     }).end(json.encode());
@@ -285,7 +285,7 @@ public class HttpServerVerticleTest {
     vertx.createHttpClient().delete(8080, "localhost", "/api/products/x", response -> {
       context.assertEquals(400, response.statusCode());
       response.handler(body -> {
-        context.assertEquals("Invalid product id", body.toString());
+        context.assertEquals("Invalid id", body.toString());
         async.complete();
       });
     }).end();
