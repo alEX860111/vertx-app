@@ -20,12 +20,15 @@ final class HttpServerVerticle extends AbstractVerticle {
 
   private final Vertx vertx;
 
-  private final ProductHandler handler;
+  private final ProductHandler productHandler;
+
+  private final IdParameterHandler idParameterHandler;
 
   @Inject
-  public HttpServerVerticle(final Vertx vertx, final ProductHandler handler) {
+  public HttpServerVerticle(final Vertx vertx, final ProductHandler productHandler, final IdParameterHandler idParameterHandler) {
     this.vertx = vertx;
-    this.handler = handler;
+    this.productHandler = productHandler;
+    this.idParameterHandler = idParameterHandler;
   }
 
   @Override
@@ -49,12 +52,13 @@ final class HttpServerVerticle extends AbstractVerticle {
         .allowedHeader("Content-Type")
         .allowedMethods(Sets.newHashSet(HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE)));
 
-    router.get("/api/products").handler(handler::getProducts);
+    router.get("/api/products").handler(productHandler::getProducts);
     router.route("/api/products*").handler(BodyHandler.create());
-    router.post("/api/products").handler(handler::addProduct);
-    router.get("/api/products/:id").handler(handler::getProduct);
-    router.put("/api/products/:id").handler(handler::updateProduct);
-    router.delete("/api/products/:id").handler(handler::deleteProduct);
+    router.post("/api/products").handler(productHandler::addProduct);
+    router.route("/api/products/:id").handler(idParameterHandler::handleIdParameter);
+    router.get("/api/products/:id").handler(productHandler::getProduct);
+    router.put("/api/products/:id").handler(productHandler::updateProduct);
+    router.delete("/api/products/:id").handler(productHandler::deleteProduct);
     return router;
   }
 

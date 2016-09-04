@@ -10,6 +10,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.util.Modules;
+
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.Json;
@@ -28,10 +33,14 @@ public class HttpServerVerticleTest {
   @Before
   public void setUp(TestContext context) {
     serviceMock = Mockito.mock(ProductService.class);
-
-    vertx = Vertx.vertx();
-    final HttpServerVerticle verticle = new HttpServerVerticle(vertx, new ProductHandlerImpl(serviceMock));
-    vertx.deployVerticle(verticle, context.asyncAssertSuccess());
+    final Injector injector = Guice.createInjector(Modules.override(new ApplicationModule()).with(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(ProductService.class).toInstance(serviceMock);
+      }
+    }));
+    vertx = injector.getInstance(Vertx.class);
+    vertx.deployVerticle(injector.getInstance(HttpServerVerticle.class), context.asyncAssertSuccess());
   }
 
   @After

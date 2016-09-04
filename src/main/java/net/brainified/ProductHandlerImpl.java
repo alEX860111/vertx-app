@@ -10,8 +10,6 @@ import io.vertx.ext.web.RoutingContext;
 
 final class ProductHandlerImpl implements ProductHandler {
 
-  private static final String INVALID_PRODUCT_ID = "Invalid product id";
-
   private static final String INVALID_JSON_IN_BODY = "Invalid JSON in body";
 
   private final ProductService service;
@@ -36,13 +34,7 @@ final class ProductHandlerImpl implements ProductHandler {
 
   @Override
   public void getProduct(final RoutingContext routingContext) {
-    final Integer id;
-    try {
-      id = Integer.valueOf(routingContext.request().getParam("id"));
-    } catch (final NumberFormatException e) {
-      routingContext.response().setStatusCode(400).end(INVALID_PRODUCT_ID);
-      return;
-    }
+    final Integer id = routingContext.get("id");
 
     final Future<Product> future = service.getProduct(id);
     future.setHandler(productResult -> {
@@ -78,13 +70,7 @@ final class ProductHandlerImpl implements ProductHandler {
 
   @Override
   public void updateProduct(final RoutingContext routingContext) {
-    final Integer id;
-    try {
-      id = Integer.valueOf(routingContext.request().getParam("id"));
-    } catch (final NumberFormatException e) {
-      routingContext.response().setStatusCode(400).end(INVALID_PRODUCT_ID);
-      return;
-    }
+    final Integer id = routingContext.get("id");
 
     final JsonObject json;
     try {
@@ -108,13 +94,7 @@ final class ProductHandlerImpl implements ProductHandler {
 
   @Override
   public void deleteProduct(final RoutingContext routingContext) {
-    final Integer id;
-    try {
-      id = Integer.valueOf(routingContext.request().getParam("id"));
-    } catch (final NumberFormatException e) {
-      routingContext.response().setStatusCode(400).end(INVALID_PRODUCT_ID);
-      return;
-    }
+    final Integer id = routingContext.get("id");
 
     final Future<Product> future = service.deleteProduct(id);
     future.setHandler(productResult -> {
