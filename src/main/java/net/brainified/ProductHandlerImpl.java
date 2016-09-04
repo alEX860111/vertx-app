@@ -35,7 +35,6 @@ final class ProductHandlerImpl implements ProductHandler {
   @Override
   public void getProduct(final RoutingContext routingContext) {
     final Integer id = routingContext.get("id");
-
     final Future<Product> future = service.getProduct(id);
     future.setHandler(productResult -> {
       if (productResult.succeeded()) {
@@ -95,7 +94,6 @@ final class ProductHandlerImpl implements ProductHandler {
   @Override
   public void deleteProduct(final RoutingContext routingContext) {
     final Integer id = routingContext.get("id");
-
     final Future<Product> future = service.deleteProduct(id);
     future.setHandler(productResult -> {
       if (productResult.succeeded()) {
