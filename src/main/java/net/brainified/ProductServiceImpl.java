@@ -19,7 +19,7 @@ final class ProductServiceImpl implements ProductService {
 
   private final AtomicInteger COUNTER = new AtomicInteger();
 
-  private Vertx vertx;
+  private final Vertx vertx;
 
   private final Map<Integer, Product> products = new LinkedHashMap<>();
 
