@@ -6,6 +6,7 @@ import com.google.inject.TypeLiteral;
 
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 
 final class ApplicationModule extends AbstractModule {
@@ -13,6 +14,8 @@ final class ApplicationModule extends AbstractModule {
   protected void configure() {
     final Vertx vertx = Vertx.vertx();
     bind(Vertx.class).toInstance(vertx);
+
+    bind(Router.class).toProvider(RouterProvider.class);
 
     bind(ProductService.class).to(ProductServiceImpl.class).in(Scopes.SINGLETON);
 
