@@ -70,6 +70,7 @@ public class AddProductHandlerIntegrationTest {
         context.assertEquals(product.getId(), resultProduct.getId());
         context.assertEquals(json.getString("name"), resultProduct.getData().getName());
         context.assertEquals(json.getInteger("price"), resultProduct.getData().getPrice());
+        context.assertEquals("http://localhost:8080/api/products/" + product.getId(), response.getHeader("Location"));
         async.complete();
       });
     }).end(json.encode());

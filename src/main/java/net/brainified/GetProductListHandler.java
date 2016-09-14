@@ -45,7 +45,7 @@ final class GetProductListHandler implements Handler<RoutingContext> {
     future.setHandler(productsResult -> {
       if (productsResult.succeeded()) {
         final ProductContainer container = productsResult.result();
-        routingContext.response().putHeader("content-type", "application/json; charset=utf-8").end(Json.encodePrettily(container));
+        routingContext.response().putHeader("Content-Type", "application/json; charset=utf-8").end(Json.encodePrettily(container));
       } else {
         routingContext.response().setStatusCode(500).end();
       }

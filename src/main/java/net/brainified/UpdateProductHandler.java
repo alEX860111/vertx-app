@@ -44,7 +44,7 @@ final class UpdateProductHandler implements Handler<RoutingContext> {
     future.setHandler(productResult -> {
       if (productResult.succeeded()) {
         final Product product = productResult.result();
-        routingContext.response().putHeader("content-type", "application/json; charset=utf-8").end(Json.encodePrettily(product));
+        routingContext.response().putHeader("Content-Type", "application/json; charset=utf-8").end(Json.encodePrettily(product));
       } else {
         routingContext.response().setStatusCode(404).end();
       }
