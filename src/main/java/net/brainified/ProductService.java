@@ -4,7 +4,7 @@ import io.vertx.core.Future;
 
 interface ProductService {
 
-  Future<ProductContainer> getProducts();
+  Future<ProductContainer> getProductList(Integer page, Integer perpage);
 
   Future<Product> getProduct(Integer id);
 

@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
 
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 
 import io.vertx.core.Future;
@@ -27,26 +28,25 @@ final class ProductServiceImpl implements ProductService {
   public ProductServiceImpl(final Vertx vertx) {
     this.vertx = vertx;
 
-    final ProductData dataIphone = new ProductData();
-    dataIphone.setName("iphone");
-    dataIphone.setPrice(100);
-    final Product iphone = createProduct(dataIphone);
-    products.put(iphone.getId(), iphone);
-
-    final ProductData dataRazr = new ProductData();
-    dataRazr.setName("razr");
-    dataRazr.setPrice(200);
-    final Product razr = createProduct(dataRazr);
-    products.put(razr.getId(), razr);
+    addProduct("iphone", 799000);
+    addProduct("razr", 699000);
+    addProduct("galaxy", 749000);
+    addProduct("ngage", 499000);
+    addProduct("nexus", 649000);
+    addProduct("fairphone", 199000);
+    addProduct("communicator", 399000);
+    addProduct("edge", 599000);
   }
 
   @Override
-  public Future<ProductContainer> getProducts() {
+  public Future<ProductContainer> getProductList(final Integer page, final Integer perpage) {
     final Future<ProductContainer> future = Future.future();
     vertx.setTimer(DELAY_IN_MS, timerId -> {
       final ProductContainer container = new ProductContainer();
       final List<Product> productList = Lists.newArrayList(products.values());
-      container.setProducts(productList);
+      final int skip = (page - 1) * perpage;
+      container.setProducts(FluentIterable.from(productList).skip(skip).limit(perpage).toList());
+      container.setNumberOfProducts(products.size());
       future.complete(container);
     });
     return future;
@@ -104,6 +104,14 @@ final class ProductServiceImpl implements ProductService {
       }
     });
     return future;
+  }
+  
+  private void addProduct(final String name, final Integer price) {
+    final ProductData data = new ProductData();
+    data.setName(name);
+    data.setPrice(price);
+    final Product product = createProduct(data);
+    products.put(product.getId(), product);
   }
 
   private Product createProduct(final ProductData data) {

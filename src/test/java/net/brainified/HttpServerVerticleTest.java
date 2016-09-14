@@ -52,7 +52,7 @@ public class HttpServerVerticleTest {
   public void testGetProducts(TestContext context) {
     final ProductContainer container = new ProductContainer();
     container.setProducts(Collections.emptyList());
-    when(serviceMock.getProducts()).thenReturn(Future.succeededFuture(container));
+    when(serviceMock.getProductList(any(Integer.class), any(Integer.class))).thenReturn(Future.succeededFuture(container));
 
     final Async async = context.async();
 
@@ -68,7 +68,7 @@ public class HttpServerVerticleTest {
 
   @Test
   public void testGetProducts_serverError(TestContext context) {
-    when(serviceMock.getProducts()).thenReturn(Future.failedFuture(""));
+    when(serviceMock.getProductList(any(Integer.class), any(Integer.class))).thenReturn(Future.failedFuture(""));
 
     final Async async = context.async();
 

@@ -1,6 +1,7 @@
 package net.brainified;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -36,16 +37,12 @@ public class ProductServiceImplTest {
   }
 
   @Test
-  public void testGetProducts(final TestContext context) {
+  public void testGetProductList(final TestContext context) {
     final Async async = context.async();
-    service.getProducts().setHandler(productsResult -> {
+    service.getProductList(1, 10).setHandler(productsResult -> {
       assertTrue(productsResult.succeeded());
       final List<Product> products = productsResult.result().getProducts();
-      assertEquals(2, products.size());
-      assertEquals("iphone", products.get(0).getData().getName());
-      assertEquals(Integer.valueOf(100), products.get(0).getData().getPrice());
-      assertEquals("razr", products.get(1).getData().getName());
-      assertEquals(Integer.valueOf(200), products.get(1).getData().getPrice());
+      assertFalse(products.isEmpty());
       async.complete();
     });
   }
@@ -53,13 +50,11 @@ public class ProductServiceImplTest {
   @Test
   public void testGetProduct(final TestContext context) {
     final Async async = context.async();
-    service.getProducts().setHandler(productsResult -> {
+    service.getProductList(1, 10).setHandler(productsResult -> {
       final List<Product> products = productsResult.result().getProducts();
       service.getProduct(products.get(0).getId()).setHandler(productResult -> {
         assertTrue(productResult.succeeded());
-        final Product product = productResult.result();
-        assertEquals("iphone", product.getData().getName());
-        assertEquals(Integer.valueOf(100), product.getData().getPrice());
+        assertNotNull(productResult.result());
         async.complete();
       });
     });
@@ -96,9 +91,8 @@ public class ProductServiceImplTest {
   @Test
   public void testUpdateProduct(final TestContext context) {
     final Async async = context.async();
-    service.getProducts().setHandler(productsResult -> {
+    service.getProductList(1, 10).setHandler(productsResult -> {
       final List<Product> products = productsResult.result().getProducts();
-      assertEquals(2, products.size());
       final ProductData data = new ProductData();
       data.setName("myNewProduct");
       data.setPrice(900);
@@ -130,16 +124,13 @@ public class ProductServiceImplTest {
   @Test
   public void testDeleteProduct(final TestContext context) {
     final Async async = context.async();
-    service.getProducts().setHandler(productsResult -> {
+    service.getProductList(1, 10).setHandler(productsResult -> {
       final List<Product> products = productsResult.result().getProducts();
-      assertEquals(2, products.size());
       service.deleteProduct(products.get(0).getId()).setHandler(productResult -> {
         assertTrue(productResult.succeeded());
         final Product product = productResult.result();
         assertNotNull(product);
         assertEquals(products.get(0).getId(), product.getId());
-        assertEquals("iphone", products.get(0).getData().getName());
-        assertEquals(Integer.valueOf(100), products.get(0).getData().getPrice());
         async.complete();
       });
     });
