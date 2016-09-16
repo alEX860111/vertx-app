@@ -28,14 +28,14 @@ final class ProductServiceImpl implements ProductService {
   public ProductServiceImpl(final Vertx vertx) {
     this.vertx = vertx;
 
-    addProduct("iphone", 799000);
-    addProduct("razr", 699000);
-    addProduct("galaxy", 749000);
-    addProduct("ngage", 499000);
-    addProduct("nexus", 649000);
-    addProduct("fairphone", 199000);
-    addProduct("communicator", 399000);
-    addProduct("edge", 599000);
+    addProduct("iphone", 79900);
+    addProduct("razr", 69900);
+    addProduct("galaxy", 74900);
+    addProduct("ngage", 49900);
+    addProduct("nexus", 64900);
+    addProduct("fairphone", 19900);
+    addProduct("communicator", 39900);
+    addProduct("edge", 59900);
   }
 
   @Override
