@@ -1,15 +1,14 @@
 package net.brainified;
 
+import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -43,9 +42,14 @@ final class ProductServiceImpl implements ProductService {
     final Future<ProductContainer> future = Future.future();
     vertx.setTimer(DELAY_IN_MS, timerId -> {
       final ProductContainer container = new ProductContainer();
-      final List<Product> productList = Lists.newArrayList(products.values());
       final int skip = (page - 1) * perpage;
-      container.setProducts(FluentIterable.from(productList).skip(skip).limit(perpage).toList());
+      final List<Product> productList = products.values()
+        .stream()
+        .sorted((p1, p2) -> p2.getId() - p1.getId())
+        .skip(skip)
+        .limit(perpage)
+        .collect(Collectors.toList());
+      container.setProducts(productList);
       container.setNumberOfProducts(products.size());
       future.complete(container);
     });
