@@ -15,7 +15,7 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 
 @RunWith(VertxUnitRunner.class)
-abstract class IntegrationTest {
+public abstract class IntegrationTest {
 
   protected Vertx vertx;
 
