@@ -1,6 +1,5 @@
 package net.brainified;
 
-import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,11 +43,10 @@ final class ProductServiceImpl implements ProductService {
       final ProductContainer container = new ProductContainer();
       final int skip = (page - 1) * perpage;
       final List<Product> productList = products.values()
-        .stream()
-        .sorted((p1, p2) -> p2.getId() - p1.getId())
-        .skip(skip)
-        .limit(perpage)
-        .collect(Collectors.toList());
+          .stream().sorted((p1, p2) -> p2.getId() - p1.getId())
+          .skip(skip)
+          .limit(perpage)
+          .collect(Collectors.toList());
       container.setProducts(productList);
       container.setNumberOfProducts(products.size());
       future.complete(container);
@@ -109,7 +107,7 @@ final class ProductServiceImpl implements ProductService {
     });
     return future;
   }
-  
+
   private void addProduct(final String name, final Integer price) {
     final ProductData data = new ProductData();
     data.setName(name);
