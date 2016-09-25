@@ -1,15 +1,19 @@
 package net.brainified;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
+import org.mockito.Mockito;
 
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.json.Json;
+import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.mongo.MongoClientUpdateResult;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -19,48 +23,79 @@ public class UpdateProductHandlerIntegrationTest extends IntegrationTest {
 
   @Test
   public void testUpdateProduct(TestContext context) {
-    final int id = 1;
+    final String id = "1";
 
     final JsonObject json = new JsonObject();
     json.put("name", "myProduct");
     json.put("price", 100);
 
-    final Product product = new Product();
-    product.setId(id);
-    final ProductData data = new ProductData();
-    data.setName("myProduct");
-    data.setPrice(100);
-    product.setData(data);
-    when(serviceMock.updateProduct(eq(id), any(ProductData.class))).thenReturn(Future.succeededFuture(product));
+    final MongoClientUpdateResult result = Mockito.mock(MongoClientUpdateResult.class);
+    when(result.getDocModified()).thenReturn(1L);
+
+    doAnswer(invocation -> {
+      @SuppressWarnings("unchecked")
+      final Handler<AsyncResult<MongoClientUpdateResult>> handler = (Handler<AsyncResult<MongoClientUpdateResult>>) invocation.getArguments()[2];
+      handler.handle(Future.succeededFuture(result));
+      return null;
+    }).when(serviceMock).updateProduct(eq(id), eq(json), Matchers.<Handler<AsyncResult<MongoClientUpdateResult>>>any());
 
     final Async async = context.async();
 
     vertx.createHttpClient().put(8080, "localhost", "/api/products/" + id, response -> {
-      context.assertEquals(200, response.statusCode());
-      response.handler(body -> {
-        final Product resultProduct = Json.decodeValue(body.toString(), Product.class);
-        context.assertEquals(product.getId(), resultProduct.getId());
-        context.assertEquals(json.getString("name"), resultProduct.getData().getName());
-        context.assertEquals(json.getInteger("price"), resultProduct.getData().getPrice());
-        async.complete();
-      });
+      context.assertEquals(204, response.statusCode());
+      async.complete();
     }).end(json.encode());
   }
 
   @Test
-  public void testUpdateProduct_sendInvalidProductId(TestContext context) {
+  public void testUpdateProduct_serverError(TestContext context) {
+    final String id = "1";
+
     final JsonObject json = new JsonObject();
     json.put("name", "myProduct");
     json.put("price", 100);
 
+    final MongoClientUpdateResult result = Mockito.mock(MongoClientUpdateResult.class);
+    when(result.getDocModified()).thenReturn(1L);
+
+    doAnswer(invocation -> {
+      @SuppressWarnings("unchecked")
+      final Handler<AsyncResult<MongoClientUpdateResult>> handler = (Handler<AsyncResult<MongoClientUpdateResult>>) invocation.getArguments()[2];
+      handler.handle(Future.failedFuture("error"));
+      return null;
+    }).when(serviceMock).updateProduct(eq(id), eq(json), Matchers.<Handler<AsyncResult<MongoClientUpdateResult>>>any());
+
     final Async async = context.async();
 
-    vertx.createHttpClient().put(8080, "localhost", "/api/products/x", response -> {
-      context.assertEquals(400, response.statusCode());
-      response.handler(body -> {
-        context.assertEquals("Invalid id", body.toString());
-        async.complete();
-      });
+    vertx.createHttpClient().put(8080, "localhost", "/api/products/" + id, response -> {
+      context.assertEquals(500, response.statusCode());
+      async.complete();
+    }).end(json.encode());
+  }
+
+  @Test
+  public void testUpdateProduct_notFound(TestContext context) {
+    final String id = "1";
+
+    final JsonObject json = new JsonObject();
+    json.put("name", "myProduct");
+    json.put("price", 100);
+
+    final MongoClientUpdateResult result = Mockito.mock(MongoClientUpdateResult.class);
+    when(result.getDocModified()).thenReturn(0L);
+
+    doAnswer(invocation -> {
+      @SuppressWarnings("unchecked")
+      final Handler<AsyncResult<MongoClientUpdateResult>> handler = (Handler<AsyncResult<MongoClientUpdateResult>>) invocation.getArguments()[2];
+      handler.handle(Future.succeededFuture(result));
+      return null;
+    }).when(serviceMock).updateProduct(eq(id), eq(json), Matchers.<Handler<AsyncResult<MongoClientUpdateResult>>>any());
+
+    final Async async = context.async();
+
+    vertx.createHttpClient().put(8080, "localhost", "/api/products/" + id, response -> {
+      context.assertEquals(404, response.statusCode());
+      async.complete();
     }).end(json.encode());
   }
 
@@ -75,24 +110,6 @@ public class UpdateProductHandlerIntegrationTest extends IntegrationTest {
         async.complete();
       });
     }).end();
-  }
-
-  @Test
-  public void testUpdateProduct_notFound(TestContext context) {
-    final int id = 1;
-
-    final JsonObject json = new JsonObject();
-    json.put("name", "myProduct");
-    json.put("price", 100);
-
-    when(serviceMock.updateProduct(eq(id), any(ProductData.class))).thenReturn(Future.failedFuture("not found"));
-
-    final Async async = context.async();
-
-    vertx.createHttpClient().put(8080, "localhost", "/api/products/" + id, response -> {
-      context.assertEquals(404, response.statusCode());
-      async.complete();
-    }).end(json.encode());
   }
 
 }

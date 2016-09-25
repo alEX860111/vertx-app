@@ -1,17 +1,25 @@
 package net.brainified;
 
-import io.vertx.core.Future;
+import java.util.List;
+
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.mongo.MongoClientDeleteResult;
+import io.vertx.ext.mongo.MongoClientUpdateResult;
 
 interface ProductService {
 
-  Future<ProductContainer> getProductList(Integer page, Integer perpage);
+  void getProductCount(Handler<AsyncResult<Long>> handler);
 
-  Future<Product> getProduct(Integer id);
+  void getProductList(Integer page, Integer perpage, Handler<AsyncResult<List<JsonObject>>> handler);
 
-  Future<Product> addProduct(ProductData data);
+  void getProduct(String id, Handler<AsyncResult<JsonObject>> handler);
 
-  Future<Product> updateProduct(Integer id, ProductData data);
+  void addProduct(JsonObject product, Handler<AsyncResult<String>> handler);
 
-  Future<Product> deleteProduct(Integer id);
+  void updateProduct(String id, JsonObject data, Handler<AsyncResult<MongoClientUpdateResult>> handler);
+
+  void deleteProduct(String id, Handler<AsyncResult<MongoClientDeleteResult>> handler);
 
 }

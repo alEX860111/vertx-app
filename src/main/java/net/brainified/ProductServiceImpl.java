@@ -1,126 +1,73 @@
 package net.brainified;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import io.vertx.core.Future;
-import io.vertx.core.Vertx;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.mongo.FindOptions;
+import io.vertx.ext.mongo.MongoClient;
+import io.vertx.ext.mongo.MongoClientDeleteResult;
+import io.vertx.ext.mongo.MongoClientUpdateResult;
 
 final class ProductServiceImpl implements ProductService {
 
-  private static final int DELAY_IN_MS = 100;
+  private static final String PRODUCTS_COLLECTION = "products";
 
-  private final AtomicInteger COUNTER = new AtomicInteger();
-
-  private final Vertx vertx;
-
-  private final Map<Integer, Product> products = new LinkedHashMap<>();
+  private final MongoClient client;
 
   @Inject
-  public ProductServiceImpl(final Vertx vertx) {
-    this.vertx = vertx;
-
-    addProduct("iphone", 79900);
-    addProduct("razr", 69900);
-    addProduct("galaxy", 74900);
-    addProduct("ngage", 49900);
-    addProduct("nexus", 64900);
-    addProduct("fairphone", 19900);
-    addProduct("communicator", 39900);
-    addProduct("edge", 59900);
+  public ProductServiceImpl(MongoClient client) {
+    this.client = client;
   }
 
   @Override
-  public Future<ProductContainer> getProductList(final Integer page, final Integer perpage) {
-    final Future<ProductContainer> future = Future.future();
-    vertx.setTimer(DELAY_IN_MS, timerId -> {
-      final ProductContainer container = new ProductContainer();
-      final int skip = (page - 1) * perpage;
-      final List<Product> productList = products.values()
-          .stream().sorted((p1, p2) -> p2.getId() - p1.getId())
-          .skip(skip)
-          .limit(perpage)
-          .collect(Collectors.toList());
-      container.setProducts(productList);
-      container.setNumberOfProducts(products.size());
-      future.complete(container);
-    });
-    return future;
+  public void getProductCount(final Handler<AsyncResult<Long>> handler) {
+    final JsonObject query = new JsonObject();
+    client.count(PRODUCTS_COLLECTION, query, handler);
   }
 
   @Override
-  public Future<Product> getProduct(final Integer id) {
-    final Future<Product> future = Future.future();
-    vertx.setTimer(DELAY_IN_MS, timerId -> {
-      final Product product = products.get(id);
-      if (Objects.nonNull(product)) {
-        future.complete(product);
-      } else {
-        future.fail("not found");
-      }
-    });
-    return future;
+  public void getProductList(final Integer page, final Integer perpage, final Handler<AsyncResult<List<JsonObject>>> handler) {
+    final JsonObject query = new JsonObject();
+    final FindOptions options = new FindOptions().setLimit(perpage).setSkip((page - 1) * perpage);
+    client.findWithOptions(PRODUCTS_COLLECTION, query, options, handler);
   }
 
   @Override
-  public Future<Product> addProduct(final ProductData data) {
-    final Future<Product> future = Future.future();
-    vertx.setTimer(DELAY_IN_MS, timerId -> {
-      final Product product = createProduct(data);
-      products.put(product.getId(), product);
-      future.complete(product);
-    });
-    return future;
+  public void getProduct(final String id, final Handler<AsyncResult<JsonObject>> handler) {
+    final JsonObject query = new JsonObject();
+    query.put("_id", id);
+    final JsonObject fields = new JsonObject();
+    client.findOne(PRODUCTS_COLLECTION, query, fields, handler);
   }
 
   @Override
-  public Future<Product> updateProduct(final Integer id, final ProductData data) {
-    final Future<Product> future = Future.future();
-    vertx.setTimer(DELAY_IN_MS, timerId -> {
-      if (products.containsKey(id)) {
-        final Product product = products.get(id);
-        product.setData(data);
-        future.complete(product);
-      } else {
-        future.fail("not found");
-      }
-    });
-    return future;
+  public void addProduct(final JsonObject product, final Handler<AsyncResult<String>> handler) {
+    client.insert(PRODUCTS_COLLECTION, product, handler);
   }
 
   @Override
-  public Future<Product> deleteProduct(final Integer id) {
-    final Future<Product> future = Future.future();
-    vertx.setTimer(DELAY_IN_MS, timerId -> {
-      final Product product = products.remove(id);
-      if (Objects.nonNull(product)) {
-        future.complete(product);
-      } else {
-        future.fail("not found");
-      }
-    });
-    return future;
+  public void updateProduct(final String id, final JsonObject data, final Handler<AsyncResult<MongoClientUpdateResult>> handler) {
+    final JsonObject query = new JsonObject();
+    query.put("_id", id);
+
+    final JsonObject product = new JsonObject();
+    product.put("data", data);
+
+    final JsonObject update = new JsonObject();
+    update.put("$set", product);
+
+    client.updateCollection(PRODUCTS_COLLECTION, query, update, handler);
   }
 
-  private void addProduct(final String name, final Integer price) {
-    final ProductData data = new ProductData();
-    data.setName(name);
-    data.setPrice(price);
-    final Product product = createProduct(data);
-    products.put(product.getId(), product);
-  }
-
-  private Product createProduct(final ProductData data) {
-    final Product product = new Product();
-    product.setId(COUNTER.incrementAndGet());
-    product.setData(data);
-    return product;
+  @Override
+  public void deleteProduct(final String id, final Handler<AsyncResult<MongoClientDeleteResult>> handler) {
+    final JsonObject query = new JsonObject();
+    query.put("_id", id);
+    client.removeDocument(PRODUCTS_COLLECTION, query, handler);
   }
 
 }

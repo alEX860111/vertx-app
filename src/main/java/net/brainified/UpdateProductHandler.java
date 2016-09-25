@@ -1,19 +1,18 @@
 package net.brainified;
 
-import java.util.Objects;
-
 import javax.inject.Inject;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.primitives.Ints;
-
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.DecodeException;
-import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+import io.vertx.ext.mongo.MongoClientUpdateResult;
 import io.vertx.ext.web.RoutingContext;
 
 final class UpdateProductHandler implements Handler<RoutingContext> {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(UpdateProductHandler.class);
 
   private static final String INVALID_JSON_IN_BODY = "Invalid JSON in body";
 
@@ -26,27 +25,26 @@ final class UpdateProductHandler implements Handler<RoutingContext> {
 
   @Override
   public void handle(RoutingContext routingContext) {
-    final Integer id = Ints.tryParse(MoreObjects.firstNonNull(routingContext.request().getParam("id"), ""));
-    if (Objects.isNull(id)) {
-      routingContext.response().setStatusCode(400).end("Invalid id");
-      return;
-    }
+    final String id = routingContext.request().getParam("id");
 
-    final ProductData data;
+    JsonObject data = null;
     try {
-      data = Json.decodeValue(routingContext.getBodyAsString(), ProductData.class);
+      data = routingContext.getBodyAsJson();
     } catch (final DecodeException e) {
       routingContext.response().setStatusCode(400).end(INVALID_JSON_IN_BODY);
-      return;
     }
 
-    final Future<Product> future = service.updateProduct(id, data);
-    future.setHandler(productResult -> {
-      if (productResult.succeeded()) {
-        final Product product = productResult.result();
-        routingContext.response().putHeader("Content-Type", "application/json; charset=utf-8").end(Json.encodePrettily(product));
+    service.updateProduct(id, data, updateResult -> {
+      if (updateResult.succeeded()) {
+        final MongoClientUpdateResult result = updateResult.result();
+        if (result.getDocModified() == 0) {
+          routingContext.response().setStatusCode(404).end();
+          return;
+        }
+        routingContext.response().setStatusCode(204).end();
       } else {
-        routingContext.response().setStatusCode(404).end();
+        LOGGER.error(updateResult.cause().getMessage());
+        routingContext.response().setStatusCode(500).end();
       }
     });
   }

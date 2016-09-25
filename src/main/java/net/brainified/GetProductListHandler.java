@@ -1,5 +1,6 @@
 package net.brainified;
 
+import java.util.List;
 import java.util.Objects;
 
 import javax.inject.Inject;
@@ -7,12 +8,16 @@ import javax.inject.Inject;
 import com.google.common.base.MoreObjects;
 import com.google.common.primitives.Ints;
 
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.RoutingContext;
 
 final class GetProductListHandler implements Handler<RoutingContext> {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(GetProductListHandler.class);
 
   private static final String PAGE_DEFAULT = "1";
   private static final int PAGE_MIN = 1;
@@ -41,15 +46,26 @@ final class GetProductListHandler implements Handler<RoutingContext> {
       return;
     }
 
-    final Future<ProductContainer> future = service.getProductList(page, perpage);
-    future.setHandler(productsResult -> {
-      if (productsResult.succeeded()) {
-        final ProductContainer container = productsResult.result();
-        routingContext.response().putHeader("Content-Type", "application/json; charset=utf-8").end(Json.encodePrettily(container));
+    service.getProductCount(countResult -> {
+      if (countResult.succeeded()) {
+        service.getProductList(page, perpage, productsResult -> {
+          if (productsResult.succeeded()) {
+            final JsonObject container = new JsonObject();
+            final List<JsonObject> products = productsResult.result();
+            container.put("products", products);
+            container.put("numberOfProducts", countResult.result());
+            routingContext.response().putHeader("Content-Type", "application/json; charset=utf-8").end(Json.encodePrettily(container));
+          } else {
+            LOGGER.error(productsResult.cause().getMessage());
+            routingContext.response().setStatusCode(500).end();
+          }
+        });
       } else {
+        LOGGER.error(countResult.cause().getMessage());
         routingContext.response().setStatusCode(500).end();
       }
     });
+
   }
 
 }

@@ -1,18 +1,16 @@
 package net.brainified;
 
-import java.util.Objects;
-
 import javax.inject.Inject;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.primitives.Ints;
-
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.json.Json;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+import io.vertx.ext.mongo.MongoClientDeleteResult;
 import io.vertx.ext.web.RoutingContext;
 
 final class DeleteProductHandler implements Handler<RoutingContext> {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(DeleteProductHandler.class);
 
   private final ProductService service;
 
@@ -23,19 +21,19 @@ final class DeleteProductHandler implements Handler<RoutingContext> {
 
   @Override
   public void handle(RoutingContext routingContext) {
-    final Integer id = Ints.tryParse(MoreObjects.firstNonNull(routingContext.request().getParam("id"), ""));
-    if (Objects.isNull(id)) {
-      routingContext.response().setStatusCode(400).end("Invalid id");
-      return;
-    }
+    final String id = routingContext.request().getParam("id");
 
-    final Future<Product> future = service.deleteProduct(id);
-    future.setHandler(productResult -> {
-      if (productResult.succeeded()) {
-        final Product product = productResult.result();
-        routingContext.response().putHeader("Content-Type", "application/json; charset=utf-8").end(Json.encodePrettily(product));
+    service.deleteProduct(id, deleteResult -> {
+      if (deleteResult.succeeded()) {
+        final MongoClientDeleteResult result = deleteResult.result();
+        if (result.getRemovedCount() == 0) {
+          routingContext.response().setStatusCode(404).end();
+          return;
+        }
+        routingContext.response().setStatusCode(204).end();
       } else {
-        routingContext.response().setStatusCode(404).end();
+        LOGGER.error(deleteResult.cause().getMessage());
+        routingContext.response().setStatusCode(500).end();
       }
     });
   }

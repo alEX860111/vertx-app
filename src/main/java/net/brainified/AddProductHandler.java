@@ -2,13 +2,17 @@ package net.brainified;
 
 import javax.inject.Inject;
 
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.RoutingContext;
 
 final class AddProductHandler implements Handler<RoutingContext> {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(AddProductHandler.class);
 
   private static final String INVALID_JSON_IN_BODY = "Invalid JSON in body";
 
@@ -21,23 +25,25 @@ final class AddProductHandler implements Handler<RoutingContext> {
 
   @Override
   public void handle(RoutingContext routingContext) {
-    final ProductData data;
+    JsonObject data = null;
     try {
-      data = Json.decodeValue(routingContext.getBodyAsString(), ProductData.class);
+      data = routingContext.getBodyAsJson();
     } catch (final DecodeException e) {
       routingContext.response().setStatusCode(400).end(INVALID_JSON_IN_BODY);
-      return;
     }
 
-    final Future<Product> future = service.addProduct(data);
-    future.setHandler(productResult -> {
-      if (productResult.succeeded()) {
-        final Product product = productResult.result();
+    final JsonObject product = new JsonObject();
+    product.put("data", data);
+
+    service.addProduct(product, result -> {
+      if (result.succeeded()) {
+        final String id = result.result();
         routingContext.response().setStatusCode(201)
           .putHeader("Content-Type", "application/json; charset=utf-8")
-          .putHeader("Location", routingContext.request().absoluteURI() + "/" + product.getId())
+          .putHeader("Location", routingContext.request().absoluteURI() + "/" + id)
           .end(Json.encodePrettily(product));
       } else {
+        LOGGER.error(result.cause().getMessage());
         routingContext.response().setStatusCode(500).end();
       }
     });

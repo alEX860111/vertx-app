@@ -2,7 +2,6 @@ package net.brainified;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 import com.google.inject.AbstractModule;
@@ -12,9 +11,7 @@ import com.google.inject.util.Modules;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.unit.TestContext;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
 
-@RunWith(VertxUnitRunner.class)
 public abstract class IntegrationTest {
 
   protected Vertx vertx;

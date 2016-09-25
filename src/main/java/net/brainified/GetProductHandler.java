@@ -4,15 +4,16 @@ import java.util.Objects;
 
 import javax.inject.Inject;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.primitives.Ints;
-
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.RoutingContext;
 
 final class GetProductHandler implements Handler<RoutingContext> {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(GetProductHandler.class);
 
   private final ProductService service;
 
@@ -23,19 +24,19 @@ final class GetProductHandler implements Handler<RoutingContext> {
 
   @Override
   public void handle(RoutingContext routingContext) {
-    final Integer id = Ints.tryParse(MoreObjects.firstNonNull(routingContext.request().getParam("id"), ""));
-    if (Objects.isNull(id)) {
-      routingContext.response().setStatusCode(400).end("Invalid id");
-      return;
-    }
+    final String id = routingContext.request().getParam("id");
 
-    final Future<Product> future = service.getProduct(id);
-    future.setHandler(productResult -> {
-      if (productResult.succeeded()) {
-        final Product product = productResult.result();
-        routingContext.response().putHeader("Content-Type", "application/json; charset=utf-8").end(Json.encodePrettily(product));
+    service.getProduct(id, result -> {
+      if (result.succeeded()) {
+        final JsonObject product = result.result();
+        if (Objects.isNull(product)) {
+          routingContext.response().setStatusCode(404).end("not found");
+        } else {
+          routingContext.response().putHeader("Content-Type", "application/json; charset=utf-8").end(Json.encodePrettily(product));
+        }
       } else {
-        routingContext.response().setStatusCode(404).end();
+        LOGGER.error(result.cause().getMessage());
+        routingContext.response().setStatusCode(500).end();
       }
     });
   }

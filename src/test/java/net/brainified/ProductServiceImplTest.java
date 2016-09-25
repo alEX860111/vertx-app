@@ -1,149 +1,115 @@
 package net.brainified;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
 
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import io.vertx.core.Vertx;
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.mongo.FindOptions;
+import io.vertx.ext.mongo.MongoClient;
+import io.vertx.ext.mongo.MongoClientDeleteResult;
+import io.vertx.ext.mongo.MongoClientUpdateResult;
 
-@RunWith(VertxUnitRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class ProductServiceImplTest {
 
-  private ProductServiceImpl service;
+  @Mock
+  private MongoClient client;
 
-  private Vertx vertx;
+  @InjectMocks
+  private ProductServiceImpl serviceSUT;
 
-  @Before
-  public void setUp() {
-    vertx = Vertx.vertx();
-    service = new ProductServiceImpl(vertx);
-  }
+  @Test
+  public void testGetProductCount() {
+    @SuppressWarnings("unchecked")
+    final Handler<AsyncResult<Long>> handler = Mockito.mock(Handler.class);
 
-  @After
-  public void tearDown(TestContext context) {
-    vertx.close(context.asyncAssertSuccess());
+    serviceSUT.getProductCount(handler);
+
+    verify(client).count("products", new JsonObject(), handler);
   }
 
   @Test
-  public void testGetProductList(final TestContext context) {
-    final Async async = context.async();
-    service.getProductList(1, 10).setHandler(productsResult -> {
-      assertTrue(productsResult.succeeded());
-      final List<Product> products = productsResult.result().getProducts();
-      assertFalse(products.isEmpty());
-      async.complete();
-    });
+  public void testGetProductList() {
+    @SuppressWarnings("unchecked")
+    final Handler<AsyncResult<List<JsonObject>>> handler = Mockito.mock(Handler.class);
+
+    final ArgumentCaptor<FindOptions> optionsCaptor = ArgumentCaptor.forClass(FindOptions.class);
+
+    serviceSUT.getProductList(1, 10, handler);
+
+    verify(client).findWithOptions(eq("products"), eq(new JsonObject()), optionsCaptor.capture(), eq(handler));
+    final FindOptions options = optionsCaptor.getValue();
+    assertEquals(10, options.getLimit());
+    assertEquals(0, options.getSkip());
   }
 
   @Test
-  public void testGetProduct(final TestContext context) {
-    final Async async = context.async();
-    service.getProductList(1, 10).setHandler(productsResult -> {
-      final List<Product> products = productsResult.result().getProducts();
-      service.getProduct(products.get(0).getId()).setHandler(productResult -> {
-        assertTrue(productResult.succeeded());
-        assertNotNull(productResult.result());
-        async.complete();
-      });
-    });
+  public void testGetProduct() {
+    @SuppressWarnings("unchecked")
+    final Handler<AsyncResult<JsonObject>> handler = Mockito.mock(Handler.class);
+
+    serviceSUT.getProduct("1", handler);
+
+    final JsonObject query = new JsonObject();
+    query.put("_id", "1");
+    verify(client).findOne(eq("products"), eq(query), eq(new JsonObject()), eq(handler));
   }
 
   @Test
-  public void testGetProduct_notFound(final TestContext context) {
-    final Async async = context.async();
-    service.getProduct(42).setHandler(productResult -> {
-      assertTrue(productResult.failed());
-      assertNull(productResult.result());
-      async.complete();
-    });
+  public void testAddProduct() {
+    @SuppressWarnings("unchecked")
+    final Handler<AsyncResult<String>> handler = Mockito.mock(Handler.class);
+
+    final JsonObject product = new JsonObject();
+
+    serviceSUT.addProduct(product, handler);
+
+    verify(client).insert(eq("products"), eq(product), eq(handler));
   }
 
   @Test
-  public void testAddProduct(final TestContext context) {
-    final Async async = context.async();
-    final ProductData data = new ProductData();
-    data.setName("myNewProduct");
-    data.setPrice(900);
-    service.addProduct(data).setHandler(productResult -> {
-      assertTrue(productResult.succeeded());
-      final Product product = productResult.result();
-      assertNotNull(product);
-      assertTrue(product.getId() > 0);
-      assertEquals("myNewProduct", product.getData().getName());
-      assertEquals(Integer.valueOf(900), product.getData().getPrice());
+  public void testUpdateProduct() {
+    @SuppressWarnings("unchecked")
+    final Handler<AsyncResult<MongoClientUpdateResult>> handler = Mockito.mock(Handler.class);
 
-      async.complete();
-    });
+    final JsonObject data = new JsonObject();
+
+    serviceSUT.updateProduct("1", data, handler);
+
+    final JsonObject query = new JsonObject();
+    query.put("_id", "1");
+
+    final JsonObject product = new JsonObject();
+    product.put("data", data);
+
+    final JsonObject update = new JsonObject();
+    update.put("$set", product);
+    verify(client).updateCollection(eq("products"), eq(query), eq(update), eq(handler));
   }
 
   @Test
-  public void testUpdateProduct(final TestContext context) {
-    final Async async = context.async();
-    service.getProductList(1, 10).setHandler(productsResult -> {
-      final List<Product> products = productsResult.result().getProducts();
-      final ProductData data = new ProductData();
-      data.setName("myNewProduct");
-      data.setPrice(900);
-      service.updateProduct(products.get(0).getId(), data).setHandler(productResult -> {
-        assertTrue(productResult.succeeded());
-        final Product product = productResult.result();
-        assertNotNull(product);
-        assertEquals(products.get(0).getId(), product.getId());
-        assertEquals("myNewProduct", product.getData().getName());
-        assertEquals(Integer.valueOf(900), product.getData().getPrice());
-        async.complete();
-      });
-    });
-  }
+  public void testDeleteProduct() {
+    @SuppressWarnings("unchecked")
+    final Handler<AsyncResult<MongoClientDeleteResult>> handler = Mockito.mock(Handler.class);
 
-  @Test
-  public void testUpdateProduct_notFound(final TestContext context) {
-    final Async async = context.async();
-    final ProductData data = new ProductData();
-    data.setName("myNewProduct");
-    data.setPrice(900);
-    service.updateProduct(42, data).setHandler(productResult -> {
-      assertTrue(productResult.failed());
-      assertNull(productResult.result());
-      async.complete();
-    });
-  }
+    serviceSUT.deleteProduct("1", handler);
 
-  @Test
-  public void testDeleteProduct(final TestContext context) {
-    final Async async = context.async();
-    service.getProductList(1, 10).setHandler(productsResult -> {
-      final List<Product> products = productsResult.result().getProducts();
-      service.deleteProduct(products.get(0).getId()).setHandler(productResult -> {
-        assertTrue(productResult.succeeded());
-        final Product product = productResult.result();
-        assertNotNull(product);
-        assertEquals(products.get(0).getId(), product.getId());
-        async.complete();
-      });
-    });
-  }
-
-  @Test
-  public void testDeleteProduct_notFound(final TestContext context) {
-    final Async async = context.async();
-    service.deleteProduct(42).setHandler(productResult -> {
-      assertTrue(productResult.failed());
-      assertNull(productResult.result());
-      async.complete();
-    });
+    final JsonObject query = new JsonObject();
+    query.put("_id", "1");
+    verify(client).removeDocument(eq("products"), eq(query), eq(handler));
   }
 
 }

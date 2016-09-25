@@ -1,13 +1,15 @@
 package net.brainified;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doAnswer;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.json.Json;
+import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -18,31 +20,38 @@ public class AddProductHandlerIntegrationTest extends IntegrationTest {
 
   @Test
   public void testAddProduct(TestContext context) {
-    final JsonObject json = new JsonObject();
-    json.put("name", "myProduct");
-    json.put("price", 100);
+    final JsonObject payload = new JsonObject();
+    payload.put("name", "myProduct");
+    payload.put("price", 100);
 
-    final Product product = new Product();
-    product.setId(1);
-    final ProductData data = new ProductData();
-    data.setName("myProduct");
-    data.setPrice(100);
-    product.setData(data);
-    when(serviceMock.addProduct(any(ProductData.class))).thenReturn(Future.succeededFuture(product));
+    final JsonObject expectedProduct = new JsonObject();
+    final JsonObject data = new JsonObject();
+    data.put("name", "myProduct");
+    data.put("price", 100);
+    expectedProduct.put("data", data);
+    expectedProduct.put("_id", "id");
+
+    doAnswer(invocation -> {
+      final String id = "id";
+      final JsonObject product = invocation.getArgumentAt(0, JsonObject.class);
+      product.put("_id", id);
+      @SuppressWarnings("unchecked")
+      final Handler<AsyncResult<String>> handler = (Handler<AsyncResult<String>>) invocation.getArguments()[1];
+      handler.handle(Future.succeededFuture(id));
+      return null;
+    }).when(serviceMock).addProduct(any(JsonObject.class), Matchers.<Handler<AsyncResult<String>>>any());
 
     final Async async = context.async();
 
     vertx.createHttpClient().post(8080, "localhost", "/api/products", response -> {
       context.assertEquals(201, response.statusCode());
       response.handler(body -> {
-        final Product resultProduct = Json.decodeValue(body.toString(), Product.class);
-        context.assertEquals(product.getId(), resultProduct.getId());
-        context.assertEquals(json.getString("name"), resultProduct.getData().getName());
-        context.assertEquals(json.getInteger("price"), resultProduct.getData().getPrice());
-        context.assertEquals("http://localhost:8080/api/products/" + product.getId(), response.getHeader("Location"));
+        final JsonObject resultProduct = new JsonObject(body.toString());
+        context.assertEquals(expectedProduct, resultProduct);
+        context.assertEquals("http://localhost:8080/api/products/" + resultProduct.getValue("_id"), response.getHeader("Location"));
         async.complete();
       });
-    }).end(json.encode());
+    }).end(payload.encode());
   }
 
   @Test
@@ -64,7 +73,12 @@ public class AddProductHandlerIntegrationTest extends IntegrationTest {
     json.put("name", "myProduct");
     json.put("price", 100);
 
-    when(serviceMock.addProduct(any(ProductData.class))).thenReturn(Future.failedFuture("failed"));
+    doAnswer(invocation -> {
+      @SuppressWarnings("unchecked")
+      final Handler<AsyncResult<String>> handler = (Handler<AsyncResult<String>>) invocation.getArguments()[1];
+      handler.handle(Future.failedFuture("error"));
+      return null;
+    }).when(serviceMock).addProduct(any(JsonObject.class), Matchers.<Handler<AsyncResult<String>>>any());
 
     final Async async = context.async();
 
