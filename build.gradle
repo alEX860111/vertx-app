@@ -20,12 +20,6 @@ dependencies {
 }
 
 jar {
-    from {
-        (configurations.runtime).collect {
-            it.isDirectory() ? it : zipTree(it)
-        }
-    }
-    manifest {
-        attributes("Main-Class": "net.brainified.Main" )
-    }
+  from configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) }
+  manifest { attributes("Main-Class": "net.brainified.Main" ) }
 }
