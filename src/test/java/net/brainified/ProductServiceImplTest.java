@@ -3,6 +3,7 @@ package net.brainified;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 
@@ -18,9 +19,10 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.FindOptions;
-import io.vertx.ext.mongo.MongoClient;
 import io.vertx.ext.mongo.MongoClientDeleteResult;
 import io.vertx.ext.mongo.MongoClientUpdateResult;
+import io.vertx.rxjava.ext.mongo.MongoClient;
+import rx.Observable;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProductServiceImplTest {
@@ -61,14 +63,13 @@ public class ProductServiceImplTest {
 
   @Test
   public void testGetProduct() {
-    @SuppressWarnings("unchecked")
-    final Handler<AsyncResult<JsonObject>> handler = Mockito.mock(Handler.class);
-
-    serviceSUT.getProduct("1", handler);
-
     final JsonObject query = new JsonObject();
     query.put("_id", "1");
-    verify(client).findOne(eq("products"), eq(query), eq(new JsonObject()), eq(handler));
+    when(client.findOneObservable(eq("products"), eq(query), eq(new JsonObject()))).thenReturn(Observable.just(new JsonObject()));
+
+    serviceSUT.getProduct("1");
+
+    verify(client).findOneObservable(eq("products"), eq(query), eq(new JsonObject()));
   }
 
   @Test

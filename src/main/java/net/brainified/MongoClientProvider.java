@@ -3,9 +3,9 @@ package net.brainified;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-import io.vertx.core.Vertx;
+import io.vertx.rxjava.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.mongo.MongoClient;
+import io.vertx.rxjava.ext.mongo.MongoClient;
 
 final class MongoClientProvider implements Provider<MongoClient> {
 

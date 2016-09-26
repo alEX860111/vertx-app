@@ -8,7 +8,8 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.FindOptions;
-import io.vertx.ext.mongo.MongoClient;
+import io.vertx.rxjava.ext.mongo.MongoClient;
+import rx.Observable;
 import io.vertx.ext.mongo.MongoClientDeleteResult;
 import io.vertx.ext.mongo.MongoClientUpdateResult;
 
@@ -44,11 +45,11 @@ final class ProductServiceImpl implements ProductService {
   }
 
   @Override
-  public void getProduct(final String id, final Handler<AsyncResult<JsonObject>> handler) {
+  public Observable<JsonObject> getProduct(final String id) {
     final JsonObject query = new JsonObject();
     query.put("_id", id);
     final JsonObject fields = new JsonObject();
-    client.findOne(PRODUCTS_COLLECTION, query, fields, handler);
+    return client.findOneObservable(PRODUCTS_COLLECTION, query, fields);
   }
 
   @Override

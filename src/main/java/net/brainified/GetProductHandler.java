@@ -6,10 +6,9 @@ import javax.inject.Inject;
 
 import io.vertx.core.Handler;
 import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.web.RoutingContext;
+import io.vertx.rxjava.ext.web.RoutingContext;
 
 final class GetProductHandler implements Handler<RoutingContext> {
 
@@ -26,19 +25,17 @@ final class GetProductHandler implements Handler<RoutingContext> {
   public void handle(RoutingContext routingContext) {
     final String id = routingContext.request().getParam("id");
 
-    service.getProduct(id, result -> {
-      if (result.succeeded()) {
-        final JsonObject product = result.result();
-        if (Objects.isNull(product)) {
-          routingContext.response().setStatusCode(404).end("not found");
-        } else {
-          routingContext.response().putHeader("Content-Type", "application/json; charset=utf-8").end(Json.encodePrettily(product));
-        }
+    service.getProduct(id).subscribe(product -> {
+      if (Objects.isNull(product)) {
+        routingContext.response().setStatusCode(404).end("not found");
       } else {
-        LOGGER.error(result.cause().getMessage());
-        routingContext.response().setStatusCode(500).end();
+        routingContext.response().putHeader("Content-Type", "application/json; charset=utf-8").end(Json.encodePrettily(product));
       }
+    }, error -> {
+      LOGGER.error(error.getMessage());
+      routingContext.response().setStatusCode(500).end();
     });
+
   }
 
 }

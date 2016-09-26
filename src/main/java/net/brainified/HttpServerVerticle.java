@@ -2,12 +2,12 @@ package net.brainified;
 
 import javax.inject.Inject;
 
-import io.vertx.core.AbstractVerticle;
+import io.vertx.rxjava.core.AbstractVerticle;
 import io.vertx.core.Future;
-import io.vertx.core.Vertx;
+import io.vertx.rxjava.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.web.Router;
+import io.vertx.rxjava.ext.web.Router;
 
 final class HttpServerVerticle extends AbstractVerticle {
 

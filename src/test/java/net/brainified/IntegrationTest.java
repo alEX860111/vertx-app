@@ -9,7 +9,9 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.util.Modules;
 
-import io.vertx.core.Vertx;
+import io.vertx.rxjava.core.RxHelper;
+import io.vertx.rxjava.core.Vertx;
+import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 
 public abstract class IntegrationTest {
@@ -20,6 +22,7 @@ public abstract class IntegrationTest {
 
   @Before
   public void setUp(TestContext context) {
+    final Async async = context.async();
     serviceMock = Mockito.mock(ProductService.class);
     final Injector injector = Guice.createInjector(Modules.override(new ApplicationModule()).with(new AbstractModule() {
       @Override
@@ -28,7 +31,7 @@ public abstract class IntegrationTest {
       }
     }));
     vertx = injector.getInstance(Vertx.class);
-    vertx.deployVerticle(injector.getInstance(HttpServerVerticle.class), context.asyncAssertSuccess());
+    RxHelper.deployVerticle(vertx, injector.getInstance(HttpServerVerticle.class)).subscribe((s) -> async.complete());
   }
 
   @After

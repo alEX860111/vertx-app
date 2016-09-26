@@ -1,19 +1,16 @@
 package net.brainified;
 
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import rx.Observable;
 
 @RunWith(VertxUnitRunner.class)
 public class GetProductHandlerIntegrationTest extends IntegrationTest {
@@ -27,12 +24,7 @@ public class GetProductHandlerIntegrationTest extends IntegrationTest {
     data.put("price", 100);
     product.put("data", data);
 
-    doAnswer(invocation -> {
-      @SuppressWarnings("unchecked")
-      final Handler<AsyncResult<JsonObject>> handler = (Handler<AsyncResult<JsonObject>>) invocation.getArguments()[1];
-      handler.handle(Future.succeededFuture(product));
-      return null;
-    }).when(serviceMock).getProduct(eq("1"), Matchers.<Handler<AsyncResult<JsonObject>>>any());
+    when(serviceMock.getProduct(eq("1"))).thenReturn(Observable.just(product));
 
     final Async async = context.async();
 
@@ -48,12 +40,7 @@ public class GetProductHandlerIntegrationTest extends IntegrationTest {
 
   @Test
   public void testGetProduct_notFound(TestContext context) {
-    doAnswer(invocation -> {
-      @SuppressWarnings("unchecked")
-      final Handler<AsyncResult<JsonObject>> handler = (Handler<AsyncResult<JsonObject>>) invocation.getArguments()[1];
-      handler.handle(Future.succeededFuture(null));
-      return null;
-    }).when(serviceMock).getProduct(eq("1"), Matchers.<Handler<AsyncResult<JsonObject>>>any());
+    when(serviceMock.getProduct(eq("1"))).thenReturn(Observable.just(null));
     final Async async = context.async();
 
     vertx.createHttpClient().getNow(8080, "localhost", "/api/products/1", response -> {
@@ -64,12 +51,7 @@ public class GetProductHandlerIntegrationTest extends IntegrationTest {
 
   @Test
   public void testGetProduct_serverError(TestContext context) {
-    doAnswer(invocation -> {
-      @SuppressWarnings("unchecked")
-      final Handler<AsyncResult<JsonObject>> handler = (Handler<AsyncResult<JsonObject>>) invocation.getArguments()[1];
-      handler.handle(Future.failedFuture("error"));
-      return null;
-    }).when(serviceMock).getProduct(eq("1"), Matchers.<Handler<AsyncResult<JsonObject>>>any());
+    when(serviceMock.getProduct(eq("1"))).thenReturn(Observable.error(new RuntimeException("error")));
     final Async async = context.async();
 
     vertx.createHttpClient().getNow(8080, "localhost", "/api/products/1", response -> {

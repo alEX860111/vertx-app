@@ -5,10 +5,10 @@ import com.google.inject.Scopes;
 import com.google.inject.TypeLiteral;
 
 import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
-import io.vertx.ext.mongo.MongoClient;
-import io.vertx.ext.web.Router;
-import io.vertx.ext.web.RoutingContext;
+import io.vertx.rxjava.core.Vertx;
+import io.vertx.rxjava.ext.mongo.MongoClient;
+import io.vertx.rxjava.ext.web.Router;
+import io.vertx.rxjava.ext.web.RoutingContext;
 
 final class ApplicationModule extends AbstractModule {
   @Override

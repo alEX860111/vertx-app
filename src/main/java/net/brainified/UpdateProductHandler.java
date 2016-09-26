@@ -8,7 +8,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.mongo.MongoClientUpdateResult;
-import io.vertx.ext.web.RoutingContext;
+import io.vertx.rxjava.ext.web.RoutingContext;
 
 final class UpdateProductHandler implements Handler<RoutingContext> {
 
