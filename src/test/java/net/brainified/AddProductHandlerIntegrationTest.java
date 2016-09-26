@@ -20,19 +20,13 @@ public class AddProductHandlerIntegrationTest extends IntegrationTest {
 
   @Test
   public void testAddProduct(TestContext context) {
-    final JsonObject payload = new JsonObject();
-    payload.put("name", "myProduct");
-    payload.put("price", 100);
-
-    final JsonObject expectedProduct = new JsonObject();
     final JsonObject data = new JsonObject();
     data.put("name", "myProduct");
     data.put("price", 100);
-    expectedProduct.put("data", data);
-    expectedProduct.put("_id", "id");
+
+    final String id = "id";
 
     doAnswer(invocation -> {
-      final String id = "id";
       final JsonObject product = invocation.getArgumentAt(0, JsonObject.class);
       product.put("_id", id);
       @SuppressWarnings("unchecked")
@@ -47,11 +41,13 @@ public class AddProductHandlerIntegrationTest extends IntegrationTest {
       context.assertEquals(201, response.statusCode());
       response.handler(body -> {
         final JsonObject resultProduct = new JsonObject(body.toString());
-        context.assertEquals(expectedProduct, resultProduct);
+        context.assertEquals(id, resultProduct.getValue("_id"));
+        context.assertFalse(resultProduct.getString("createdAt").isEmpty());
+        context.assertEquals(data, resultProduct.getValue("data"));
         context.assertEquals("http://localhost:8080/api/products/" + resultProduct.getValue("_id"), response.getHeader("Location"));
         async.complete();
       });
-    }).end(payload.encode());
+    }).end(data.encode());
   }
 
   @Test

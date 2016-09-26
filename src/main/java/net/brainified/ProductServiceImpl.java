@@ -14,6 +14,8 @@ import io.vertx.ext.mongo.MongoClientUpdateResult;
 
 final class ProductServiceImpl implements ProductService {
 
+  private static final int DESC = -1;
+
   private static final String PRODUCTS_COLLECTION = "products";
 
   private final MongoClient client;
@@ -32,7 +34,12 @@ final class ProductServiceImpl implements ProductService {
   @Override
   public void getProductList(final Integer page, final Integer perpage, final Handler<AsyncResult<List<JsonObject>>> handler) {
     final JsonObject query = new JsonObject();
-    final FindOptions options = new FindOptions().setLimit(perpage).setSkip((page - 1) * perpage);
+    final JsonObject sort = new JsonObject();
+    sort.put("createdAt", DESC);
+    final FindOptions options = new FindOptions()
+        .setLimit(perpage)
+        .setSkip((page - 1) * perpage)
+        .setSort(sort);
     client.findWithOptions(PRODUCTS_COLLECTION, query, options, handler);
   }
 

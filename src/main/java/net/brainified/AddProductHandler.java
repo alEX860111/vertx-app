@@ -1,5 +1,7 @@
 package net.brainified;
 
+import java.time.Instant;
+
 import javax.inject.Inject;
 
 import io.vertx.core.Handler;
@@ -34,6 +36,7 @@ final class AddProductHandler implements Handler<RoutingContext> {
 
     final JsonObject product = new JsonObject();
     product.put("data", data);
+    product.put("createdAt", Instant.now());
 
     service.addProduct(product, result -> {
       if (result.succeeded()) {

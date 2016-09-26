@@ -54,6 +54,9 @@ public class ProductServiceImplTest {
     final FindOptions options = optionsCaptor.getValue();
     assertEquals(10, options.getLimit());
     assertEquals(0, options.getSkip());
+    final JsonObject sort = new JsonObject();
+    sort.put("createdAt", -1);
+    assertEquals(sort , options.getSort());
   }
 
   @Test
