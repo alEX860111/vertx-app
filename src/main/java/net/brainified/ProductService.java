@@ -5,7 +5,6 @@ import java.util.List;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.mongo.MongoClientUpdateResult;
 import rx.Observable;
 
 interface ProductService {
@@ -18,7 +17,7 @@ interface ProductService {
 
   Observable<String> addProduct(JsonObject product);
 
-  void updateProduct(String id, JsonObject data, Handler<AsyncResult<MongoClientUpdateResult>> handler);
+  Observable<Long> updateProduct(String id, JsonObject data);
 
   Observable<Long> deleteProduct(String id);
 

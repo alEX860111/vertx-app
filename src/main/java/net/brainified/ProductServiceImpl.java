@@ -8,7 +8,6 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.FindOptions;
-import io.vertx.ext.mongo.MongoClientUpdateResult;
 import io.vertx.rxjava.ext.mongo.MongoClient;
 import rx.Observable;
 
@@ -54,14 +53,15 @@ final class ProductServiceImpl implements ProductService {
   }
 
   @Override
-  public void updateProduct(final String id, final JsonObject data, final Handler<AsyncResult<MongoClientUpdateResult>> handler) {
+  public Observable<Long> updateProduct(final String id, final JsonObject data) {
     final JsonObject query = new JsonObject().put("_id", id);
 
     final JsonObject product = new JsonObject().put("data", data);
-
     final JsonObject update = new JsonObject().put("$set", product);
 
-    client.updateCollection(PRODUCTS_COLLECTION, query, update, handler);
+    return client.updateCollectionObservable(PRODUCTS_COLLECTION, query, update).map(result -> {
+      return result.getDocModified();
+    });
   }
 
   @Override

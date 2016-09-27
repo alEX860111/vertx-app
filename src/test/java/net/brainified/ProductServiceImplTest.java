@@ -63,14 +63,11 @@ public class ProductServiceImplTest {
 
   @Test
   public void testGetProduct() {
-    final JsonObject query = new JsonObject();
-    query.put("_id", "1");
+    final JsonObject query = new JsonObject().put("_id", "1");
 
     final JsonObject fields = new JsonObject();
 
-    final JsonObject product = new JsonObject();
-    product.put("_id", "1");
-    product.put("name", "myProduct");
+    final JsonObject product = new JsonObject().put("_id", "1").put("name", "myProduct");
 
     when(client.findOneObservable("products", query, fields)).thenReturn(Observable.just(product));
 
@@ -91,28 +88,26 @@ public class ProductServiceImplTest {
 
   @Test
   public void testUpdateProduct() {
-    @SuppressWarnings("unchecked")
-    final Handler<AsyncResult<MongoClientUpdateResult>> handler = Mockito.mock(Handler.class);
-
     final JsonObject data = new JsonObject();
 
-    serviceSUT.updateProduct("1", data, handler);
+    final JsonObject query = new JsonObject().put("_id", "1");
 
-    final JsonObject query = new JsonObject();
-    query.put("_id", "1");
+    final JsonObject product = new JsonObject().put("data", data);
+    final JsonObject update = new JsonObject().put("$set", product);
+    
+    final MongoClientUpdateResult result = Mockito.mock(MongoClientUpdateResult.class);
+    when(result.getDocModified()).thenReturn(1L);
 
-    final JsonObject product = new JsonObject();
-    product.put("data", data);
+    when(client.updateCollectionObservable("products", query, update)).thenReturn(Observable.just(result));
 
-    final JsonObject update = new JsonObject();
-    update.put("$set", product);
-    verify(client).updateCollection(eq("products"), eq(query), eq(update), eq(handler));
+    serviceSUT.updateProduct("1", data).subscribe(numModified -> assertEquals(Long.valueOf(1L), numModified));
+
+    verify(client).updateCollectionObservable("products", query, update);
   }
 
   @Test
   public void testDeleteProduct() {
-    final JsonObject query = new JsonObject();
-    query.put("_id", "1");
+    final JsonObject query = new JsonObject().put("_id", "1");
 
     final MongoClientDeleteResult result = Mockito.mock(MongoClientDeleteResult.class);
     when(result.getRemovedCount()).thenReturn(1L);

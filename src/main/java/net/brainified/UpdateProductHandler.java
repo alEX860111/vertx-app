@@ -7,7 +7,6 @@ import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.mongo.MongoClientUpdateResult;
 import io.vertx.rxjava.ext.web.RoutingContext;
 
 final class UpdateProductHandler implements Handler<RoutingContext> {
@@ -35,18 +34,15 @@ final class UpdateProductHandler implements Handler<RoutingContext> {
       return;
     }
 
-    service.updateProduct(id, data, updateResult -> {
-      if (updateResult.succeeded()) {
-        final MongoClientUpdateResult result = updateResult.result();
-        if (result.getDocModified() == 0) {
-          routingContext.response().setStatusCode(404).end();
-          return;
-        }
-        routingContext.response().setStatusCode(204).end();
+    service.updateProduct(id, data).subscribe(numModified -> {
+      if (numModified == 0) {
+        routingContext.response().setStatusCode(404).end();
       } else {
-        LOGGER.error(updateResult.cause().getMessage());
-        routingContext.response().setStatusCode(500).end();
+        routingContext.response().setStatusCode(204).end();
       }
+    }, error -> {
+      LOGGER.error(error.getMessage());
+      routingContext.response().setStatusCode(500).end();
     });
   }
 
