@@ -53,8 +53,8 @@ final class ProductServiceImpl implements ProductService {
   }
 
   @Override
-  public void addProduct(final JsonObject product, final Handler<AsyncResult<String>> handler) {
-    client.insert(PRODUCTS_COLLECTION, product, handler);
+  public Observable<String> addProduct(final JsonObject product) {
+    return client.insertObservable(PRODUCTS_COLLECTION, product);
   }
 
   @Override

@@ -17,7 +17,7 @@ interface ProductService {
 
   Observable<JsonObject> getProduct(String id);
 
-  void addProduct(JsonObject product, Handler<AsyncResult<String>> handler);
+  Observable<String> addProduct(JsonObject product);
 
   void updateProduct(String id, JsonObject data, Handler<AsyncResult<MongoClientUpdateResult>> handler);
 

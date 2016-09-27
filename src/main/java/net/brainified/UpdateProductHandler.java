@@ -32,6 +32,7 @@ final class UpdateProductHandler implements Handler<RoutingContext> {
       data = routingContext.getBodyAsJson();
     } catch (final DecodeException e) {
       routingContext.response().setStatusCode(400).end(INVALID_JSON_IN_BODY);
+      return;
     }
 
     service.updateProduct(id, data, updateResult -> {

@@ -58,30 +58,35 @@ public class ProductServiceImplTest {
     assertEquals(0, options.getSkip());
     final JsonObject sort = new JsonObject();
     sort.put("createdAt", -1);
-    assertEquals(sort , options.getSort());
+    assertEquals(sort, options.getSort());
   }
 
   @Test
   public void testGetProduct() {
     final JsonObject query = new JsonObject();
     query.put("_id", "1");
-    when(client.findOneObservable(eq("products"), eq(query), eq(new JsonObject()))).thenReturn(Observable.just(new JsonObject()));
 
-    serviceSUT.getProduct("1");
+    final JsonObject fields = new JsonObject();
 
-    verify(client).findOneObservable(eq("products"), eq(query), eq(new JsonObject()));
+    final JsonObject product = new JsonObject();
+    product.put("_id", "1");
+    product.put("name", "myProduct");
+
+    when(client.findOneObservable("products", query, fields)).thenReturn(Observable.just(product));
+
+    serviceSUT.getProduct("1").subscribe(result -> assertEquals(product, result));
+
+    verify(client).findOneObservable("products", query, fields);
   }
 
   @Test
   public void testAddProduct() {
-    @SuppressWarnings("unchecked")
-    final Handler<AsyncResult<String>> handler = Mockito.mock(Handler.class);
-
     final JsonObject product = new JsonObject();
+    when(client.insertObservable("products", product)).thenReturn(Observable.just("id"));
 
-    serviceSUT.addProduct(product, handler);
+    serviceSUT.addProduct(product).subscribe(id -> assertEquals("id", id));
 
-    verify(client).insert(eq("products"), eq(product), eq(handler));
+    verify(client).insertObservable("products", product);
   }
 
   @Test

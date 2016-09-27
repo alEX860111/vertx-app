@@ -1,19 +1,16 @@
 package net.brainified;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.*;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import rx.Observable;
 
 @RunWith(VertxUnitRunner.class)
 public class AddProductHandlerIntegrationTest extends IntegrationTest {
@@ -26,14 +23,7 @@ public class AddProductHandlerIntegrationTest extends IntegrationTest {
 
     final String id = "id";
 
-    doAnswer(invocation -> {
-      final JsonObject product = invocation.getArgumentAt(0, JsonObject.class);
-      product.put("_id", id);
-      @SuppressWarnings("unchecked")
-      final Handler<AsyncResult<String>> handler = (Handler<AsyncResult<String>>) invocation.getArguments()[1];
-      handler.handle(Future.succeededFuture(id));
-      return null;
-    }).when(serviceMock).addProduct(any(JsonObject.class), Matchers.<Handler<AsyncResult<String>>>any());
+    when(serviceMock.addProduct(any(JsonObject.class))).thenReturn(Observable.just(id));
 
     final Async async = context.async();
 
@@ -58,6 +48,7 @@ public class AddProductHandlerIntegrationTest extends IntegrationTest {
       context.assertEquals(400, response.statusCode());
       response.handler(body -> {
         context.assertEquals("Invalid JSON in body", body.toString());
+        verifyZeroInteractions(serviceMock);
         async.complete();
       });
     }).end();
@@ -65,23 +56,18 @@ public class AddProductHandlerIntegrationTest extends IntegrationTest {
 
   @Test
   public void testAddProduct_serverError(TestContext context) {
-    final JsonObject json = new JsonObject();
-    json.put("name", "myProduct");
-    json.put("price", 100);
+    final JsonObject data = new JsonObject();
+    data.put("name", "myProduct");
+    data.put("price", 100);
 
-    doAnswer(invocation -> {
-      @SuppressWarnings("unchecked")
-      final Handler<AsyncResult<String>> handler = (Handler<AsyncResult<String>>) invocation.getArguments()[1];
-      handler.handle(Future.failedFuture("error"));
-      return null;
-    }).when(serviceMock).addProduct(any(JsonObject.class), Matchers.<Handler<AsyncResult<String>>>any());
+    when(serviceMock.addProduct(any(JsonObject.class))).thenReturn(Observable.error(new RuntimeException("error")));
 
     final Async async = context.async();
 
     vertx.createHttpClient().post(8080, "localhost", "/api/products", response -> {
       context.assertEquals(500, response.statusCode());
       async.complete();
-    }).end(json.encode());
+    }).end(data.encode());
   }
 
 }

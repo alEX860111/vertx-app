@@ -32,23 +32,22 @@ final class AddProductHandler implements Handler<RoutingContext> {
       data = routingContext.getBodyAsJson();
     } catch (final DecodeException e) {
       routingContext.response().setStatusCode(400).end(INVALID_JSON_IN_BODY);
+      return;
     }
 
     final JsonObject product = new JsonObject();
     product.put("data", data);
     product.put("createdAt", Instant.now());
 
-    service.addProduct(product, result -> {
-      if (result.succeeded()) {
-        final String id = result.result();
-        routingContext.response().setStatusCode(201)
-          .putHeader("Content-Type", "application/json; charset=utf-8")
-          .putHeader("Location", routingContext.request().absoluteURI() + "/" + id)
-          .end(Json.encodePrettily(product));
-      } else {
-        LOGGER.error(result.cause().getMessage());
-        routingContext.response().setStatusCode(500).end();
-      }
+    service.addProduct(product).subscribe(id -> {
+      product.put("_id", id);
+      routingContext.response().setStatusCode(201)
+      .putHeader("Content-Type", "application/json; charset=utf-8")
+      .putHeader("Location", routingContext.request().absoluteURI() + "/" + id)
+      .end(Json.encodePrettily(product));
+    }, error -> {
+      LOGGER.error(error.getMessage());
+      routingContext.response().setStatusCode(500).end();
     });
   }
 
