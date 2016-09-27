@@ -26,7 +26,7 @@ final class AddProductHandler implements Handler<RoutingContext> {
   }
 
   @Override
-  public void handle(RoutingContext routingContext) {
+  public void handle(final RoutingContext routingContext) {
     JsonObject data = null;
     try {
       data = routingContext.getBodyAsJson();

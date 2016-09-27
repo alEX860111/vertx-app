@@ -111,14 +111,17 @@ public class ProductServiceImplTest {
 
   @Test
   public void testDeleteProduct() {
-    @SuppressWarnings("unchecked")
-    final Handler<AsyncResult<MongoClientDeleteResult>> handler = Mockito.mock(Handler.class);
-
-    serviceSUT.deleteProduct("1", handler);
-
     final JsonObject query = new JsonObject();
     query.put("_id", "1");
-    verify(client).removeDocument(eq("products"), eq(query), eq(handler));
+
+    final MongoClientDeleteResult result = Mockito.mock(MongoClientDeleteResult.class);
+    when(result.getRemovedCount()).thenReturn(1L);
+
+    when(client.removeDocumentObservable("products", query)).thenReturn(Observable.just(result));
+
+    serviceSUT.deleteProduct("1").subscribe(numDeleted -> assertEquals(Long.valueOf(1L), numDeleted));
+
+    verify(client).removeDocumentObservable("products", query);
   }
 
 }

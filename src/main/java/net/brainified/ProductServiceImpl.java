@@ -8,10 +8,9 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.FindOptions;
+import io.vertx.ext.mongo.MongoClientUpdateResult;
 import io.vertx.rxjava.ext.mongo.MongoClient;
 import rx.Observable;
-import io.vertx.ext.mongo.MongoClientDeleteResult;
-import io.vertx.ext.mongo.MongoClientUpdateResult;
 
 final class ProductServiceImpl implements ProductService {
 
@@ -37,10 +36,7 @@ final class ProductServiceImpl implements ProductService {
     final JsonObject query = new JsonObject();
     final JsonObject sort = new JsonObject();
     sort.put("createdAt", DESC);
-    final FindOptions options = new FindOptions()
-        .setLimit(perpage)
-        .setSkip((page - 1) * perpage)
-        .setSort(sort);
+    final FindOptions options = new FindOptions().setLimit(perpage).setSkip((page - 1) * perpage).setSort(sort);
     client.findWithOptions(PRODUCTS_COLLECTION, query, options, handler);
   }
 
@@ -59,23 +55,21 @@ final class ProductServiceImpl implements ProductService {
 
   @Override
   public void updateProduct(final String id, final JsonObject data, final Handler<AsyncResult<MongoClientUpdateResult>> handler) {
-    final JsonObject query = new JsonObject();
-    query.put("_id", id);
+    final JsonObject query = new JsonObject().put("_id", id);
 
-    final JsonObject product = new JsonObject();
-    product.put("data", data);
+    final JsonObject product = new JsonObject().put("data", data);
 
-    final JsonObject update = new JsonObject();
-    update.put("$set", product);
+    final JsonObject update = new JsonObject().put("$set", product);
 
     client.updateCollection(PRODUCTS_COLLECTION, query, update, handler);
   }
 
   @Override
-  public void deleteProduct(final String id, final Handler<AsyncResult<MongoClientDeleteResult>> handler) {
-    final JsonObject query = new JsonObject();
-    query.put("_id", id);
-    client.removeDocument(PRODUCTS_COLLECTION, query, handler);
+  public Observable<Long> deleteProduct(final String id) {
+    final JsonObject query = new JsonObject().put("_id", id);
+    return client.removeDocumentObservable(PRODUCTS_COLLECTION, query).map(result -> {
+      return result.getRemovedCount();
+    });
   }
 
 }

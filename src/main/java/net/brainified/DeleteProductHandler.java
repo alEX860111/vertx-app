@@ -5,7 +5,6 @@ import javax.inject.Inject;
 import io.vertx.core.Handler;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.mongo.MongoClientDeleteResult;
 import io.vertx.rxjava.ext.web.RoutingContext;
 
 final class DeleteProductHandler implements Handler<RoutingContext> {
@@ -23,18 +22,15 @@ final class DeleteProductHandler implements Handler<RoutingContext> {
   public void handle(RoutingContext routingContext) {
     final String id = routingContext.request().getParam("id");
 
-    service.deleteProduct(id, deleteResult -> {
-      if (deleteResult.succeeded()) {
-        final MongoClientDeleteResult result = deleteResult.result();
-        if (result.getRemovedCount() == 0) {
-          routingContext.response().setStatusCode(404).end();
-          return;
-        }
-        routingContext.response().setStatusCode(204).end();
+    service.deleteProduct(id).subscribe(numDeleted -> {
+      if (numDeleted == 0) {
+        routingContext.response().setStatusCode(404).end();
       } else {
-        LOGGER.error(deleteResult.cause().getMessage());
-        routingContext.response().setStatusCode(500).end();
+        routingContext.response().setStatusCode(204).end();
       }
+    }, error -> {
+      LOGGER.error(error.getMessage());
+      routingContext.response().setStatusCode(500).end();
     });
   }
 

@@ -22,7 +22,7 @@ final class GetProductHandler implements Handler<RoutingContext> {
   }
 
   @Override
-  public void handle(RoutingContext routingContext) {
+  public void handle(final RoutingContext routingContext) {
     final String id = routingContext.request().getParam("id");
 
     service.getProduct(id).subscribe(product -> {
