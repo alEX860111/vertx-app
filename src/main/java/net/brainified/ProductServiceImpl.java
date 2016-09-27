@@ -1,6 +1,7 @@
 package net.brainified;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -38,11 +39,13 @@ final class ProductServiceImpl implements ProductService {
   }
 
   @Override
-  public Observable<JsonObject> getProduct(final String id) {
+  public Observable<Optional<JsonObject>> getProduct(final String id) {
     final JsonObject query = new JsonObject();
     query.put("_id", id);
     final JsonObject fields = new JsonObject();
-    return client.findOneObservable(PRODUCTS_COLLECTION, query, fields);
+    return client.findOneObservable(PRODUCTS_COLLECTION, query, fields).map(product -> {
+      return Optional.ofNullable(product);
+    });
   }
 
   @Override

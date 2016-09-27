@@ -1,6 +1,7 @@
 package net.brainified;
 
 import java.util.List;
+import java.util.Optional;
 
 import io.vertx.core.json.JsonObject;
 import rx.Observable;
@@ -11,7 +12,7 @@ interface ProductService {
 
   Observable<List<JsonObject>> getProductList(Integer page, Integer perpage);
 
-  Observable<JsonObject> getProduct(String id);
+  Observable<Optional<JsonObject>> getProduct(String id);
 
   Observable<String> addProduct(JsonObject product);
 

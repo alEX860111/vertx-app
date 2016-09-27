@@ -1,7 +1,5 @@
 package net.brainified;
 
-import java.util.Objects;
-
 import javax.inject.Inject;
 
 import io.vertx.core.Handler;
@@ -26,10 +24,10 @@ final class GetProductHandler implements Handler<RoutingContext> {
     final String id = routingContext.request().getParam("id");
 
     service.getProduct(id).subscribe(product -> {
-      if (Objects.isNull(product)) {
-        routingContext.response().setStatusCode(404).end("not found");
+      if (product.isPresent()) {
+        routingContext.response().putHeader("Content-Type", "application/json; charset=utf-8").end(Json.encodePrettily(product.get()));
       } else {
-        routingContext.response().putHeader("Content-Type", "application/json; charset=utf-8").end(Json.encodePrettily(product));
+        routingContext.response().setStatusCode(404).end("not found");
       }
     }, error -> {
       LOGGER.error(error.getMessage());

@@ -6,6 +6,8 @@ import static org.mockito.Mockito.when;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Optional;
+
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -24,7 +26,7 @@ public class GetProductHandlerIntegrationTest extends IntegrationTest {
     data.put("price", 100);
     product.put("data", data);
 
-    when(serviceMock.getProduct(eq("1"))).thenReturn(Observable.just(product));
+    when(serviceMock.getProduct(eq("1"))).thenReturn(Observable.just(Optional.of(product)));
 
     final Async async = context.async();
 
@@ -40,7 +42,7 @@ public class GetProductHandlerIntegrationTest extends IntegrationTest {
 
   @Test
   public void testGetProduct_notFound(TestContext context) {
-    when(serviceMock.getProduct(eq("1"))).thenReturn(Observable.just(null));
+    when(serviceMock.getProduct(eq("1"))).thenReturn(Observable.just(Optional.empty()));
     final Async async = context.async();
 
     vertx.createHttpClient().getNow(8080, "localhost", "/api/products/1", response -> {

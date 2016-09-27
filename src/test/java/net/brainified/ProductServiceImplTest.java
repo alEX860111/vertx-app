@@ -71,7 +71,7 @@ public class ProductServiceImplTest {
 
     when(client.findOneObservable("products", query, fields)).thenReturn(Observable.just(product));
 
-    serviceSUT.getProduct("1").subscribe(result -> assertEquals(product, result));
+    serviceSUT.getProduct("1").subscribe(result -> assertEquals(product, result.get()));
 
     verify(client).findOneObservable("products", query, fields);
   }
