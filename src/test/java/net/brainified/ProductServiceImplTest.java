@@ -1,11 +1,11 @@
 package net.brainified;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.eq;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-import java.util.List;
+import java.util.Collections;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,8 +15,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.FindOptions;
 import io.vertx.ext.mongo.MongoClientDeleteResult;
@@ -35,24 +33,26 @@ public class ProductServiceImplTest {
 
   @Test
   public void testGetProductCount() {
-    @SuppressWarnings("unchecked")
-    final Handler<AsyncResult<Long>> handler = Mockito.mock(Handler.class);
+    final JsonObject query = new JsonObject();
+    when(client.countObservable("products", query)).thenReturn(Observable.just(42L));
 
-    serviceSUT.getProductCount(handler);
+    serviceSUT.getProductCount().subscribe(count -> assertEquals(Long.valueOf(42L), count));
 
-    verify(client).count("products", new JsonObject(), handler);
+    verify(client).countObservable("products", query);
   }
 
   @Test
   public void testGetProductList() {
-    @SuppressWarnings("unchecked")
-    final Handler<AsyncResult<List<JsonObject>>> handler = Mockito.mock(Handler.class);
+    final JsonObject query = new JsonObject();
 
     final ArgumentCaptor<FindOptions> optionsCaptor = ArgumentCaptor.forClass(FindOptions.class);
 
-    serviceSUT.getProductList(1, 10, handler);
+    when(client.findWithOptionsObservable(eq("products"), eq(query), optionsCaptor.capture())).thenReturn(Observable.just(Collections.emptyList()));
 
-    verify(client).findWithOptions(eq("products"), eq(new JsonObject()), optionsCaptor.capture(), eq(handler));
+    serviceSUT.getProductList(1, 10).subscribe(products -> assertTrue(products.isEmpty()));
+
+    verify(client).findWithOptionsObservable(eq("products"), eq(query), optionsCaptor.capture());
+
     final FindOptions options = optionsCaptor.getValue();
     assertEquals(10, options.getLimit());
     assertEquals(0, options.getSkip());
@@ -94,7 +94,7 @@ public class ProductServiceImplTest {
 
     final JsonObject product = new JsonObject().put("data", data);
     final JsonObject update = new JsonObject().put("$set", product);
-    
+
     final MongoClientUpdateResult result = Mockito.mock(MongoClientUpdateResult.class);
     when(result.getDocModified()).thenReturn(1L);
 

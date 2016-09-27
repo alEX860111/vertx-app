@@ -2,16 +2,14 @@ package net.brainified;
 
 import java.util.List;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import rx.Observable;
 
 interface ProductService {
 
-  void getProductCount(Handler<AsyncResult<Long>> handler);
+  Observable<Long> getProductCount();
 
-  void getProductList(Integer page, Integer perpage, Handler<AsyncResult<List<JsonObject>>> handler);
+  Observable<List<JsonObject>> getProductList(Integer page, Integer perpage);
 
   Observable<JsonObject> getProduct(String id);
 

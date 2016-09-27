@@ -4,8 +4,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.FindOptions;
 import io.vertx.rxjava.ext.mongo.MongoClient;
@@ -25,18 +23,18 @@ final class ProductServiceImpl implements ProductService {
   }
 
   @Override
-  public void getProductCount(final Handler<AsyncResult<Long>> handler) {
+  public Observable<Long> getProductCount() {
     final JsonObject query = new JsonObject();
-    client.count(PRODUCTS_COLLECTION, query, handler);
+    return client.countObservable(PRODUCTS_COLLECTION, query);
   }
 
   @Override
-  public void getProductList(final Integer page, final Integer perpage, final Handler<AsyncResult<List<JsonObject>>> handler) {
+  public Observable<List<JsonObject>> getProductList(final Integer page, final Integer perpage) {
     final JsonObject query = new JsonObject();
     final JsonObject sort = new JsonObject();
     sort.put("createdAt", DESC);
     final FindOptions options = new FindOptions().setLimit(perpage).setSkip((page - 1) * perpage).setSort(sort);
-    client.findWithOptions(PRODUCTS_COLLECTION, query, options, handler);
+    return client.findWithOptionsObservable(PRODUCTS_COLLECTION, query, options);
   }
 
   @Override

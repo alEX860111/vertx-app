@@ -1,6 +1,5 @@
 package net.brainified;
 
-import java.util.List;
 import java.util.Objects;
 
 import javax.inject.Inject;
@@ -46,24 +45,20 @@ final class GetProductListHandler implements Handler<RoutingContext> {
       return;
     }
 
-    service.getProductCount(countResult -> {
-      if (countResult.succeeded()) {
-        service.getProductList(page, perpage, productsResult -> {
-          if (productsResult.succeeded()) {
-            final JsonObject container = new JsonObject();
-            final List<JsonObject> products = productsResult.result();
-            container.put("products", products);
-            container.put("numberOfProducts", countResult.result());
-            routingContext.response().putHeader("Content-Type", "application/json; charset=utf-8").end(Json.encodePrettily(container));
-          } else {
-            LOGGER.error(productsResult.cause().getMessage());
-            routingContext.response().setStatusCode(500).end();
-          }
-        });
-      } else {
-        LOGGER.error(countResult.cause().getMessage());
+    service.getProductCount().subscribe(count -> {
+      service.getProductList(page, perpage).subscribe(products -> {
+        final JsonObject container = new JsonObject();
+        container.put("products", products);
+        container.put("numberOfProducts", count);
+        routingContext.response().putHeader("Content-Type", "application/json; charset=utf-8")
+        .end(Json.encodePrettily(container));
+      }, error -> {
+        LOGGER.error(error.getMessage());
         routingContext.response().setStatusCode(500).end();
-      }
+      });
+    }, error -> {
+      LOGGER.error(error.getMessage());
+      routingContext.response().setStatusCode(500).end();
     });
 
   }
