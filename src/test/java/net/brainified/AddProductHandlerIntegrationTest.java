@@ -1,15 +1,19 @@
 package net.brainified;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import io.vertx.rxjava.core.eventbus.Message;
 import rx.Observable;
 
 @RunWith(VertxUnitRunner.class)
@@ -23,7 +27,10 @@ public class AddProductHandlerIntegrationTest extends IntegrationTest {
 
     final String id = "id";
 
-    when(serviceMock.addProduct(any(JsonObject.class))).thenReturn(Observable.just(id));
+    @SuppressWarnings("unchecked")
+    final Message<String> message = Mockito.mock(Message.class);
+    when(message.body()).thenReturn(id);
+    when(eventBusMock.<String>sendObservable(eq("addProduct"), any(JsonObject.class))).thenReturn(Observable.just(message));
 
     final Async async = context.async();
 
@@ -48,7 +55,7 @@ public class AddProductHandlerIntegrationTest extends IntegrationTest {
       context.assertEquals(400, response.statusCode());
       response.handler(body -> {
         context.assertEquals("Invalid JSON in body", body.toString());
-        verifyZeroInteractions(serviceMock);
+        verifyZeroInteractions(eventBusMock);
         async.complete();
       });
     }).end();
@@ -60,7 +67,7 @@ public class AddProductHandlerIntegrationTest extends IntegrationTest {
     data.put("name", "myProduct");
     data.put("price", 100);
 
-    when(serviceMock.addProduct(any(JsonObject.class))).thenReturn(Observable.error(new RuntimeException("error")));
+    when(eventBusMock.<String>sendObservable(eq("addProduct"), any(JsonObject.class))).thenReturn(Observable.error(new RuntimeException("error")));
 
     final Async async = context.async();
 

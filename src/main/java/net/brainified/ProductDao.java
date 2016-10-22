@@ -6,7 +6,7 @@ import java.util.Optional;
 import io.vertx.core.json.JsonObject;
 import rx.Observable;
 
-interface ProductService {
+interface ProductDao {
 
   Observable<Long> getProductCount();
 

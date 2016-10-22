@@ -9,9 +9,11 @@ import com.google.common.primitives.Ints;
 
 import io.vertx.core.Handler;
 import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import io.vertx.rxjava.core.eventbus.EventBus;
 import io.vertx.rxjava.ext.web.RoutingContext;
 
 final class GetProductListHandler implements Handler<RoutingContext> {
@@ -24,11 +26,11 @@ final class GetProductListHandler implements Handler<RoutingContext> {
   private static final String PER_PAGE_DEFAULT = "10";
   private static final int PER_PAGE_MIN = 1;
 
-  private final ProductService service;
+  private final EventBus eventBus;
 
   @Inject
-  public GetProductListHandler(final ProductService service) {
-    this.service = service;
+  public GetProductListHandler(final EventBus eventBus) {
+    this.eventBus = eventBus;
   }
 
   @Override
@@ -45,13 +47,21 @@ final class GetProductListHandler implements Handler<RoutingContext> {
       return;
     }
 
-    service.getProductCount().subscribe(count -> {
-      service.getProductList(page, perpage).subscribe(products -> {
+    eventBus.<Long>sendObservable("getProductCount", new JsonObject()).subscribe(countMessage -> {
+      final Long count = countMessage.body();
+
+      final JsonObject params = new JsonObject();
+      params.put("page", page);
+      params.put("perpage", perpage);
+
+      eventBus.<JsonArray>sendObservable("getProductList", params).subscribe(productsMessage -> {
+        final JsonArray products = productsMessage.body();
         final JsonObject container = new JsonObject();
         container.put("products", products);
         container.put("numberOfProducts", count);
-        routingContext.response().putHeader("Content-Type", "application/json; charset=utf-8")
-        .end(Json.encodePrettily(container));
+        routingContext.response()
+          .putHeader("Content-Type", "application/json; charset=utf-8")
+          .end(Json.encodePrettily(container));
       }, error -> {
         LOGGER.error(error.getMessage());
         routingContext.response().setStatusCode(500).end();

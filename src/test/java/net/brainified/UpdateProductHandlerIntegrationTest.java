@@ -1,15 +1,19 @@
 package net.brainified;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import io.vertx.rxjava.core.eventbus.Message;
 import rx.Observable;
 
 @RunWith(VertxUnitRunner.class)
@@ -23,7 +27,10 @@ public class UpdateProductHandlerIntegrationTest extends IntegrationTest {
     data.put("name", "myProduct");
     data.put("price", 100);
 
-    when(serviceMock.updateProduct(id, data)).thenReturn(Observable.just(1L));
+    @SuppressWarnings("unchecked")
+    final Message<Long> message = Mockito.mock(Message.class);
+    when(message.body()).thenReturn(1L);
+    when(eventBusMock.<Long>sendObservable(eq("updateProduct"), any(JsonObject.class))).thenReturn(Observable.just(message));
 
     final Async async = context.async();
 
@@ -41,7 +48,7 @@ public class UpdateProductHandlerIntegrationTest extends IntegrationTest {
     data.put("name", "myProduct");
     data.put("price", 100);
 
-    when(serviceMock.updateProduct(id, data)).thenReturn(Observable.error(new RuntimeException("error")));
+    when(eventBusMock.<String>sendObservable(eq("updateProduct"), any(JsonObject.class))).thenReturn(Observable.error(new RuntimeException("error")));
 
     final Async async = context.async();
 
@@ -59,7 +66,10 @@ public class UpdateProductHandlerIntegrationTest extends IntegrationTest {
     data.put("name", "myProduct");
     data.put("price", 100);
 
-    when(serviceMock.updateProduct(id, data)).thenReturn(Observable.just(0L));
+    @SuppressWarnings("unchecked")
+    final Message<Long> message = Mockito.mock(Message.class);
+    when(message.body()).thenReturn(0L);
+    when(eventBusMock.<Long>sendObservable(eq("updateProduct"), any(JsonObject.class))).thenReturn(Observable.just(message));
 
     final Async async = context.async();
 
@@ -77,7 +87,7 @@ public class UpdateProductHandlerIntegrationTest extends IntegrationTest {
       context.assertEquals(400, response.statusCode());
       response.handler(body -> {
         context.assertEquals("Invalid JSON in body", body.toString());
-        verifyZeroInteractions(serviceMock);
+        verifyZeroInteractions(eventBusMock);
         async.complete();
       });
     }).end();

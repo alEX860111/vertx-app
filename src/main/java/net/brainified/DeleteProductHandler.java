@@ -3,26 +3,31 @@ package net.brainified;
 import javax.inject.Inject;
 
 import io.vertx.core.Handler;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import io.vertx.rxjava.core.eventbus.EventBus;
 import io.vertx.rxjava.ext.web.RoutingContext;
 
 final class DeleteProductHandler implements Handler<RoutingContext> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(DeleteProductHandler.class);
 
-  private final ProductService service;
+  private final EventBus eventBus;
 
   @Inject
-  public DeleteProductHandler(final ProductService service) {
-    this.service = service;
+  public DeleteProductHandler(final EventBus eventBus) {
+    this.eventBus = eventBus;
   }
 
   @Override
   public void handle(RoutingContext routingContext) {
     final String id = routingContext.request().getParam("id");
+    final JsonObject params = new JsonObject();
+    params.put("id", id);
 
-    service.deleteProduct(id).subscribe(numDeleted -> {
+    eventBus.<Long>sendObservable("deleteProduct", params).subscribe(message -> {
+      final Long numDeleted = message.body();
       if (numDeleted == 0) {
         routingContext.response().setStatusCode(404).end();
       } else {

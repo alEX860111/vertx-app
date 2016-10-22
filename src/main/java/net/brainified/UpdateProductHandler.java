@@ -7,6 +7,7 @@ import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import io.vertx.rxjava.core.eventbus.EventBus;
 import io.vertx.rxjava.ext.web.RoutingContext;
 
 final class UpdateProductHandler implements Handler<RoutingContext> {
@@ -15,11 +16,11 @@ final class UpdateProductHandler implements Handler<RoutingContext> {
 
   private static final String INVALID_JSON_IN_BODY = "Invalid JSON in body";
 
-  private final ProductService service;
+  private final EventBus eventBus;
 
   @Inject
-  public UpdateProductHandler(final ProductService service) {
-    this.service = service;
+  public UpdateProductHandler(final EventBus eventBus) {
+    this.eventBus = eventBus;
   }
 
   @Override
@@ -34,7 +35,12 @@ final class UpdateProductHandler implements Handler<RoutingContext> {
       return;
     }
 
-    service.updateProduct(id, data).subscribe(numModified -> {
+    final JsonObject params = new JsonObject();
+    params.put("id", id);
+    params.put("data", data);
+
+    eventBus.<Long>sendObservable("updateProduct", params).subscribe(message -> {
+      final Long numModified = message.body();
       if (numModified == 0) {
         routingContext.response().setStatusCode(404).end();
       } else {

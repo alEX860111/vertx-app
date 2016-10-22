@@ -11,6 +11,7 @@ import com.google.inject.util.Modules;
 
 import io.vertx.rxjava.core.RxHelper;
 import io.vertx.rxjava.core.Vertx;
+import io.vertx.rxjava.core.eventbus.EventBus;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 
@@ -18,16 +19,16 @@ public abstract class IntegrationTest {
 
   protected Vertx vertx;
 
-  protected ProductService serviceMock;
+  protected EventBus eventBusMock;
 
   @Before
   public void setUp(TestContext context) {
     final Async async = context.async();
-    serviceMock = Mockito.mock(ProductService.class);
+    eventBusMock = Mockito.mock(EventBus.class);
     final Injector injector = Guice.createInjector(Modules.override(new ApplicationModule()).with(new AbstractModule() {
       @Override
       protected void configure() {
-        bind(ProductService.class).toInstance(serviceMock);
+        bind(EventBus.class).toInstance(eventBusMock);
       }
     }));
     vertx = injector.getInstance(Vertx.class);

@@ -1,17 +1,18 @@
 package net.brainified;
 
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.Optional;
+import org.mockito.Mockito;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import io.vertx.rxjava.core.eventbus.Message;
 import rx.Observable;
 
 @RunWith(VertxUnitRunner.class)
@@ -26,7 +27,10 @@ public class GetProductHandlerIntegrationTest extends IntegrationTest {
     data.put("price", 100);
     product.put("data", data);
 
-    when(serviceMock.getProduct(eq("1"))).thenReturn(Observable.just(Optional.of(product)));
+    @SuppressWarnings("unchecked")
+    final Message<JsonObject> message = Mockito.mock(Message.class);
+    when(message.body()).thenReturn(product);
+    when(eventBusMock.<JsonObject>sendObservable(eq("getProduct"), any(JsonObject.class))).thenReturn(Observable.just(message));
 
     final Async async = context.async();
 
@@ -42,7 +46,11 @@ public class GetProductHandlerIntegrationTest extends IntegrationTest {
 
   @Test
   public void testGetProduct_notFound(TestContext context) {
-    when(serviceMock.getProduct(eq("1"))).thenReturn(Observable.just(Optional.empty()));
+    @SuppressWarnings("unchecked")
+    final Message<JsonObject> message = Mockito.mock(Message.class);
+    when(message.body()).thenReturn(null);
+    when(eventBusMock.<JsonObject>sendObservable(eq("getProduct"), any(JsonObject.class))).thenReturn(Observable.just(message));
+
     final Async async = context.async();
 
     vertx.createHttpClient().getNow(8080, "localhost", "/api/products/1", response -> {
@@ -53,7 +61,8 @@ public class GetProductHandlerIntegrationTest extends IntegrationTest {
 
   @Test
   public void testGetProduct_serverError(TestContext context) {
-    when(serviceMock.getProduct(eq("1"))).thenReturn(Observable.error(new RuntimeException("error")));
+    when(eventBusMock.<JsonObject>sendObservable(eq("getProduct"), any(JsonObject.class)))
+        .thenReturn(Observable.error(new RuntimeException("error")));
     final Async async = context.async();
 
     vertx.createHttpClient().getNow(8080, "localhost", "/api/products/1", response -> {

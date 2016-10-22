@@ -1,31 +1,38 @@
 package net.brainified;
 
+import java.util.Objects;
+
 import javax.inject.Inject;
 
 import io.vertx.core.Handler;
 import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import io.vertx.rxjava.core.eventbus.EventBus;
 import io.vertx.rxjava.ext.web.RoutingContext;
 
 final class GetProductHandler implements Handler<RoutingContext> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetProductHandler.class);
 
-  private final ProductService service;
+  private final EventBus eventBus;
 
   @Inject
-  public GetProductHandler(final ProductService service) {
-    this.service = service;
+  public GetProductHandler(final EventBus eventBus) {
+    this.eventBus = eventBus;
   }
 
   @Override
   public void handle(final RoutingContext routingContext) {
     final String id = routingContext.request().getParam("id");
+    final JsonObject params = new JsonObject();
+    params.put("id", id);
 
-    service.getProduct(id).subscribe(product -> {
-      if (product.isPresent()) {
-        routingContext.response().putHeader("Content-Type", "application/json; charset=utf-8").end(Json.encodePrettily(product.get()));
+    eventBus.<JsonObject>sendObservable("getProduct", params).subscribe(message -> {
+      final JsonObject product = message.body();
+      if (Objects.nonNull(product)) {
+        routingContext.response().putHeader("Content-Type", "application/json; charset=utf-8").end(Json.encodePrettily(product));
       } else {
         routingContext.response().setStatusCode(404).end("not found");
       }
