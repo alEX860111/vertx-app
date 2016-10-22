@@ -1,4 +1,4 @@
-package net.brainified;
+package net.brainified.http;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;

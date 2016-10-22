@@ -1,4 +1,4 @@
-package net.brainified;
+package net.brainified.db;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -20,6 +20,7 @@ import io.vertx.ext.mongo.FindOptions;
 import io.vertx.ext.mongo.MongoClientDeleteResult;
 import io.vertx.ext.mongo.MongoClientUpdateResult;
 import io.vertx.rxjava.ext.mongo.MongoClient;
+import net.brainified.db.ProductDaoImpl;
 import rx.Observable;
 
 @RunWith(MockitoJUnitRunner.class)

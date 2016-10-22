@@ -1,4 +1,4 @@
-package net.brainified;
+package net.brainified.db;
 
 import java.util.List;
 import java.util.Optional;

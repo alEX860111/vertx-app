@@ -1,4 +1,4 @@
-package net.brainified;
+package net.brainified.db;
 
 import javax.inject.Inject;
 import javax.inject.Provider;

@@ -1,4 +1,4 @@
-package net.brainified;
+package net.brainified.http;
 
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;

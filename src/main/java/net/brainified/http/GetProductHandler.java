@@ -1,4 +1,4 @@
-package net.brainified;
+package net.brainified.http;
 
 import java.util.Objects;
 
