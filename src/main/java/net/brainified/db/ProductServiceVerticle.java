@@ -60,9 +60,9 @@ final class ProductServiceVerticle extends AbstractVerticle {
 
   private void handleAddProduct(final Message<JsonObject> message) {
     final JsonObject params = message.body();
-    final JsonObject product = params.getJsonObject("product");
-    productDao.addProduct(product).subscribe(id -> {
-      message.reply(id);
+    final JsonObject data = params.getJsonObject("data");
+    productDao.addProduct(data).subscribe(product -> {
+      message.reply(product);
     }, error -> message.fail(0, error.getMessage()));
   }
 

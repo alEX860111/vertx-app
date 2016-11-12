@@ -10,7 +10,7 @@ import java.util.Collections;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
+import org.mockito.Mock;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -23,15 +23,17 @@ import rx.Observable;
 @RunWith(VertxUnitRunner.class)
 public class GetProductListHandlerIntegrationTest extends IntegrationTest {
 
+  @Mock
+  private Message<Long> productCountMessage;
+
+  @Mock
+  private Message<JsonArray> productListMessage;
+
   @Test
   public void testGetProducts(TestContext context) {
-    @SuppressWarnings("unchecked")
-    final Message<Long> productCountMessage = Mockito.mock(Message.class);
     when(productCountMessage.body()).thenReturn(42L);
     when(eventBusMock.<Long>sendObservable(eq("getProductCount"), any(JsonObject.class))).thenReturn(Observable.just(productCountMessage));
 
-    @SuppressWarnings("unchecked")
-    final Message<JsonArray> productListMessage = Mockito.mock(Message.class);
     when(productListMessage.body()).thenReturn(new JsonArray(Collections.emptyList()));
     when(eventBusMock.<JsonArray>sendObservable(eq("getProductList"), any(JsonObject.class))).thenReturn(Observable.just(productListMessage));
 
@@ -63,8 +65,6 @@ public class GetProductListHandlerIntegrationTest extends IntegrationTest {
 
   @Test
   public void testGetProducts_getListError(TestContext context) {
-    @SuppressWarnings("unchecked")
-    final Message<Long> productCountMessage = Mockito.mock(Message.class);
     when(productCountMessage.body()).thenReturn(42L);
     when(eventBusMock.<Long>sendObservable(eq("getProductCount"), any(JsonObject.class))).thenReturn(Observable.just(productCountMessage));
 

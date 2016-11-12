@@ -1,5 +1,6 @@
 package net.brainified.db;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,8 +50,14 @@ final class ProductDaoImpl implements ProductDao {
   }
 
   @Override
-  public Observable<String> addProduct(final JsonObject product) {
-    return client.insertObservable(PRODUCTS_COLLECTION, product);
+  public Observable<JsonObject> addProduct(final JsonObject data) {
+    final JsonObject product = new JsonObject();
+    product.put("data", data);
+    product.put("createdAt", Instant.now());
+    return client.insertObservable(PRODUCTS_COLLECTION, product).map(id -> {
+      product.put("_id", id);
+      return product;
+    });
   }
 
   @Override

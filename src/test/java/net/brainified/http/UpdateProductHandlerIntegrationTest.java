@@ -7,7 +7,7 @@ import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
+import org.mockito.Mock;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
@@ -19,6 +19,9 @@ import rx.Observable;
 @RunWith(VertxUnitRunner.class)
 public class UpdateProductHandlerIntegrationTest extends IntegrationTest {
 
+  @Mock
+  private Message<Long> message;
+
   @Test
   public void testUpdateProduct(TestContext context) {
     final String id = "1";
@@ -27,8 +30,6 @@ public class UpdateProductHandlerIntegrationTest extends IntegrationTest {
     data.put("name", "myProduct");
     data.put("price", 100);
 
-    @SuppressWarnings("unchecked")
-    final Message<Long> message = Mockito.mock(Message.class);
     when(message.body()).thenReturn(1L);
     when(eventBusMock.<Long>sendObservable(eq("updateProduct"), any(JsonObject.class))).thenReturn(Observable.just(message));
 
@@ -66,8 +67,6 @@ public class UpdateProductHandlerIntegrationTest extends IntegrationTest {
     data.put("name", "myProduct");
     data.put("price", 100);
 
-    @SuppressWarnings("unchecked")
-    final Message<Long> message = Mockito.mock(Message.class);
     when(message.body()).thenReturn(0L);
     when(eventBusMock.<Long>sendObservable(eq("updateProduct"), any(JsonObject.class))).thenReturn(Observable.just(message));
 

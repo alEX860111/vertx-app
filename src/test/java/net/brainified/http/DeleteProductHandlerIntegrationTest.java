@@ -6,7 +6,7 @@ import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
+import org.mockito.Mock;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
@@ -18,10 +18,11 @@ import rx.Observable;
 @RunWith(VertxUnitRunner.class)
 public class DeleteProductHandlerIntegrationTest extends IntegrationTest {
 
+  @Mock
+  private Message<Long> message;
+
   @Test
   public void testDeleteProduct(TestContext context) {
-    @SuppressWarnings("unchecked")
-    final Message<Long> message = Mockito.mock(Message.class);
     when(message.body()).thenReturn(1L);
     when(eventBusMock.<Long>sendObservable(eq("deleteProduct"), any(JsonObject.class))).thenReturn(Observable.just(message));
 
@@ -35,8 +36,6 @@ public class DeleteProductHandlerIntegrationTest extends IntegrationTest {
 
   @Test
   public void testDeleteProduct_notFound(TestContext context) {
-    @SuppressWarnings("unchecked")
-    final Message<Long> message = Mockito.mock(Message.class);
     when(message.body()).thenReturn(0L);
     when(eventBusMock.<Long>sendObservable(eq("deleteProduct"), any(JsonObject.class))).thenReturn(Observable.just(message));
 

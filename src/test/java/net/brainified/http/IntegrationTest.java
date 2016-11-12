@@ -2,7 +2,8 @@ package net.brainified.http;
 
 import org.junit.After;
 import org.junit.Before;
-import org.mockito.Mockito;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -18,13 +19,15 @@ public abstract class IntegrationTest {
 
   protected Vertx vertx;
 
+  @Mock
   protected EventBus eventBusMock;
 
   @Before
   public void setUp(TestContext context) {
+    MockitoAnnotations.initMocks(this);
+
     final Async async = context.async();
     vertx = Vertx.vertx();
-    eventBusMock = Mockito.mock(EventBus.class);
     final Injector injector = Guice.createInjector(new AbstractModule() {
       @Override
       protected void configure() {

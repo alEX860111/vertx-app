@@ -1,7 +1,5 @@
 package net.brainified.http;
 
-import java.time.Instant;
-
 import javax.inject.Inject;
 
 import io.vertx.core.Handler;
@@ -36,21 +34,16 @@ final class AddProductHandler implements Handler<RoutingContext> {
       return;
     }
 
-    final JsonObject product = new JsonObject();
-    product.put("data", data);
-    product.put("createdAt", Instant.now());
-
     final JsonObject params = new JsonObject();
-    params.put("product", product);
+    params.put("data", data);
 
-    eventBus.<String>sendObservable("addProduct", params).subscribe(message -> {
-      final String id = message.body();
-      product.put("_id", id);
+    eventBus.<JsonObject>sendObservable("addProduct", params).subscribe(message -> {
+      final JsonObject savedProduct = message.body();
       routingContext.response()
         .setStatusCode(201)
         .putHeader("Content-Type", "application/json; charset=utf-8")
-        .putHeader("Location", routingContext.request().absoluteURI() + "/" + id)
-        .end(Json.encodePrettily(product));
+        .putHeader("Location", routingContext.request().absoluteURI() + "/" + savedProduct.getString(("_id")))
+        .end(Json.encodePrettily(savedProduct));
     }, error -> {
       LOGGER.error(error.getMessage());
       routingContext.response().setStatusCode(500).end();

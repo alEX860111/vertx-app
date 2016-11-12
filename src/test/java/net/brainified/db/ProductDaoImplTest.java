@@ -1,9 +1,12 @@
 package net.brainified.db;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 
@@ -20,7 +23,6 @@ import io.vertx.ext.mongo.FindOptions;
 import io.vertx.ext.mongo.MongoClientDeleteResult;
 import io.vertx.ext.mongo.MongoClientUpdateResult;
 import io.vertx.rxjava.ext.mongo.MongoClient;
-import net.brainified.db.ProductDaoImpl;
 import rx.Observable;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -79,12 +81,16 @@ public class ProductDaoImplTest {
 
   @Test
   public void testAddProduct() {
-    final JsonObject product = new JsonObject();
-    when(client.insertObservable("products", product)).thenReturn(Observable.just("id"));
+    when(client.insertObservable(eq("products"), any(JsonObject.class))).thenReturn(Observable.just("id"));
 
-    serviceSUT.addProduct(product).subscribe(id -> assertEquals("id", id));
+    final JsonObject data = new JsonObject();
+    serviceSUT.addProduct(data).subscribe(savedProduct -> {
+      assertEquals(data, savedProduct.getJsonObject("data"));
+      assertEquals("id", savedProduct.getString("_id"));
+      assertFalse(savedProduct.getString("createdAt").isEmpty());
+    });
 
-    verify(client).insertObservable("products", product);
+    verify(client).insertObservable(eq("products"), any(JsonObject.class));
   }
 
   @Test

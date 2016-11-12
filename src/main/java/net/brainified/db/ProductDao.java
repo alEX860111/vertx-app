@@ -14,7 +14,7 @@ interface ProductDao {
 
   Observable<Optional<JsonObject>> getProduct(String id);
 
-  Observable<String> addProduct(JsonObject product);
+  Observable<JsonObject> addProduct(JsonObject data);
 
   Observable<Long> updateProduct(String id, JsonObject data);
 

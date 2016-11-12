@@ -7,7 +7,7 @@ import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
+import org.mockito.Mock;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
@@ -19,6 +19,9 @@ import rx.Observable;
 @RunWith(VertxUnitRunner.class)
 public class AddProductHandlerIntegrationTest extends IntegrationTest {
 
+  @Mock
+  private Message<JsonObject> message;
+
   @Test
   public void testAddProduct(TestContext context) {
     final JsonObject data = new JsonObject();
@@ -26,11 +29,11 @@ public class AddProductHandlerIntegrationTest extends IntegrationTest {
     data.put("price", 100);
 
     final String id = "id";
+    final JsonObject product = new JsonObject();
+    product.put("_id", id);
 
-    @SuppressWarnings("unchecked")
-    final Message<String> message = Mockito.mock(Message.class);
-    when(message.body()).thenReturn(id);
-    when(eventBusMock.<String>sendObservable(eq("addProduct"), any(JsonObject.class))).thenReturn(Observable.just(message));
+    when(message.body()).thenReturn(product);
+    when(eventBusMock.<JsonObject>sendObservable(eq("addProduct"), any(JsonObject.class))).thenReturn(Observable.just(message));
 
     final Async async = context.async();
 
@@ -38,9 +41,8 @@ public class AddProductHandlerIntegrationTest extends IntegrationTest {
       context.assertEquals(201, response.statusCode());
       response.handler(body -> {
         final JsonObject resultProduct = new JsonObject(body.toString());
+
         context.assertEquals(id, resultProduct.getValue("_id"));
-        context.assertFalse(resultProduct.getString("createdAt").isEmpty());
-        context.assertEquals(data, resultProduct.getValue("data"));
         context.assertEquals("http://localhost:8080/api/products/" + resultProduct.getValue("_id"), response.getHeader("Location"));
         async.complete();
       });
