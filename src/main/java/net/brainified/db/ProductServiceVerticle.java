@@ -10,7 +10,7 @@ import io.vertx.rxjava.core.AbstractVerticle;
 import io.vertx.rxjava.core.eventbus.EventBus;
 import io.vertx.rxjava.core.eventbus.Message;
 
-final class ProductServiceVerticle extends AbstractVerticle {
+public final class ProductServiceVerticle extends AbstractVerticle {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ProductServiceVerticle.class);
 

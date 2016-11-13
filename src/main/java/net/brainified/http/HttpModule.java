@@ -5,7 +5,6 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 
 import io.vertx.core.Handler;
-import io.vertx.core.Verticle;
 import io.vertx.rxjava.ext.web.Router;
 import io.vertx.rxjava.ext.web.RoutingContext;
 
@@ -21,7 +20,5 @@ public final class HttpModule extends AbstractModule {
     handlers.addBinding().to(AddProductHandler.class);
     handlers.addBinding().to(UpdateProductHandler.class);
     handlers.addBinding().to(DeleteProductHandler.class);
-
-    bind(Verticle.class).annotatedWith(HttpVerticle.class).to(HttpServerVerticle.class);
   }
 }

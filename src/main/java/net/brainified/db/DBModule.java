@@ -3,7 +3,6 @@ package net.brainified.db;
 import com.google.inject.AbstractModule;
 import com.google.inject.Scopes;
 
-import io.vertx.core.Verticle;
 import io.vertx.rxjava.ext.mongo.MongoClient;
 
 public final class DBModule extends AbstractModule {
@@ -11,6 +10,5 @@ public final class DBModule extends AbstractModule {
   protected void configure() {
     bind(MongoClient.class).toProvider(MongoClientProvider.class);
     bind(ProductDao.class).to(ProductDaoImpl.class).in(Scopes.SINGLETON);
-    bind(Verticle.class).annotatedWith(DBVerticle.class).to(ProductServiceVerticle.class);
   }
 }

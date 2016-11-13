@@ -9,7 +9,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rxjava.ext.web.Router;
 
-final class HttpServerVerticle extends AbstractVerticle {
+public final class HttpServerVerticle extends AbstractVerticle {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(HttpServerVerticle.class);
 
