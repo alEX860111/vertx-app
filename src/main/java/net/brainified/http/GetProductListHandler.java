@@ -8,6 +8,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.primitives.Ints;
 
 import io.vertx.core.Handler;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -15,6 +16,8 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rxjava.core.eventbus.EventBus;
 import io.vertx.rxjava.ext.web.RoutingContext;
+
+@HandlerConfiguration(path = "/api/products", method = HttpMethod.GET)
 
 final class GetProductListHandler implements Handler<RoutingContext> {
 

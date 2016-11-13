@@ -2,6 +2,7 @@ package net.brainified.http;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
+import com.google.inject.multibindings.Multibinder;
 
 import io.vertx.core.Handler;
 import io.vertx.core.Verticle;
@@ -13,11 +14,13 @@ public final class HttpModule extends AbstractModule {
   protected void configure() {
     bind(Router.class).toProvider(RouterProvider.class);
 
-    bind(new TypeLiteral<Handler<RoutingContext>>() {}).annotatedWith(GetProductList.class).to(GetProductListHandler.class);
-    bind(new TypeLiteral<Handler<RoutingContext>>() {}).annotatedWith(GetProduct.class).to(GetProductHandler.class);
-    bind(new TypeLiteral<Handler<RoutingContext>>() {}).annotatedWith(AddProduct.class).to(AddProductHandler.class);
-    bind(new TypeLiteral<Handler<RoutingContext>>() {}).annotatedWith(UpdateProduct.class).to(UpdateProductHandler.class);
-    bind(new TypeLiteral<Handler<RoutingContext>>() {}).annotatedWith(DeleteProduct.class).to(DeleteProductHandler.class);
+    final Multibinder<Handler<RoutingContext>> handlers = Multibinder.newSetBinder(binder(), new TypeLiteral<Handler<RoutingContext>>() {
+    });
+    handlers.addBinding().to(GetProductListHandler.class);
+    handlers.addBinding().to(GetProductHandler.class);
+    handlers.addBinding().to(AddProductHandler.class);
+    handlers.addBinding().to(UpdateProductHandler.class);
+    handlers.addBinding().to(DeleteProductHandler.class);
 
     bind(Verticle.class).annotatedWith(HttpVerticle.class).to(HttpServerVerticle.class);
   }

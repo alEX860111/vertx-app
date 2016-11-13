@@ -1,7 +1,11 @@
 package net.brainified.http;
 
+import java.util.Set;
+
 import javax.inject.Inject;
 import javax.inject.Provider;
+
+import com.google.common.base.Preconditions;
 
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
@@ -15,49 +19,49 @@ final class RouterProvider implements Provider<Router> {
 
   private final Vertx vertx;
 
-  private final Handler<RoutingContext> getProductListHandler;
-
-  private final Handler<RoutingContext> getProductHandler;
-
-  private final Handler<RoutingContext> addProductHandler;
-
-  private final Handler<RoutingContext> updateProductHandler;
-
-  private final Handler<RoutingContext> deleteProductHandler;
+  private Set<Handler<RoutingContext>> handlers;
 
   @Inject
-  public RouterProvider(
-      final Vertx vertx,
-      @GetProductList final Handler<RoutingContext> getProductListHandler,
-      @GetProduct final Handler<RoutingContext> getProductHandler,
-      @AddProduct final Handler<RoutingContext> addProductHandler,
-      @UpdateProduct final Handler<RoutingContext> updateProductHandler,
-      @DeleteProduct final Handler<RoutingContext> deleteProductHandler) {
+  public RouterProvider(final Vertx vertx, final Set<Handler<RoutingContext>> handlers) {
     this.vertx = vertx;
-    this.getProductListHandler = getProductListHandler;
-    this.getProductHandler = getProductHandler;
-    this.addProductHandler = addProductHandler;
-    this.updateProductHandler = updateProductHandler;
-    this.deleteProductHandler = deleteProductHandler;  }
+    this.handlers = handlers;
+  }
 
   @Override
   public Router get() {
     final Router router = Router.router(vertx);
-    router.route().handler(CorsHandler.create("*")
-        .allowedHeader("Content-Type")
-        .allowedMethod(HttpMethod.GET)
-        .allowedMethod(HttpMethod.POST)
-        .allowedMethod(HttpMethod.PUT)
-        .allowedMethod(HttpMethod.DELETE));
+
+    router.route().handler(CorsHandler.create("*").allowedHeader("Content-Type").allowedMethod(HttpMethod.GET).allowedMethod(HttpMethod.POST)
+        .allowedMethod(HttpMethod.PUT).allowedMethod(HttpMethod.DELETE));
 
     router.route("/api/products*").handler(BodyHandler.create());
 
-    router.get("/api/products").handler(getProductListHandler);
-    router.post("/api/products").handler(addProductHandler);
-    router.get("/api/products/:id").handler(getProductHandler);
-    router.put("/api/products/:id").handler(updateProductHandler);
-    router.delete("/api/products/:id").handler(deleteProductHandler);
+    handlers.forEach(handler -> registerHandler(router, handler));
     return router;
+  }
+
+  private void registerHandler(final Router router, final Handler<RoutingContext> handler) {
+    final HandlerConfiguration config = handler.getClass().getAnnotation(HandlerConfiguration.class);
+    Preconditions.checkNotNull(config, "Missing HandlerConfiguration");
+
+    final HttpMethod method = config.method();
+
+    switch (method) {
+    case DELETE:
+      router.delete(config.path()).handler(handler);
+      break;
+    case GET:
+      router.get(config.path()).handler(handler);
+      break;
+    case POST:
+      router.post(config.path()).handler(handler);
+      break;
+    case PUT:
+      router.put(config.path()).handler(handler);
+      break;
+    default:
+      throw new IllegalArgumentException("Unsupported HttpMethod: " + method);
+    }
   }
 
 }
