@@ -11,7 +11,7 @@ import io.vertx.rxjava.core.eventbus.Message;
 @EventBusHandlerConfiguration(address = "getProductList")
 final class GetProductListHandler implements Handler<Message<JsonObject>> {
 
-  private ProductDao productDao;
+  private final ProductDao productDao;
 
   @Inject
   public GetProductListHandler(final ProductDao productDao) {

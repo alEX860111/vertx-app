@@ -9,7 +9,7 @@ import io.vertx.rxjava.core.eventbus.Message;
 @EventBusHandlerConfiguration(address = "addProduct")
 final class AddProductHandler implements Handler<Message<JsonObject>> {
 
-  private ProductDao productDao;
+  private final ProductDao productDao;
 
   @Inject
   public AddProductHandler(final ProductDao productDao) {
