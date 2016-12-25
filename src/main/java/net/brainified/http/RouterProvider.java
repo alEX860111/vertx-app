@@ -49,24 +49,7 @@ final class RouterProvider implements Provider<Router> {
     final HandlerConfiguration config = handler.getClass().getAnnotation(HandlerConfiguration.class);
     Preconditions.checkNotNull(config, "Missing HandlerConfiguration");
 
-    final HttpMethod method = config.method();
-
-    switch (method) {
-    case DELETE:
-      router.delete(config.path()).handler(handler);
-      break;
-    case GET:
-      router.get(config.path()).handler(handler);
-      break;
-    case POST:
-      router.post(config.path()).handler(handler);
-      break;
-    case PUT:
-      router.put(config.path()).handler(handler);
-      break;
-    default:
-      throw new IllegalArgumentException("Unsupported HttpMethod: " + method);
-    }
+    router.route(config.method(), config.path()).handler(handler);
   }
 
 }
