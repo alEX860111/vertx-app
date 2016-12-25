@@ -31,10 +31,15 @@ final class RouterProvider implements Provider<Router> {
   public Router get() {
     final Router router = Router.router(vertx);
 
-    router.route().handler(CorsHandler.create("*").allowedHeader("Content-Type").allowedMethod(HttpMethod.GET).allowedMethod(HttpMethod.POST)
-        .allowedMethod(HttpMethod.PUT).allowedMethod(HttpMethod.DELETE));
+    final CorsHandler corsHandler = CorsHandler.create("*")
+        .allowedHeader("Content-Type")
+        .allowedMethod(HttpMethod.GET)
+        .allowedMethod(HttpMethod.POST)
+        .allowedMethod(HttpMethod.PUT)
+        .allowedMethod(HttpMethod.DELETE);
 
-    router.route("/api/products*").handler(BodyHandler.create());
+    router.route().handler(corsHandler);
+    router.route("/api*").handler(BodyHandler.create());
 
     handlers.forEach(handler -> registerHandler(router, handler));
     return router;
