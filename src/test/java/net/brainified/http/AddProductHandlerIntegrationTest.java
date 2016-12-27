@@ -1,26 +1,22 @@
 package net.brainified.http;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import io.vertx.rxjava.core.eventbus.Message;
+import net.brainified.db.Product;
+import net.brainified.db.ProductData;
 import rx.Observable;
 
 @RunWith(VertxUnitRunner.class)
 public class AddProductHandlerIntegrationTest extends IntegrationTest {
-
-  @Mock
-  private Message<JsonObject> message;
 
   @Test
   public void testAddProduct(TestContext context) {
@@ -29,11 +25,10 @@ public class AddProductHandlerIntegrationTest extends IntegrationTest {
     data.put("price", 100);
 
     final String id = "id";
-    final JsonObject product = new JsonObject();
-    product.put("_id", id);
+    final Product product = new Product();
+    product.set_id(id);
 
-    when(message.body()).thenReturn(product);
-    when(eventBusMock.<JsonObject>sendObservable(eq("addProduct"), any(JsonObject.class))).thenReturn(Observable.just(message));
+    when(dao.addProduct(any(ProductData.class))).thenReturn(Observable.just(product));
 
     final Async async = context.async();
 
@@ -57,7 +52,7 @@ public class AddProductHandlerIntegrationTest extends IntegrationTest {
       context.assertEquals(400, response.statusCode());
       response.handler(body -> {
         context.assertEquals("Invalid JSON in body", body.toString());
-        verifyZeroInteractions(eventBusMock);
+        verifyZeroInteractions(dao);
         async.complete();
       });
     }).end();
@@ -69,7 +64,7 @@ public class AddProductHandlerIntegrationTest extends IntegrationTest {
     data.put("name", "myProduct");
     data.put("price", 100);
 
-    when(eventBusMock.<String>sendObservable(eq("addProduct"), any(JsonObject.class))).thenReturn(Observable.error(new RuntimeException("error")));
+    when(dao.addProduct(any(ProductData.class))).thenReturn(Observable.error(new RuntimeException("error")));
 
     final Async async = context.async();
 

@@ -1,45 +1,40 @@
 package net.brainified.http;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+
+import java.util.Optional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 
-import io.vertx.core.json.JsonObject;
+import io.vertx.core.json.Json;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import io.vertx.rxjava.core.eventbus.Message;
+import net.brainified.db.Product;
+import net.brainified.db.ProductData;
 import rx.Observable;
 
 @RunWith(VertxUnitRunner.class)
 public class GetProductHandlerIntegrationTest extends IntegrationTest {
 
-  @Mock
-  private Message<JsonObject> message;
-
   @Test
   public void testGetProduct(TestContext context) {
-    final JsonObject product = new JsonObject();
-    product.put("_id", "1");
-    final JsonObject data = new JsonObject();
-    data.put("name", "name");
-    data.put("price", 100);
-    product.put("data", data);
+    final Product product = new Product();
+    product.set_id("1");
+    final ProductData data = new ProductData();
+    data.setName("name");
+    data.setPrice(100d);
+    product.setData(data);
 
-    when(message.body()).thenReturn(product);
-    when(eventBusMock.<JsonObject>sendObservable(eq("getProduct"), any(JsonObject.class))).thenReturn(Observable.just(message));
+    when(dao.getProduct("1")).thenReturn(Observable.just(Optional.of(product)));
 
     final Async async = context.async();
 
     vertx.createHttpClient().getNow(8080, "localhost", "/api/products/1", response -> {
       context.assertEquals(200, response.statusCode());
       response.handler(body -> {
-        final JsonObject resultProduct = new JsonObject(body.toString());
-        context.assertEquals(product, resultProduct);
+        context.assertEquals(Json.encodePrettily(product), body.toString());
         async.complete();
       });
     });
@@ -47,8 +42,7 @@ public class GetProductHandlerIntegrationTest extends IntegrationTest {
 
   @Test
   public void testGetProduct_notFound(TestContext context) {
-    when(message.body()).thenReturn(null);
-    when(eventBusMock.<JsonObject>sendObservable(eq("getProduct"), any(JsonObject.class))).thenReturn(Observable.just(message));
+    when(dao.getProduct("1")).thenReturn(Observable.just(Optional.empty()));
 
     final Async async = context.async();
 
@@ -60,8 +54,7 @@ public class GetProductHandlerIntegrationTest extends IntegrationTest {
 
   @Test
   public void testGetProduct_serverError(TestContext context) {
-    when(eventBusMock.<JsonObject>sendObservable(eq("getProduct"), any(JsonObject.class)))
-        .thenReturn(Observable.error(new RuntimeException("error")));
+    when(dao.getProduct("1")).thenReturn(Observable.error(new RuntimeException("error")));
     final Async async = context.async();
 
     vertx.createHttpClient().getNow(8080, "localhost", "/api/products/1", response -> {

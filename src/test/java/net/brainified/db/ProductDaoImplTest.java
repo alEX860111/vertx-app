@@ -70,11 +70,14 @@ public class ProductDaoImplTest {
 
     final JsonObject fields = new JsonObject();
 
-    final JsonObject product = new JsonObject().put("_id", "1").put("name", "myProduct");
+    final JsonObject document = new JsonObject().put("_id", "1");
 
-    when(client.findOneObservable("products", query, fields)).thenReturn(Observable.just(product));
+    when(client.findOneObservable("products", query, fields)).thenReturn(Observable.just(document));
 
-    serviceSUT.getProduct("1").subscribe(result -> assertEquals(product, result.get()));
+    serviceSUT.getProduct("1").subscribe(product -> {
+      assertTrue(product.isPresent());
+      assertEquals("1", product.get().get_id());
+    });
 
     verify(client).findOneObservable("products", query, fields);
   }
@@ -83,11 +86,11 @@ public class ProductDaoImplTest {
   public void testAddProduct() {
     when(client.insertObservable(eq("products"), any(JsonObject.class))).thenReturn(Observable.just("id"));
 
-    final JsonObject data = new JsonObject();
+    final ProductData data = new ProductData();
     serviceSUT.addProduct(data).subscribe(savedProduct -> {
-      assertEquals(data, savedProduct.getJsonObject("data"));
-      assertEquals("id", savedProduct.getString("_id"));
-      assertFalse(savedProduct.getString("createdAt").isEmpty());
+      assertEquals(data, savedProduct.getData());
+      assertEquals("id", savedProduct.get_id());
+      assertFalse(savedProduct.getCreatedAt().isEmpty());
     });
 
     verify(client).insertObservable(eq("products"), any(JsonObject.class));
@@ -95,11 +98,9 @@ public class ProductDaoImplTest {
 
   @Test
   public void testUpdateProduct() {
-    final JsonObject data = new JsonObject();
-
     final JsonObject query = new JsonObject().put("_id", "1");
 
-    final JsonObject product = new JsonObject().put("data", data);
+    final JsonObject product = new JsonObject().put("data", new JsonObject().put("name", "abc").put("price", 299.99d));
     final JsonObject update = new JsonObject().put("$set", product);
 
     final MongoClientUpdateResult result = Mockito.mock(MongoClientUpdateResult.class);
@@ -107,6 +108,9 @@ public class ProductDaoImplTest {
 
     when(client.updateCollectionObservable("products", query, update)).thenReturn(Observable.just(result));
 
+    final ProductData data = new ProductData();
+    data.setName("abc");
+    data.setPrice(299.99d);
     serviceSUT.updateProduct("1", data).subscribe(numModified -> assertEquals(Long.valueOf(1L), numModified));
 
     verify(client).updateCollectionObservable("products", query, update);

@@ -1,30 +1,21 @@
 package net.brainified.http;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import io.vertx.rxjava.core.eventbus.Message;
 import rx.Observable;
 
 @RunWith(VertxUnitRunner.class)
 public class DeleteProductHandlerIntegrationTest extends IntegrationTest {
 
-  @Mock
-  private Message<Long> message;
-
   @Test
   public void testDeleteProduct(TestContext context) {
-    when(message.body()).thenReturn(1L);
-    when(eventBusMock.<Long>sendObservable(eq("deleteProduct"), any(JsonObject.class))).thenReturn(Observable.just(message));
+    when(dao.deleteProduct("1")).thenReturn(Observable.just(1L));
 
     final Async async = context.async();
 
@@ -36,8 +27,7 @@ public class DeleteProductHandlerIntegrationTest extends IntegrationTest {
 
   @Test
   public void testDeleteProduct_notFound(TestContext context) {
-    when(message.body()).thenReturn(0L);
-    when(eventBusMock.<Long>sendObservable(eq("deleteProduct"), any(JsonObject.class))).thenReturn(Observable.just(message));
+    when(dao.deleteProduct("1")).thenReturn(Observable.just(0L));
 
     final Async async = context.async();
 
@@ -49,7 +39,7 @@ public class DeleteProductHandlerIntegrationTest extends IntegrationTest {
 
   @Test
   public void testDeleteProduct_serverError(TestContext context) {
-    when(eventBusMock.<Long>sendObservable(eq("deleteProduct"), any(JsonObject.class))).thenReturn(Observable.error(new RuntimeException("error")));
+    when(dao.deleteProduct("1")).thenReturn(Observable.error(new RuntimeException("error")));
 
     final Async async = context.async();
 

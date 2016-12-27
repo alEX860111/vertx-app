@@ -10,12 +10,11 @@ import com.google.common.primitives.Ints;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.rxjava.core.eventbus.EventBus;
 import io.vertx.rxjava.ext.web.RoutingContext;
+import net.brainified.db.ProductContainer;
+import net.brainified.db.ProductDao;
 
 @HandlerConfiguration(path = "/api/products", method = HttpMethod.GET)
 
@@ -29,11 +28,11 @@ final class GetProductListHandler implements Handler<RoutingContext> {
   private static final String PER_PAGE_DEFAULT = "10";
   private static final int PER_PAGE_MIN = 1;
 
-  private final EventBus eventBus;
+  private final ProductDao dao;
 
   @Inject
-  public GetProductListHandler(final EventBus eventBus) {
-    this.eventBus = eventBus;
+  public GetProductListHandler(final ProductDao dao) {
+    this.dao = dao;
   }
 
   @Override
@@ -50,18 +49,11 @@ final class GetProductListHandler implements Handler<RoutingContext> {
       return;
     }
 
-    eventBus.<Long>sendObservable("getProductCount", new JsonObject()).subscribe(countMessage -> {
-      final Long count = countMessage.body();
-
-      final JsonObject params = new JsonObject();
-      params.put("page", page);
-      params.put("perpage", perpage);
-
-      eventBus.<JsonArray>sendObservable("getProductList", params).subscribe(productsMessage -> {
-        final JsonArray products = productsMessage.body();
-        final JsonObject container = new JsonObject();
-        container.put("products", products);
-        container.put("numberOfProducts", count);
+    dao.getProductCount().subscribe(count -> {
+      dao.getProductList(page, perpage).subscribe(products -> {
+        final ProductContainer container = new ProductContainer();
+        container.setProducts(products);
+        container.setNumberOfProducts(count);
         routingContext.response()
           .putHeader("Content-Type", "application/json; charset=utf-8")
           .end(Json.encodePrettily(container));

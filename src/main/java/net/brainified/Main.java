@@ -7,7 +7,6 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rxjava.core.RxHelper;
 import io.vertx.rxjava.core.Vertx;
-import net.brainified.db.ProductServiceVerticle;
 import net.brainified.http.HttpServerVerticle;
 
 public final class Main {
@@ -21,8 +20,6 @@ public final class Main {
 
     final Vertx vertx = injector.getInstance(Vertx.class);
     RxHelper.deployVerticle(vertx, injector.getInstance(HttpServerVerticle.class));
-    RxHelper.deployVerticle(vertx, injector.getInstance(ProductServiceVerticle.class));
-    RxHelper.deployVerticle(vertx, injector.getInstance(ProductServiceVerticle.class));
   }
 
 }

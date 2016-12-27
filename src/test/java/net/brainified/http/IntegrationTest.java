@@ -13,14 +13,14 @@ import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.rxjava.core.RxHelper;
 import io.vertx.rxjava.core.Vertx;
-import io.vertx.rxjava.core.eventbus.EventBus;
+import net.brainified.db.ProductDao;
 
 public abstract class IntegrationTest {
 
   protected Vertx vertx;
 
   @Mock
-  protected EventBus eventBusMock;
+  protected ProductDao dao;
 
   @Before
   public void setUp(TestContext context) {
@@ -32,7 +32,7 @@ public abstract class IntegrationTest {
       @Override
       protected void configure() {
         bind(Vertx.class).toInstance(vertx);
-        bind(EventBus.class).toInstance(eventBusMock);
+        bind(ProductDao.class).toInstance(dao);
       }
     }, new HttpModule());
     RxHelper.deployVerticle(vertx, injector.getInstance(HttpServerVerticle.class)).subscribe((s) -> async.complete());
