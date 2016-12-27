@@ -22,6 +22,7 @@ final class JWTAuthProvider implements Provider<JWTAuth> {
         .put("path", "keystore.jceks")
         .put("type", "jceks")
         .put("password", "secret");
+
     final JsonObject config = new JsonObject()
         .put("keyStore", keystore);
 
