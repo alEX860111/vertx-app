@@ -1,4 +1,4 @@
-package net.brainified.http;
+package net.brainified.http.users;
 
 import javax.inject.Inject;
 
@@ -9,20 +9,21 @@ import io.vertx.core.json.Json;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rxjava.ext.web.RoutingContext;
-import net.brainified.db.ProductDao;
-import net.brainified.db.ProductData;
+import net.brainified.db.User;
+import net.brainified.db.UserDao;
+import net.brainified.http.HandlerConfiguration;
 
-@HandlerConfiguration(path = "/api/products", method = HttpMethod.POST)
-final class AddProductHandler implements Handler<RoutingContext> {
+@HandlerConfiguration(path = "/api/users", method = HttpMethod.POST)
+final class AddUserHandler implements Handler<RoutingContext> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(AddProductHandler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(AddUserHandler.class);
 
   private static final String INVALID_JSON_IN_BODY = "Invalid JSON in body";
 
-  private final ProductDao dao;
+  private final UserDao dao;
 
   @Inject
-  public AddProductHandler(final ProductDao dao) {
+  public AddUserHandler(final UserDao dao) {
     this.dao = dao;
   }
 
@@ -30,21 +31,21 @@ final class AddProductHandler implements Handler<RoutingContext> {
   public void handle(final RoutingContext routingContext) {
     final String body = routingContext.getBodyAsString();
 
-    ProductData data = null;
+    User user = null;
     try {
-      data = Json.decodeValue(body, ProductData.class);
+      user = Json.decodeValue(body, User.class);
     } catch (final DecodeException e) {
       routingContext.response().setStatusCode(400).end(INVALID_JSON_IN_BODY);
       return;
     }
 
-    dao.addProduct(data).subscribe(savedProduct -> {
+    dao.addUser(user).subscribe(savedUser -> {
       routingContext
         .response()
         .setStatusCode(201)
         .putHeader("Content-Type", "application/json; charset=utf-8")
-        .putHeader("Location", routingContext.request().absoluteURI() + "/" + savedProduct.get_id())
-        .end(Json.encodePrettily(savedProduct));
+        .putHeader("Location", routingContext.request().absoluteURI() + "/" + savedUser.get_id())
+        .end(Json.encodePrettily(savedUser));
     }, error -> {
       LOGGER.error(error.getMessage());
       routingContext.response().setStatusCode(500).end();

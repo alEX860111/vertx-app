@@ -1,4 +1,4 @@
-package net.brainified.http;
+package net.brainified.http.login;
 
 import javax.inject.Inject;
 import javax.inject.Provider;

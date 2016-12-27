@@ -14,6 +14,7 @@ import io.vertx.rxjava.ext.web.Router;
 import io.vertx.rxjava.ext.web.RoutingContext;
 import io.vertx.rxjava.ext.web.handler.BodyHandler;
 import io.vertx.rxjava.ext.web.handler.CorsHandler;
+import io.vertx.rxjava.ext.web.handler.JWTAuthHandler;
 
 final class RouterProvider implements Provider<Router> {
 
@@ -21,10 +22,13 @@ final class RouterProvider implements Provider<Router> {
 
   private Set<Handler<RoutingContext>> handlers;
 
+  private final JWTAuthHandler authenticationHandler;
+
   @Inject
-  public RouterProvider(final Vertx vertx, final Set<Handler<RoutingContext>> handlers) {
+  public RouterProvider(final Vertx vertx, final Set<Handler<RoutingContext>> handlers, final JWTAuthHandler authenticationHandler) {
     this.vertx = vertx;
     this.handlers = handlers;
+    this.authenticationHandler = authenticationHandler;
   }
 
   @Override
@@ -39,7 +43,9 @@ final class RouterProvider implements Provider<Router> {
         .allowedMethod(HttpMethod.DELETE);
 
     router.route().handler(corsHandler);
-    router.route("/api*").handler(BodyHandler.create());
+    router.route("/*").handler(BodyHandler.create());
+
+    router.route("/api/*").handler(authenticationHandler);
 
     handlers.forEach(handler -> registerHandler(router, handler));
     return router;

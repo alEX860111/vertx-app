@@ -1,28 +1,21 @@
 package net.brainified.http;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.TypeLiteral;
-import com.google.inject.multibindings.Multibinder;
 
-import io.vertx.core.Handler;
-import io.vertx.rxjava.ext.auth.jwt.JWTAuth;
 import io.vertx.rxjava.ext.web.Router;
-import io.vertx.rxjava.ext.web.RoutingContext;
+import net.brainified.http.login.LoginModule;
+import net.brainified.http.products.ProductsHandlerModule;
+import net.brainified.http.users.UsersHandlerModule;
 
 public final class HttpModule extends AbstractModule {
+
   @Override
   protected void configure() {
+    install(new ProductsHandlerModule());
+    install(new UsersHandlerModule());
+    install(new LoginModule());
+
     bind(Router.class).toProvider(RouterProvider.class);
-
-    final Multibinder<Handler<RoutingContext>> handlers = Multibinder.newSetBinder(binder(), new TypeLiteral<Handler<RoutingContext>>() {
-    });
-    handlers.addBinding().to(GetProductListHandler.class);
-    handlers.addBinding().to(GetProductHandler.class);
-    handlers.addBinding().to(AddProductHandler.class);
-    handlers.addBinding().to(UpdateProductHandler.class);
-    handlers.addBinding().to(DeleteProductHandler.class);
-    handlers.addBinding().to(LoginHandler.class);
-
-    bind(JWTAuth.class).toProvider(JWTAuthProvider.class);
   }
+
 }

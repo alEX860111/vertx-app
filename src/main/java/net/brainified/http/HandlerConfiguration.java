@@ -9,7 +9,7 @@ import io.vertx.core.http.HttpMethod;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-@interface HandlerConfiguration {
+public @interface HandlerConfiguration {
   String path();
   HttpMethod method();
 }

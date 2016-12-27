@@ -26,13 +26,13 @@ import io.vertx.rxjava.ext.mongo.MongoClient;
 import rx.Observable;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ProductDaoImplTest {
+public class MongoProductDaoTest {
 
   @Mock
   private MongoClient client;
 
   @InjectMocks
-  private ProductDaoImpl serviceSUT;
+  private MongoProductDao serviceSUT;
 
   @Test
   public void testGetProductCount() {

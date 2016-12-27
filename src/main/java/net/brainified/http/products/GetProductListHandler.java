@@ -1,4 +1,4 @@
-package net.brainified.http;
+package net.brainified.http.products;
 
 import java.util.Objects;
 
@@ -13,8 +13,8 @@ import io.vertx.core.json.Json;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rxjava.ext.web.RoutingContext;
-import net.brainified.db.ProductContainer;
 import net.brainified.db.ProductDao;
+import net.brainified.http.HandlerConfiguration;
 
 @HandlerConfiguration(path = "/api/products", method = HttpMethod.GET)
 

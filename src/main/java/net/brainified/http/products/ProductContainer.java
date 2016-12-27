@@ -1,8 +1,10 @@
-package net.brainified.db;
+package net.brainified.http.products;
 
 import java.util.List;
 
-public final class ProductContainer {
+import net.brainified.db.Product;
+
+final class ProductContainer {
 
   private List<Product> products;
 

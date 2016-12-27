@@ -1,4 +1,4 @@
-package net.brainified.http;
+package net.brainified.http.login;
 
 import javax.inject.Inject;
 
@@ -10,8 +10,9 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.jwt.JWTOptions;
 import io.vertx.rxjava.ext.auth.jwt.JWTAuth;
 import io.vertx.rxjava.ext.web.RoutingContext;
+import net.brainified.http.HandlerConfiguration;
 
-@HandlerConfiguration(path = "/api/login", method = HttpMethod.POST)
+@HandlerConfiguration(path = "/login", method = HttpMethod.POST)
 final class LoginHandler implements Handler<RoutingContext> {
 
   private static final String USER = "admin";

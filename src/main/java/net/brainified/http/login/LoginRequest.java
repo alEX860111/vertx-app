@@ -1,4 +1,4 @@
-package net.brainified.http;
+package net.brainified.http.login;
 
 final class LoginRequest {
 

@@ -14,7 +14,7 @@ import io.vertx.ext.mongo.FindOptions;
 import io.vertx.rxjava.ext.mongo.MongoClient;
 import rx.Observable;
 
-final class ProductDaoImpl implements ProductDao {
+final class MongoProductDao implements ProductDao {
 
   private static final int DESC = -1;
 
@@ -23,7 +23,7 @@ final class ProductDaoImpl implements ProductDao {
   private final MongoClient client;
 
   @Inject
-  public ProductDaoImpl(MongoClient client) {
+  public MongoProductDao(final MongoClient client) {
     this.client = client;
   }
 

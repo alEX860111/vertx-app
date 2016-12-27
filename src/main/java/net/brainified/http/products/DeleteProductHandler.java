@@ -1,4 +1,4 @@
-package net.brainified.http;
+package net.brainified.http.products;
 
 import javax.inject.Inject;
 
@@ -8,6 +8,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rxjava.ext.web.RoutingContext;
 import net.brainified.db.ProductDao;
+import net.brainified.http.HandlerConfiguration;
 
 @HandlerConfiguration(path = "/api/products/:id", method = HttpMethod.DELETE)
 final class DeleteProductHandler implements Handler<RoutingContext> {
