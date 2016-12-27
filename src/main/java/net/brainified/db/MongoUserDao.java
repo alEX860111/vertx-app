@@ -24,7 +24,7 @@ final class MongoUserDao implements UserDao {
 
   @Override
   public Observable<Optional<User>> searchUser(final String username) {
-    final JsonObject query = new JsonObject().put("name", username);
+    final JsonObject query = new JsonObject().put("username", username);
     return findUser(query);
   }
 
