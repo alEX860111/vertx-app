@@ -37,6 +37,7 @@ final class RouterProvider implements Provider<Router> {
 
     final CorsHandler corsHandler = CorsHandler.create("*")
         .allowedHeader("Content-Type")
+        .allowedHeader("Authorization")
         .allowedMethod(HttpMethod.GET)
         .allowedMethod(HttpMethod.POST)
         .allowedMethod(HttpMethod.PUT)
