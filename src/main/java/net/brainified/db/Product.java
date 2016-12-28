@@ -6,7 +6,9 @@ public final class Product {
 
   private String createdAt;
 
-  private ProductData data;
+  private String name;
+
+  private Double price;
 
   public String get_id() {
     return _id;
@@ -24,12 +26,20 @@ public final class Product {
     this.createdAt = createdAt;
   }
 
-  public ProductData getData() {
-    return data;
+  public String getName() {
+    return name;
   }
 
-  public void setData(ProductData data) {
-    this.data = data;
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public Double getPrice() {
+    return price;
+  }
+
+  public void setPrice(Double price) {
+    this.price = price;
   }
 
 }

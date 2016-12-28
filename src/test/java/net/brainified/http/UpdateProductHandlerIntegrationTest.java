@@ -12,7 +12,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import net.brainified.db.ProductData;
+import net.brainified.db.Product;
 import rx.Observable;
 
 @RunWith(VertxUnitRunner.class)
@@ -26,7 +26,7 @@ public class UpdateProductHandlerIntegrationTest extends IntegrationTest {
     data.put("name", "myProduct");
     data.put("price", 100);
 
-    when(dao.updateProduct(eq("1"), any(ProductData.class))).thenReturn(Observable.just(1L));
+    when(dao.updateProduct(eq("1"), any(Product.class))).thenReturn(Observable.just(1L));
 
     final Async async = context.async();
 
@@ -44,7 +44,7 @@ public class UpdateProductHandlerIntegrationTest extends IntegrationTest {
     data.put("name", "myProduct");
     data.put("price", 100);
 
-    when(dao.updateProduct(eq("1"), any(ProductData.class))).thenReturn(Observable.error(new RuntimeException("error")));
+    when(dao.updateProduct(eq("1"), any(Product.class))).thenReturn(Observable.error(new RuntimeException("error")));
 
     final Async async = context.async();
 
@@ -62,7 +62,7 @@ public class UpdateProductHandlerIntegrationTest extends IntegrationTest {
     data.put("name", "myProduct");
     data.put("price", 100);
 
-    when(dao.updateProduct(eq("1"), any(ProductData.class))).thenReturn(Observable.just(0L));
+    when(dao.updateProduct(eq("1"), any(Product.class))).thenReturn(Observable.just(0L));
 
     final Async async = context.async();
 

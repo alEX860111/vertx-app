@@ -13,9 +13,9 @@ public interface ProductDao {
 
   Observable<Optional<Product>> getProduct(String id);
 
-  Observable<Product> addProduct(ProductData data);
+  Observable<Product> addProduct(Product product);
 
-  Observable<Long> updateProduct(String id, ProductData data);
+  Observable<Long> updateProduct(String id, Product product);
 
   Observable<Long> deleteProduct(String id);
 

@@ -59,9 +59,7 @@ final class MongoProductDao implements ProductDao {
   }
 
   @Override
-  public Observable<Product> addProduct(final ProductData data) {
-    final Product product = new Product();
-    product.setData(data);
+  public Observable<Product> addProduct(final Product product) {
     product.setCreatedAt(Instant.now().toString());
 
     final JsonObject document = new JsonObject(Json.encodePrettily(product));
@@ -74,11 +72,14 @@ final class MongoProductDao implements ProductDao {
   }
 
   @Override
-  public Observable<Long> updateProduct(final String id, final ProductData data) {
+  public Observable<Long> updateProduct(final String id, final Product product) {
     final JsonObject query = new JsonObject().put("_id", id);
 
-    final JsonObject product = new JsonObject().put("data", new JsonObject(Json.encodePrettily(data)));
-    final JsonObject update = new JsonObject().put("$set", product);
+    final JsonObject document = new JsonObject(Json.encodePrettily(product));
+    document.remove("_id");
+    document.remove("createdAt");
+
+    final JsonObject update = new JsonObject().put("$set", document);
 
     return client.updateCollectionObservable(PRODUCTS_COLLECTION, query, update).map(result -> {
       return result.getDocModified();

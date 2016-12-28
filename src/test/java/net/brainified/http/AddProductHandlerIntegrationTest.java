@@ -12,7 +12,6 @@ import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import net.brainified.db.Product;
-import net.brainified.db.ProductData;
 import rx.Observable;
 
 @RunWith(VertxUnitRunner.class)
@@ -28,7 +27,7 @@ public class AddProductHandlerIntegrationTest extends IntegrationTest {
     final Product product = new Product();
     product.set_id(id);
 
-    when(dao.addProduct(any(ProductData.class))).thenReturn(Observable.just(product));
+    when(dao.addProduct(any(Product.class))).thenReturn(Observable.just(product));
 
     final Async async = context.async();
 
@@ -64,7 +63,7 @@ public class AddProductHandlerIntegrationTest extends IntegrationTest {
     data.put("name", "myProduct");
     data.put("price", 100);
 
-    when(dao.addProduct(any(ProductData.class))).thenReturn(Observable.error(new RuntimeException("error")));
+    when(dao.addProduct(any(Product.class))).thenReturn(Observable.error(new RuntimeException("error")));
 
     final Async async = context.async();
 

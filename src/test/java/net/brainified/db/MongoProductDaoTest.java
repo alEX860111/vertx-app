@@ -86,9 +86,8 @@ public class MongoProductDaoTest {
   public void testAddProduct() {
     when(client.insertObservable(eq("products"), any(JsonObject.class))).thenReturn(Observable.just("id"));
 
-    final ProductData data = new ProductData();
-    serviceSUT.addProduct(data).subscribe(savedProduct -> {
-      assertEquals(data, savedProduct.getData());
+    final Product product = new Product();
+    serviceSUT.addProduct(product).subscribe(savedProduct -> {
       assertEquals("id", savedProduct.get_id());
       assertFalse(savedProduct.getCreatedAt().isEmpty());
     });
@@ -100,18 +99,18 @@ public class MongoProductDaoTest {
   public void testUpdateProduct() {
     final JsonObject query = new JsonObject().put("_id", "1");
 
-    final JsonObject product = new JsonObject().put("data", new JsonObject().put("name", "abc").put("price", 299.99d));
-    final JsonObject update = new JsonObject().put("$set", product);
+    final JsonObject document = new JsonObject().put("name", "abc").put("price", 299.99d);
+    final JsonObject update = new JsonObject().put("$set", document);
 
     final MongoClientUpdateResult result = Mockito.mock(MongoClientUpdateResult.class);
     when(result.getDocModified()).thenReturn(1L);
 
     when(client.updateCollectionObservable("products", query, update)).thenReturn(Observable.just(result));
 
-    final ProductData data = new ProductData();
-    data.setName("abc");
-    data.setPrice(299.99d);
-    serviceSUT.updateProduct("1", data).subscribe(numModified -> assertEquals(Long.valueOf(1L), numModified));
+    final Product product = new Product();
+    product.setName("abc");
+    product.setPrice(299.99d);
+    serviceSUT.updateProduct("1", product).subscribe(numModified -> assertEquals(Long.valueOf(1L), numModified));
 
     verify(client).updateCollectionObservable("products", query, update);
   }
