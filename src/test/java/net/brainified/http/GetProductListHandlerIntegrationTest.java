@@ -1,6 +1,6 @@
 package net.brainified.http;
 
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -14,6 +14,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import net.brainified.db.SortOrder;
 import rx.Observable;
 
 @RunWith(VertxUnitRunner.class)
@@ -22,7 +23,7 @@ public class GetProductListHandlerIntegrationTest extends IntegrationTest {
   @Test
   public void testGetProducts(TestContext context) {
     when(dao.getCount()).thenReturn(Observable.just(42L));
-    when(dao.getList(anyInt(), anyInt())).thenReturn(Observable.just(Collections.emptyList()));
+    when(dao.getList(anyInt(), anyInt(), anyString(), any(SortOrder.class))).thenReturn(Observable.just(Collections.emptyList()));
 
     final Async async = context.async();
 
@@ -45,7 +46,7 @@ public class GetProductListHandlerIntegrationTest extends IntegrationTest {
 
     vertx.createHttpClient().getNow(8080, "localhost", "/api/products", response -> {
       context.assertEquals(500, response.statusCode());
-      verify(dao, never()).getList(anyInt(), anyInt());
+      verify(dao, never()).getList(anyInt(), anyInt(), anyString(), any(SortOrder.class));
       async.complete();
     });
   }
@@ -54,7 +55,7 @@ public class GetProductListHandlerIntegrationTest extends IntegrationTest {
   public void testGetProducts_getListError(TestContext context) {
     when(dao.getCount()).thenReturn(Observable.just(42L));
 
-    when(dao.getList(anyInt(), anyInt())).thenReturn(Observable.error(new RuntimeException("error")));
+    when(dao.getList(anyInt(), anyInt(), anyString(), any(SortOrder.class))).thenReturn(Observable.error(new RuntimeException("error")));
 
     final Async async = context.async();
 

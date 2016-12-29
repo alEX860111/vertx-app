@@ -14,8 +14,6 @@ import rx.Observable;
 
 class MongoDao<T extends MongoObject> implements Dao<T> {
 
-  private static final int DESC = -1;
-
   private final MongoClient client;
 
   private final String collectionName;
@@ -35,9 +33,9 @@ class MongoDao<T extends MongoObject> implements Dao<T> {
   }
 
   @Override
-  public Observable<List<T>> getList(final Integer page, final Integer perpage) {
+  public Observable<List<T>> getList(final Integer page, final Integer perpage, final String sortKey, final SortOrder sortOrder) {
     final JsonObject query = new JsonObject();
-    final JsonObject sort = new JsonObject().put("createdAt", DESC);
+    final JsonObject sort = new JsonObject().put(sortKey, sortOrder.getValue());
     final FindOptions options = new FindOptions().setLimit(perpage).setSkip((page - 1) * perpage).setSort(sort);
 
     return client.findWithOptionsObservable(collectionName, query, options).map(documents -> {

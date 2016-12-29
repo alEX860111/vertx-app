@@ -9,7 +9,7 @@ public interface Dao<T> {
 
   Observable<Long> getCount();
 
-  Observable<List<T>> getList(Integer page, Integer perpage);
+  Observable<List<T>> getList(Integer page, Integer perpage, String sortKey, SortOrder sortOrder);
 
   Observable<Optional<T>> getById(String id);
 

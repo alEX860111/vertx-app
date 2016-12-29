@@ -67,7 +67,7 @@ public class MongoDaoTest {
     when(client.findWithOptionsObservable(eq(COLLECTION_NAME), eq(query), optionsCaptor.capture()))
         .thenReturn(Observable.just(Arrays.asList(document)));
 
-    dao.getList(1, 10).subscribe(objects -> {
+    dao.getList(1, 10, "createdAt", SortOrder.DESC).subscribe(objects -> {
       assertEquals(1, objects.size());
       final MongoObject object = objects.get(0);
       assertEquals(ID, object.get_id());

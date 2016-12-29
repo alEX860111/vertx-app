@@ -5,6 +5,7 @@ import java.util.Objects;
 import javax.inject.Inject;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Strings;
 import com.google.common.primitives.Ints;
 
 import io.vertx.core.Handler;
@@ -15,6 +16,7 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rxjava.ext.web.RoutingContext;
 import net.brainified.db.Dao;
 import net.brainified.db.Product;
+import net.brainified.db.SortOrder;
 import net.brainified.http.HandlerConfiguration;
 
 @HandlerConfiguration(path = "/api/products", method = HttpMethod.GET)
@@ -50,8 +52,21 @@ final class GetProductListHandler implements Handler<RoutingContext> {
       return;
     }
 
+    final String sortOrderParam = MoreObjects.firstNonNull(routingContext.request().getParam("sortorder"), "DESC");
+    final SortOrder sortOrder = SortOrder.fromString(sortOrderParam);
+    if (Objects.isNull(sortOrder)) {
+      routingContext.response().setStatusCode(400).end("sortorder must be 'asc' or 'desc'");
+      return;
+    }
+
+    final String sortKey = MoreObjects.firstNonNull(routingContext.request().getParam("sortkey"), "createdAt");
+    if (Strings.isNullOrEmpty(sortKey)) {
+      routingContext.response().setStatusCode(400).end("sortkey may not be empty");
+      return;
+    }
+
     dao.getCount().subscribe(count -> {
-      dao.getList(page, perpage).subscribe(products -> {
+      dao.getList(page, perpage, sortKey, sortOrder).subscribe(products -> {
         final ProductContainer container = new ProductContainer();
         container.setProducts(products);
         container.setNumberOfProducts(count);
