@@ -21,8 +21,8 @@ public class GetProductListHandlerIntegrationTest extends IntegrationTest {
 
   @Test
   public void testGetProducts(TestContext context) {
-    when(dao.getProductCount()).thenReturn(Observable.just(42L));
-    when(dao.getProductList(anyInt(), anyInt())).thenReturn(Observable.just(Collections.emptyList()));
+    when(dao.getCount()).thenReturn(Observable.just(42L));
+    when(dao.getList(anyInt(), anyInt())).thenReturn(Observable.just(Collections.emptyList()));
 
     final Async async = context.async();
 
@@ -39,22 +39,22 @@ public class GetProductListHandlerIntegrationTest extends IntegrationTest {
 
   @Test
   public void testGetProducts_countError(TestContext context) {
-    when(dao.getProductCount()).thenReturn(Observable.error(new RuntimeException("error")));
+    when(dao.getCount()).thenReturn(Observable.error(new RuntimeException("error")));
 
     final Async async = context.async();
 
     vertx.createHttpClient().getNow(8080, "localhost", "/api/products", response -> {
       context.assertEquals(500, response.statusCode());
-      verify(dao, never()).getProductList(anyInt(), anyInt());
+      verify(dao, never()).getList(anyInt(), anyInt());
       async.complete();
     });
   }
 
   @Test
   public void testGetProducts_getListError(TestContext context) {
-    when(dao.getProductCount()).thenReturn(Observable.just(42L));
+    when(dao.getCount()).thenReturn(Observable.just(42L));
 
-    when(dao.getProductList(anyInt(), anyInt())).thenReturn(Observable.error(new RuntimeException("error")));
+    when(dao.getList(anyInt(), anyInt())).thenReturn(Observable.error(new RuntimeException("error")));
 
     final Async async = context.async();
 

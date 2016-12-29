@@ -24,7 +24,7 @@ public class GetProductHandlerIntegrationTest extends IntegrationTest {
     product.setName("name");
     product.setPrice(100d);
 
-    when(dao.getProduct("1")).thenReturn(Observable.just(Optional.of(product)));
+    when(dao.get("1")).thenReturn(Observable.just(Optional.of(product)));
 
     final Async async = context.async();
 
@@ -39,7 +39,7 @@ public class GetProductHandlerIntegrationTest extends IntegrationTest {
 
   @Test
   public void testGetProduct_notFound(TestContext context) {
-    when(dao.getProduct("1")).thenReturn(Observable.just(Optional.empty()));
+    when(dao.get("1")).thenReturn(Observable.just(Optional.empty()));
 
     final Async async = context.async();
 
@@ -51,7 +51,7 @@ public class GetProductHandlerIntegrationTest extends IntegrationTest {
 
   @Test
   public void testGetProduct_serverError(TestContext context) {
-    when(dao.getProduct("1")).thenReturn(Observable.error(new RuntimeException("error")));
+    when(dao.get("1")).thenReturn(Observable.error(new RuntimeException("error")));
     final Async async = context.async();
 
     vertx.createHttpClient().getNow(8080, "localhost", "/api/products/1", response -> {

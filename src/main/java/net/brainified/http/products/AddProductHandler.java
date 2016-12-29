@@ -9,8 +9,8 @@ import io.vertx.core.json.Json;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rxjava.ext.web.RoutingContext;
+import net.brainified.db.Dao;
 import net.brainified.db.Product;
-import net.brainified.db.ProductDao;
 import net.brainified.http.HandlerConfiguration;
 
 @HandlerConfiguration(path = "/api/products", method = HttpMethod.POST)
@@ -20,10 +20,10 @@ final class AddProductHandler implements Handler<RoutingContext> {
 
   private static final String INVALID_JSON_IN_BODY = "Invalid JSON in body";
 
-  private final ProductDao dao;
+  private final Dao<Product> dao;
 
   @Inject
-  public AddProductHandler(final ProductDao dao) {
+  public AddProductHandler(final Dao<Product> dao) {
     this.dao = dao;
   }
 
@@ -39,7 +39,7 @@ final class AddProductHandler implements Handler<RoutingContext> {
       return;
     }
 
-    dao.addProduct(product).subscribe(savedProduct -> {
+    dao.add(product).subscribe(savedProduct -> {
       routingContext
         .response()
         .setStatusCode(201)

@@ -39,7 +39,7 @@ public class MongoProductDaoTest {
     final JsonObject query = new JsonObject();
     when(client.countObservable("products", query)).thenReturn(Observable.just(42L));
 
-    serviceSUT.getProductCount().subscribe(count -> assertEquals(Long.valueOf(42L), count));
+    serviceSUT.getCount().subscribe(count -> assertEquals(Long.valueOf(42L), count));
 
     verify(client).countObservable("products", query);
   }
@@ -52,7 +52,7 @@ public class MongoProductDaoTest {
 
     when(client.findWithOptionsObservable(eq("products"), eq(query), optionsCaptor.capture())).thenReturn(Observable.just(Collections.emptyList()));
 
-    serviceSUT.getProductList(1, 10).subscribe(products -> assertTrue(products.isEmpty()));
+    serviceSUT.getList(1, 10).subscribe(products -> assertTrue(products.isEmpty()));
 
     verify(client).findWithOptionsObservable(eq("products"), eq(query), optionsCaptor.capture());
 
@@ -74,7 +74,7 @@ public class MongoProductDaoTest {
 
     when(client.findOneObservable("products", query, fields)).thenReturn(Observable.just(document));
 
-    serviceSUT.getProduct("1").subscribe(product -> {
+    serviceSUT.get("1").subscribe(product -> {
       assertTrue(product.isPresent());
       assertEquals("1", product.get().get_id());
     });
@@ -87,7 +87,7 @@ public class MongoProductDaoTest {
     when(client.insertObservable(eq("products"), any(JsonObject.class))).thenReturn(Observable.just("id"));
 
     final Product product = new Product();
-    serviceSUT.addProduct(product).subscribe(savedProduct -> {
+    serviceSUT.add(product).subscribe(savedProduct -> {
       assertEquals("id", savedProduct.get_id());
       assertFalse(savedProduct.getCreatedAt().isEmpty());
     });
@@ -110,7 +110,7 @@ public class MongoProductDaoTest {
     final Product product = new Product();
     product.setName("abc");
     product.setPrice(299.99d);
-    serviceSUT.updateProduct("1", product).subscribe(numModified -> assertEquals(Long.valueOf(1L), numModified));
+    serviceSUT.update("1", product).subscribe(numModified -> assertEquals(Long.valueOf(1L), numModified));
 
     verify(client).updateCollectionObservable("products", query, update);
   }
@@ -124,7 +124,7 @@ public class MongoProductDaoTest {
 
     when(client.removeDocumentObservable("products", query)).thenReturn(Observable.just(result));
 
-    serviceSUT.deleteProduct("1").subscribe(numDeleted -> assertEquals(Long.valueOf(1L), numDeleted));
+    serviceSUT.delete("1").subscribe(numDeleted -> assertEquals(Long.valueOf(1L), numDeleted));
 
     verify(client).removeDocumentObservable("products", query);
   }

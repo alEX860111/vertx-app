@@ -13,7 +13,8 @@ import io.vertx.core.json.Json;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rxjava.ext.web.RoutingContext;
-import net.brainified.db.ProductDao;
+import net.brainified.db.Dao;
+import net.brainified.db.Product;
 import net.brainified.http.HandlerConfiguration;
 
 @HandlerConfiguration(path = "/api/products", method = HttpMethod.GET)
@@ -28,10 +29,10 @@ final class GetProductListHandler implements Handler<RoutingContext> {
   private static final String PER_PAGE_DEFAULT = "10";
   private static final int PER_PAGE_MIN = 1;
 
-  private final ProductDao dao;
+  private final Dao<Product> dao;
 
   @Inject
-  public GetProductListHandler(final ProductDao dao) {
+  public GetProductListHandler(final Dao<Product> dao) {
     this.dao = dao;
   }
 
@@ -49,8 +50,8 @@ final class GetProductListHandler implements Handler<RoutingContext> {
       return;
     }
 
-    dao.getProductCount().subscribe(count -> {
-      dao.getProductList(page, perpage).subscribe(products -> {
+    dao.getCount().subscribe(count -> {
+      dao.getList(page, perpage).subscribe(products -> {
         final ProductContainer container = new ProductContainer();
         container.setProducts(products);
         container.setNumberOfProducts(count);

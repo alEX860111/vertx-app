@@ -14,6 +14,7 @@ import com.google.common.base.Preconditions;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.TypeLiteral;
 
 import io.vertx.core.Handler;
 import io.vertx.ext.unit.Async;
@@ -23,7 +24,8 @@ import io.vertx.rxjava.core.Vertx;
 import io.vertx.rxjava.ext.web.Router;
 import io.vertx.rxjava.ext.web.RoutingContext;
 import io.vertx.rxjava.ext.web.handler.BodyHandler;
-import net.brainified.db.ProductDao;
+import net.brainified.db.Dao;
+import net.brainified.db.Product;
 import net.brainified.http.products.ProductsHandlerModule;
 
 public abstract class IntegrationTest {
@@ -31,7 +33,7 @@ public abstract class IntegrationTest {
   protected Vertx vertx;
 
   @Mock
-  protected ProductDao dao;
+  protected Dao<Product> dao;
 
   @Before
   public void setUp(TestContext context) {
@@ -43,7 +45,7 @@ public abstract class IntegrationTest {
       @Override
       protected void configure() {
         bind(Vertx.class).toInstance(vertx);
-        bind(ProductDao.class).toInstance(dao);
+        bind(new TypeLiteral<Dao<Product>>() {}).toInstance(dao);
         bind(Router.class).toProvider(RouterTestProvider.class);
       }
     }, new ProductsHandlerModule());

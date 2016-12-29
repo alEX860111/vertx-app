@@ -27,7 +27,7 @@ public class AddProductHandlerIntegrationTest extends IntegrationTest {
     final Product product = new Product();
     product.set_id(id);
 
-    when(dao.addProduct(any(Product.class))).thenReturn(Observable.just(product));
+    when(dao.add(any(Product.class))).thenReturn(Observable.just(product));
 
     final Async async = context.async();
 
@@ -63,7 +63,7 @@ public class AddProductHandlerIntegrationTest extends IntegrationTest {
     data.put("name", "myProduct");
     data.put("price", 100);
 
-    when(dao.addProduct(any(Product.class))).thenReturn(Observable.error(new RuntimeException("error")));
+    when(dao.add(any(Product.class))).thenReturn(Observable.error(new RuntimeException("error")));
 
     final Async async = context.async();
 

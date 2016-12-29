@@ -15,7 +15,7 @@ public class DeleteProductHandlerIntegrationTest extends IntegrationTest {
 
   @Test
   public void testDeleteProduct(TestContext context) {
-    when(dao.deleteProduct("1")).thenReturn(Observable.just(1L));
+    when(dao.delete("1")).thenReturn(Observable.just(1L));
 
     final Async async = context.async();
 
@@ -27,7 +27,7 @@ public class DeleteProductHandlerIntegrationTest extends IntegrationTest {
 
   @Test
   public void testDeleteProduct_notFound(TestContext context) {
-    when(dao.deleteProduct("1")).thenReturn(Observable.just(0L));
+    when(dao.delete("1")).thenReturn(Observable.just(0L));
 
     final Async async = context.async();
 
@@ -39,7 +39,7 @@ public class DeleteProductHandlerIntegrationTest extends IntegrationTest {
 
   @Test
   public void testDeleteProduct_serverError(TestContext context) {
-    when(dao.deleteProduct("1")).thenReturn(Observable.error(new RuntimeException("error")));
+    when(dao.delete("1")).thenReturn(Observable.error(new RuntimeException("error")));
 
     final Async async = context.async();
 
