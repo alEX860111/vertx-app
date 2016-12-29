@@ -11,8 +11,9 @@ public final class DBModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(MongoClient.class).toProvider(MongoClientProvider.class).in(Scopes.SINGLETON);
-    bind(new TypeLiteral<Dao<Product>>() {}).to(MongoProductDao.class);
-    bind(UserDao.class).to(MongoUserDao.class);
+    bind(new TypeLiteral<Dao<Product>>() {}).to(ProductDao.class);
+    bind(new TypeLiteral<Dao<User>>() {}).to(UserDao.class);
+
   }
 
 }

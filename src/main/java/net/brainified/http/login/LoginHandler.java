@@ -13,8 +13,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.jwt.JWTOptions;
 import io.vertx.rxjava.ext.auth.jwt.JWTAuth;
 import io.vertx.rxjava.ext.web.RoutingContext;
+import net.brainified.db.Dao;
 import net.brainified.db.User;
-import net.brainified.db.UserDao;
 import net.brainified.http.HandlerConfiguration;
 
 @HandlerConfiguration(path = "/login", method = HttpMethod.POST)
@@ -24,10 +24,10 @@ final class LoginHandler implements Handler<RoutingContext> {
 
   private final JWTAuth jwtAuth;
 
-  private final UserDao userDao;
+  private final Dao<User> userDao;
 
   @Inject
-  public LoginHandler(final JWTAuth jwtAuth, final UserDao userDao) {
+  public LoginHandler(final JWTAuth jwtAuth, final Dao<User> userDao) {
     this.jwtAuth = jwtAuth;
     this.userDao = userDao;
   }
@@ -46,7 +46,7 @@ final class LoginHandler implements Handler<RoutingContext> {
 
     final String password = loginRequest.getPassword();
 
-    userDao.searchUser(loginRequest.getUsername()).subscribe(userOptional -> {
+    userDao.getByKey("username", loginRequest.getUsername()).subscribe(userOptional -> {
       if (!userOptional.isPresent()) {
         routingContext.response().setStatusCode(403).end("login failed");
         return;

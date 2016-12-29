@@ -1,15 +1,14 @@
 package net.brainified.db;
 
-import java.util.Optional;
+import javax.inject.Inject;
 
-import rx.Observable;
+import io.vertx.rxjava.ext.mongo.MongoClient;
 
-public interface UserDao {
+final class UserDao extends MongoDao<User> {
 
-  Observable<Optional<User>> searchUser(String name);
-
-  Observable<Optional<User>> getUser(String id);
-
-  Observable<User> addUser(User user);
+  @Inject
+  public UserDao(final MongoClient client) {
+    super(client, "users", User.class);
+  }
 
 }

@@ -39,9 +39,9 @@ final class UpdateProductHandler implements Handler<RoutingContext> {
       return;
     }
 
-    final String id = routingContext.request().getParam("id");
+    product.set_id(routingContext.request().getParam("id"));
 
-    dao.update(id, product).subscribe(numModified -> {
+    dao.update(product).subscribe(numModified -> {
       if (numModified == 0) {
         routingContext.response().setStatusCode(404).end();
       } else {

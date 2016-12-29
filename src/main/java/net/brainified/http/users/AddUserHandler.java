@@ -9,8 +9,8 @@ import io.vertx.core.json.Json;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rxjava.ext.web.RoutingContext;
+import net.brainified.db.Dao;
 import net.brainified.db.User;
-import net.brainified.db.UserDao;
 import net.brainified.http.HandlerConfiguration;
 
 @HandlerConfiguration(path = "/api/users", method = HttpMethod.POST)
@@ -20,10 +20,10 @@ final class AddUserHandler implements Handler<RoutingContext> {
 
   private static final String INVALID_JSON_IN_BODY = "Invalid JSON in body";
 
-  private final UserDao dao;
+  private final Dao<User> dao;
 
   @Inject
-  public AddUserHandler(final UserDao dao) {
+  public AddUserHandler(final Dao<User> dao) {
     this.dao = dao;
   }
 
@@ -39,7 +39,7 @@ final class AddUserHandler implements Handler<RoutingContext> {
       return;
     }
 
-    dao.addUser(user).subscribe(savedUser -> {
+    dao.add(user).subscribe(savedUser -> {
       routingContext
         .response()
         .setStatusCode(201)

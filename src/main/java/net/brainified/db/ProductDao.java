@@ -4,10 +4,10 @@ import javax.inject.Inject;
 
 import io.vertx.rxjava.ext.mongo.MongoClient;
 
-final class MongoProductDao extends MongoDao<Product> {
+final class ProductDao extends MongoDao<Product> {
 
   @Inject
-  public MongoProductDao(final MongoClient client) {
+  public ProductDao(final MongoClient client) {
     super(client, "products", Product.class);
   }
 

@@ -8,7 +8,8 @@ import io.vertx.core.json.Json;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rxjava.ext.web.RoutingContext;
-import net.brainified.db.UserDao;
+import net.brainified.db.Dao;
+import net.brainified.db.User;
 import net.brainified.http.HandlerConfiguration;
 
 @HandlerConfiguration(path = "/api/users/:id", method = HttpMethod.GET)
@@ -16,10 +17,10 @@ final class GetUserHandler implements Handler<RoutingContext> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetUserHandler.class);
 
-  private final UserDao dao;
+  private final Dao<User> dao;
 
   @Inject
-  public GetUserHandler(final UserDao dao) {
+  public GetUserHandler(final Dao<User> dao) {
     this.dao = dao;
   }
 
@@ -27,7 +28,7 @@ final class GetUserHandler implements Handler<RoutingContext> {
   public void handle(final RoutingContext routingContext) {
     final String id = routingContext.request().getParam("id");
 
-    dao.getUser(id).subscribe(user -> {
+    dao.getById(id).subscribe(user -> {
       if (user.isPresent()) {
         routingContext.response()
           .putHeader("Content-Type", "application/json; charset=utf-8")

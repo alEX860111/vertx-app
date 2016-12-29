@@ -31,7 +31,6 @@ class MongoDao<T extends MongoObject> implements Dao<T> {
   @Override
   public Observable<Long> getCount() {
     final JsonObject query = new JsonObject();
-
     return client.countObservable(collectionName, query);
   }
 
@@ -49,8 +48,12 @@ class MongoDao<T extends MongoObject> implements Dao<T> {
   }
 
   @Override
-  public Observable<Optional<T>> get(final String id) {
+  public Observable<Optional<T>> getById(final String id) {
     final JsonObject query = new JsonObject().put("_id", id);
+    return getOne(query);
+  }
+
+  private Observable<Optional<T>> getOne(final JsonObject query) {
     final JsonObject fields = new JsonObject();
 
     return client.findOneObservable(collectionName, query, fields).map(document -> {
@@ -63,12 +66,18 @@ class MongoDao<T extends MongoObject> implements Dao<T> {
   }
 
   @Override
+  public Observable<Optional<T>> getByKey(final String key, final String value) {
+    final JsonObject query = new JsonObject().put(key, value);
+    return getOne(query);
+  }
+
+  @Override
   public Observable<T> add(final T object) {
     object.setCreatedAt(Instant.now().toString());
 
     final JsonObject document = new JsonObject(Json.encodePrettily(object));
     document.remove("_id");
- 
+
     return client.insertObservable(collectionName, document).map(id -> {
       object.set_id(id);
       return object;
@@ -76,8 +85,8 @@ class MongoDao<T extends MongoObject> implements Dao<T> {
   }
 
   @Override
-  public Observable<Long> update(final String id, final T object) {
-    final JsonObject query = new JsonObject().put("_id", id);
+  public Observable<Long> update(final T object) {
+    final JsonObject query = new JsonObject().put("_id", object.get_id());
 
     final JsonObject document = new JsonObject(Json.encodePrettily(object));
     document.remove("_id");

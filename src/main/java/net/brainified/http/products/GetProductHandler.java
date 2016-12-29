@@ -28,7 +28,7 @@ final class GetProductHandler implements Handler<RoutingContext> {
   public void handle(final RoutingContext routingContext) {
     final String id = routingContext.request().getParam("id");
 
-    dao.get(id).subscribe(product -> {
+    dao.getById(id).subscribe(product -> {
       if (product.isPresent()) {
         routingContext.response()
           .putHeader("Content-Type", "application/json; charset=utf-8")
