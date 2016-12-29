@@ -2,6 +2,9 @@ package net.brainified.http.users;
 
 import javax.inject.Inject;
 
+import com.google.common.base.Charsets;
+import com.google.common.hash.Hashing;
+
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.DecodeException;
@@ -31,13 +34,18 @@ final class AddUserHandler implements Handler<RoutingContext> {
   public void handle(final RoutingContext routingContext) {
     final String body = routingContext.getBodyAsString();
 
-    User user = null;
+    AddUserRequest addUserRequest = null;
     try {
-      user = Json.decodeValue(body, User.class);
+      addUserRequest = Json.decodeValue(body, AddUserRequest.class);
     } catch (final DecodeException e) {
       routingContext.response().setStatusCode(400).end(INVALID_JSON_IN_BODY);
       return;
     }
+
+    final User user = new User();
+    user.setUsername(addUserRequest.getUsername());
+    user.setPasswordHash(Hashing.sha1().hashString(addUserRequest.getPassword(), Charsets.UTF_8).toString());
+    user.setRole(addUserRequest.getRole());
 
     dao.add(user).subscribe(savedUser -> {
       routingContext
