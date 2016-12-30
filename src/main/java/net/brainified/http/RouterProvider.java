@@ -12,9 +12,9 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.rxjava.core.Vertx;
 import io.vertx.rxjava.ext.web.Router;
 import io.vertx.rxjava.ext.web.RoutingContext;
+import io.vertx.rxjava.ext.web.handler.AuthHandler;
 import io.vertx.rxjava.ext.web.handler.BodyHandler;
 import io.vertx.rxjava.ext.web.handler.CorsHandler;
-import io.vertx.rxjava.ext.web.handler.JWTAuthHandler;
 
 final class RouterProvider implements Provider<Router> {
 
@@ -22,16 +22,16 @@ final class RouterProvider implements Provider<Router> {
 
   private Set<Handler<RoutingContext>> handlers;
 
-  private final JWTAuthHandler authenticationHandler;
+  private final AuthHandler authHandler;
 
   private final FailureHandler failureHandler;
 
   @Inject
-  public RouterProvider(final Vertx vertx, final Set<Handler<RoutingContext>> handlers, final JWTAuthHandler authenticationHandler,
+  public RouterProvider(final Vertx vertx, final Set<Handler<RoutingContext>> handlers, final AuthHandler authHandler,
       final FailureHandler failureHandler) {
     this.vertx = vertx;
     this.handlers = handlers;
-    this.authenticationHandler = authenticationHandler;
+    this.authHandler = authHandler;
     this.failureHandler = failureHandler;
   }
 
@@ -50,7 +50,9 @@ final class RouterProvider implements Provider<Router> {
     router.route().handler(corsHandler);
     router.route("/*").handler(BodyHandler.create());
 
-    router.route("/api/*").handler(authenticationHandler);
+    if (!"test".equals(System.getProperty("environment"))) {
+      router.route("/api/*").handler(authHandler);
+    }
 
     handlers.forEach(handler -> registerHandler(router, handler));
 
