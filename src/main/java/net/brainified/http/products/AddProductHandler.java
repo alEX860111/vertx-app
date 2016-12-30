@@ -4,7 +4,6 @@ import javax.inject.Inject;
 
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
-import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.Json;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -12,32 +11,26 @@ import io.vertx.rxjava.ext.web.RoutingContext;
 import net.brainified.db.Dao;
 import net.brainified.db.Product;
 import net.brainified.http.HandlerConfiguration;
+import net.brainified.http.RoutingContextHelper;
 
 @HandlerConfiguration(path = "/api/products", method = HttpMethod.POST)
 final class AddProductHandler implements Handler<RoutingContext> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AddProductHandler.class);
 
-  private static final String INVALID_JSON_IN_BODY = "Invalid JSON in body";
+  private RoutingContextHelper routingContextHelper;
 
   private final Dao<Product> dao;
 
   @Inject
-  public AddProductHandler(final Dao<Product> dao) {
+  public AddProductHandler(final RoutingContextHelper routingContextHelper, final Dao<Product> dao) {
+    this.routingContextHelper = routingContextHelper;
     this.dao = dao;
   }
 
   @Override
   public void handle(final RoutingContext routingContext) {
-    final String body = routingContext.getBodyAsString();
-
-    Product product = null;
-    try {
-      product = Json.decodeValue(body, Product.class);
-    } catch (final DecodeException e) {
-      routingContext.response().setStatusCode(400).end(INVALID_JSON_IN_BODY);
-      return;
-    }
+    final Product product = routingContextHelper.getBody(routingContext, Product.class);
 
     dao.add(product).subscribe(savedProduct -> {
       routingContext

@@ -47,6 +47,7 @@ public abstract class IntegrationTest {
         bind(Vertx.class).toInstance(vertx);
         bind(new TypeLiteral<Dao<Product>>() {}).toInstance(dao);
         bind(Router.class).toProvider(RouterTestProvider.class);
+        bind(RoutingContextHelper.class).to(RoutingContextHelperImpl.class);
       }
     }, new ProductsHandlerModule());
     RxHelper.deployVerticle(vertx, injector.getInstance(HttpServerVerticle.class)).subscribe((s) -> async.complete());
@@ -59,14 +60,17 @@ public abstract class IntegrationTest {
 
   private static final class RouterTestProvider implements Provider<Router> {
 
-    private Vertx vertx;
+    private final Vertx vertx;
 
-    private Set<Handler<RoutingContext>> handlers;
+    private final Set<Handler<RoutingContext>> handlers;
+
+    private final FailureHandler failureHandler;
 
     @Inject
-    public RouterTestProvider(final Vertx vertx, final Set<Handler<RoutingContext>> handlers) {
+    public RouterTestProvider(final Vertx vertx, final Set<Handler<RoutingContext>> handlers, final FailureHandler failureHandler) {
       this.vertx = vertx;
       this.handlers = handlers;
+      this.failureHandler = failureHandler;
     }
 
     @Override
@@ -74,6 +78,7 @@ public abstract class IntegrationTest {
       final Router router = Router.router(vertx);
       router.route("/*").handler(BodyHandler.create());
       handlers.forEach(handler -> registerHandler(router, handler));
+      router.route().failureHandler(failureHandler);
       return router;
     }
 

@@ -16,6 +16,7 @@ public final class HttpModule extends AbstractModule {
     install(new LoginModule());
 
     bind(Router.class).toProvider(RouterProvider.class);
+    bind(RoutingContextHelper.class).to(RoutingContextHelperImpl.class);
   }
 
 }

@@ -24,11 +24,15 @@ final class RouterProvider implements Provider<Router> {
 
   private final JWTAuthHandler authenticationHandler;
 
+  private final FailureHandler failureHandler;
+
   @Inject
-  public RouterProvider(final Vertx vertx, final Set<Handler<RoutingContext>> handlers, final JWTAuthHandler authenticationHandler) {
+  public RouterProvider(final Vertx vertx, final Set<Handler<RoutingContext>> handlers, final JWTAuthHandler authenticationHandler,
+      final FailureHandler failureHandler) {
     this.vertx = vertx;
     this.handlers = handlers;
     this.authenticationHandler = authenticationHandler;
+    this.failureHandler = failureHandler;
   }
 
   @Override
@@ -49,13 +53,14 @@ final class RouterProvider implements Provider<Router> {
     router.route("/api/*").handler(authenticationHandler);
 
     handlers.forEach(handler -> registerHandler(router, handler));
+
+    router.route().failureHandler(failureHandler);
     return router;
   }
 
   private void registerHandler(final Router router, final Handler<RoutingContext> handler) {
     final HandlerConfiguration config = handler.getClass().getAnnotation(HandlerConfiguration.class);
     Preconditions.checkNotNull(config, "Missing HandlerConfiguration");
-
     router.route(config.method(), config.path()).handler(handler);
   }
 
