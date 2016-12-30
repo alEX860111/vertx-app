@@ -14,12 +14,4 @@ public enum SortOrder {
     return value;
   }
 
-  public static SortOrder fromString(final String string) {
-    try {
-      return SortOrder.valueOf(string.toUpperCase());
-    } catch (IllegalArgumentException e) {
-      return null;
-    }
-  }
-
 }

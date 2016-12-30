@@ -5,7 +5,6 @@ import java.util.Objects;
 import javax.inject.Inject;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Strings;
 import com.google.common.primitives.Ints;
 
 import io.vertx.core.Handler;
@@ -18,6 +17,7 @@ import net.brainified.db.Dao;
 import net.brainified.db.Product;
 import net.brainified.db.SortOrder;
 import net.brainified.http.HandlerConfiguration;
+import net.brainified.http.RoutingContextHelper;
 
 @HandlerConfiguration(path = "/api/products", method = HttpMethod.GET)
 
@@ -31,10 +31,13 @@ final class GetProductListHandler implements Handler<RoutingContext> {
   private static final String PER_PAGE_DEFAULT = "10";
   private static final int PER_PAGE_MIN = 1;
 
+  private RoutingContextHelper routingContextHelper;
+
   private final Dao<Product> dao;
 
   @Inject
-  public GetProductListHandler(final Dao<Product> dao) {
+  public GetProductListHandler(final RoutingContextHelper routingContextHelper, final Dao<Product> dao) {
+    this.routingContextHelper = routingContextHelper;
     this.dao = dao;
   }
 
@@ -52,21 +55,14 @@ final class GetProductListHandler implements Handler<RoutingContext> {
       return;
     }
 
-    final String sortOrderParam = MoreObjects.firstNonNull(routingContext.request().getParam("sortorder"), "DESC");
-    final SortOrder sortOrder = SortOrder.fromString(sortOrderParam);
-    if (Objects.isNull(sortOrder)) {
-      routingContext.response().setStatusCode(400).end("sortorder must be 'asc' or 'desc'");
-      return;
-    }
+    final SortOrder sortOrder = routingContextHelper.getParamAsEnum(routingContext, "sortorder", SortOrder::valueOf)
+        .orElse(SortOrder.DESC);
 
-    final String sortKey = MoreObjects.firstNonNull(routingContext.request().getParam("sortkey"), "createdAt");
-    if (Strings.isNullOrEmpty(sortKey)) {
-      routingContext.response().setStatusCode(400).end("sortkey may not be empty");
-      return;
-    }
+    final Product.SortKey sortKey = routingContextHelper.getParamAsEnum(routingContext, "sortkey", Product.SortKey::valueOf)
+        .orElse(Product.SortKey.CREATEDAT);
 
     dao.getCount().subscribe(count -> {
-      dao.getList(page, perpage, sortKey, sortOrder).subscribe(products -> {
+      dao.getList(page, perpage, sortKey.getSortKey(), sortOrder).subscribe(products -> {
         final ProductContainer container = new ProductContainer();
         container.setProducts(products);
         container.setNumberOfProducts(count);

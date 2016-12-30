@@ -2,6 +2,22 @@ package net.brainified.db;
 
 public final class Product extends MongoObject {
 
+  public enum SortKey {
+
+    NAME("name"), PRICE("price"), CREATEDAT("createdAt");
+
+    private final String sortKey;
+
+    SortKey(final String sortKey) {
+      this.sortKey = sortKey;
+    }
+
+    public String getSortKey() {
+      return sortKey;
+    }
+
+  }
+
   private String name;
 
   private Double price;
