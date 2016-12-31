@@ -27,7 +27,7 @@ final class GetProductListHandler implements Handler<RoutingContext> {
   private static final Integer PER_PAGE_MIN = 1;
   private static final Integer PER_PAGE_DEFAULT = 10;
 
-  private RoutingContextHelper routingContextHelper;
+  private final RoutingContextHelper routingContextHelper;
 
   private final Dao<Product> dao;
 
@@ -54,11 +54,15 @@ final class GetProductListHandler implements Handler<RoutingContext> {
           .end(Json.encodePrettily(container));
       }, error -> {
         LOGGER.error(error.getMessage());
-        routingContext.response().setStatusCode(500).end();
+        routingContext.response()
+          .setStatusCode(500)
+          .end();
       });
     }, error -> {
-      LOGGER.error(error.getMessage());
-      routingContext.response().setStatusCode(500).end();
+        LOGGER.error(error.getMessage());
+        routingContext.response()
+          .setStatusCode(500)
+          .end();
     });
 
   }
