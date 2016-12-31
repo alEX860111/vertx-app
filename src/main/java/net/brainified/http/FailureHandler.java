@@ -10,7 +10,10 @@ final class FailureHandler implements Handler<RoutingContext> {
     final Throwable failure = routingContext.failure();
     if (failure instanceof HandlerException) {
       final HandlerException handlerException = (HandlerException) failure;
-      routingContext.response().setStatusCode(handlerException.getStatusCode()).end(handlerException.getMessage());
+      routingContext.response()
+        .putHeader("Content-Type", "text/plain; charset=utf-8")
+        .setStatusCode(handlerException.getStatusCode())
+        .end(handlerException.getMessage());
     } else {
       routingContext.next();
     }

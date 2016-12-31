@@ -8,6 +8,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.google.common.collect.Range;
+
 import static org.mockito.Mockito.*;
 
 import java.util.Optional;
@@ -43,6 +45,7 @@ public class RoutingContextHelperImplTest {
 
   @Before
   public void setUp() {
+    when(routingContext.request()).thenReturn(request);
     routingContextHelper = new RoutingContextHelperImpl();
   }
 
@@ -60,25 +63,47 @@ public class RoutingContextHelperImplTest {
   }
 
   @Test
-  public void getParamAsEnum() {
+  public void testGetParamAsEnum() {
     when(request.getParam("sortorder")).thenReturn("asc");
-    when(routingContext.request()).thenReturn(request);
     Optional<SortOrder> sortOrderOptional = routingContextHelper.getParamAsEnum(routingContext, "sortorder", SortOrder.class);
     assertEquals(SortOrder.ASC, sortOrderOptional.get());
   }
 
   @Test
-  public void getParamAsEnum_Empty() {
-    when(routingContext.request()).thenReturn(request);
+  public void testGetParamAsEnum_Empty() {
     Optional<SortOrder> sortOrderOptional = routingContextHelper.getParamAsEnum(routingContext, "sortorder", SortOrder.class);
     assertFalse(sortOrderOptional.isPresent());
   }
 
   @Test(expected = HandlerException.class)
-  public void getParamAsEnum_Exception() {
+  public void testGetParamAsEnum_Exception() {
     when(request.getParam("sortorder")).thenReturn("some value");
-    when(routingContext.request()).thenReturn(request);
     routingContextHelper.getParamAsEnum(routingContext, "sortorder", SortOrder.class);
+  }
+
+  @Test
+  public void testGetParamAsInteger() {
+    when(request.getParam("page")).thenReturn("10");
+    final Optional<Integer> pageOptional = routingContextHelper.getParamAsInteger(routingContext, "page", Range.closed(1, 20));
+    assertEquals(Integer.valueOf(10), pageOptional.get());
+  }
+
+  @Test
+  public void testGetParamAsInteger_Empty() {
+    final Optional<Integer> pageOptional = routingContextHelper.getParamAsInteger(routingContext, "page", Range.closed(1, 20));
+    assertFalse(pageOptional.isPresent());
+  }
+
+  @Test(expected = HandlerException.class)
+  public void testGetParamAsInteger_NotAnInteger() {
+    when(request.getParam("page")).thenReturn("some value");
+    routingContextHelper.getParamAsInteger(routingContext, "page", Range.closed(1, 20));
+  }
+
+  @Test(expected = HandlerException.class)
+  public void testGetParamAsInteger_NotInRange() {
+    when(request.getParam("page")).thenReturn("30");
+    routingContextHelper.getParamAsInteger(routingContext, "page", Range.closed(1, 20));
   }
 
 }
