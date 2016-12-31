@@ -17,9 +17,9 @@ final class UpdateProductHandler implements Handler<RoutingContext> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(UpdateProductHandler.class);
 
-  private final Dao<Product> dao;
-
   private final RoutingContextHelper routingContextHelper;
+
+  private final Dao<Product> dao;
 
   @Inject
   public UpdateProductHandler(final RoutingContextHelper routingContextHelper, final Dao<Product> dao) {
@@ -33,12 +33,9 @@ final class UpdateProductHandler implements Handler<RoutingContext> {
 
     product.set_id(routingContext.request().getParam("id"));
 
-    dao.update(product).subscribe(numModified -> {
-      if (numModified == 0) {
-        routingContext.response().setStatusCode(404).end();
-      } else {
-        routingContext.response().setStatusCode(204).end();
-      }
+    dao.update(product).subscribe(updated -> {
+      final int statusCode = updated ? 204 : 404;
+      routingContext.response().setStatusCode(statusCode).end();
     }, error -> {
       LOGGER.error(error.getMessage(), error);
       routingContext.response().setStatusCode(500).end();

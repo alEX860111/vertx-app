@@ -25,7 +25,7 @@ public class UpdateProductHandlerIntegrationTest extends IntegrationTest {
     data.put("name", "myProduct");
     data.put("price", 100);
 
-    when(dao.update(any(Product.class))).thenReturn(Observable.just(1L));
+    when(dao.update(any(Product.class))).thenReturn(Observable.just(true));
 
     final Async async = context.async();
 
@@ -61,7 +61,7 @@ public class UpdateProductHandlerIntegrationTest extends IntegrationTest {
     data.put("name", "myProduct");
     data.put("price", 100);
 
-    when(dao.update(any(Product.class))).thenReturn(Observable.just(0L));
+    when(dao.update(any(Product.class))).thenReturn(Observable.just(false));
 
     final Async async = context.async();
 

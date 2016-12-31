@@ -83,7 +83,7 @@ class MongoDao<T extends MongoObject> implements Dao<T> {
   }
 
   @Override
-  public Observable<Long> update(final T object) {
+  public Observable<Boolean> update(final T object) {
     final JsonObject query = new JsonObject().put("_id", object.get_id());
 
     final JsonObject document = new JsonObject(Json.encodePrettily(object));
@@ -93,7 +93,13 @@ class MongoDao<T extends MongoObject> implements Dao<T> {
     final JsonObject update = new JsonObject().put("$set", document);
 
     return client.updateCollectionObservable(collectionName, query, update).map(result -> {
-      return result.getDocModified();
+      if (result.getDocModified() == 1) {
+        return true;
+      }
+      if (result.getDocModified() == 0) {
+        return false;
+      }
+      throw new IllegalStateException(String.format("Modified %s documents for id '%s'. The id should be unique.", result.getDocModified(), object.get_id()));
     });
   }
 

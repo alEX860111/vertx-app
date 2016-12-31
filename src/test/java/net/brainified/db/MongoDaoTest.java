@@ -140,7 +140,7 @@ public class MongoDaoTest {
     final MongoObject object = new MongoObject();
     object.set_id(ID);
     object.setCreatedAt(CREATED_AT_DATE);
-    dao.update(object).subscribe(numModified -> assertEquals(Long.valueOf(1L), numModified));
+    dao.update(object).subscribe(updated -> assertTrue(updated));
 
     verify(client).updateCollectionObservable(COLLECTION_NAME, query, update);
   }
