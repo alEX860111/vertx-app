@@ -13,12 +13,12 @@ public final class LoginModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    final Multibinder<Handler<RoutingContext>> handlers = Multibinder.newSetBinder(binder(), new TypeLiteral<Handler<RoutingContext>>() {
-    });
+    final Multibinder<Handler<RoutingContext>> handlers = Multibinder.newSetBinder(binder(), new TypeLiteral<Handler<RoutingContext>>() {});
     handlers.addBinding().to(LoginHandler.class);
 
     bind(JWTAuth.class).toProvider(JWTAuthProvider.class);
     bind(JWTAuthHandler.class).toProvider(JWTAuthHandlerProvider.class);
+    bind(LoginService.class).to(LoginServiceImpl.class);
   }
 
 }
