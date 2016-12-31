@@ -29,7 +29,7 @@ public class UpdateProductHandlerIntegrationTest extends IntegrationTest {
 
     final Async async = context.async();
 
-    vertx.createHttpClient().put(8080, "localhost", "/api/products/" + id, response -> {
+    vertx.createHttpClient().put(HTTP_PORT, "localhost", "/api/products/" + id, response -> {
       context.assertEquals(204, response.statusCode());
       async.complete();
     }).end(data.encode());
@@ -47,7 +47,7 @@ public class UpdateProductHandlerIntegrationTest extends IntegrationTest {
 
     final Async async = context.async();
 
-    vertx.createHttpClient().put(8080, "localhost", "/api/products/" + id, response -> {
+    vertx.createHttpClient().put(HTTP_PORT, "localhost", "/api/products/" + id, response -> {
       context.assertEquals(500, response.statusCode());
       async.complete();
     }).end(data.encode());
@@ -65,7 +65,7 @@ public class UpdateProductHandlerIntegrationTest extends IntegrationTest {
 
     final Async async = context.async();
 
-    vertx.createHttpClient().put(8080, "localhost", "/api/products/" + id, response -> {
+    vertx.createHttpClient().put(HTTP_PORT, "localhost", "/api/products/" + id, response -> {
       context.assertEquals(404, response.statusCode());
       async.complete();
     }).end(data.encode());
@@ -75,7 +75,7 @@ public class UpdateProductHandlerIntegrationTest extends IntegrationTest {
   public void testUpdateProduct_sendInvalidBody(TestContext context) {
     final Async async = context.async();
 
-    vertx.createHttpClient().put(8080, "localhost", "/api/products/1", response -> {
+    vertx.createHttpClient().put(HTTP_PORT, "localhost", "/api/products/1", response -> {
       context.assertEquals(400, response.statusCode());
       response.handler(body -> {
         context.assertEquals("Invalid JSON in body.", body.toString());

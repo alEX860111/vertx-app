@@ -11,6 +11,8 @@ import com.google.inject.Injector;
 import com.google.inject.TypeLiteral;
 import com.google.inject.util.Modules;
 
+import io.vertx.core.DeploymentOptions;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.rxjava.core.RxHelper;
@@ -20,6 +22,8 @@ import net.brainified.db.Product;
 import net.brainified.http.HttpServerVerticle;
 
 public abstract class IntegrationTest {
+
+  public static final int HTTP_PORT = 8081;
 
   protected Vertx vertx;
 
@@ -42,7 +46,12 @@ public abstract class IntegrationTest {
 
     }));
     vertx = injector.getInstance(Vertx.class);
-    RxHelper.deployVerticle(vertx, injector.getInstance(HttpServerVerticle.class)).subscribe((s) -> async.complete());
+
+    final DeploymentOptions options = new DeploymentOptions();
+    final JsonObject config = new JsonObject().put("http.port", HTTP_PORT);
+    options.setConfig(config);
+
+    RxHelper.deployVerticle(vertx, injector.getInstance(HttpServerVerticle.class), options).subscribe((s) -> async.complete());
   }
 
   @After

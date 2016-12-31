@@ -27,7 +27,7 @@ public class GetProductListHandlerIntegrationTest extends IntegrationTest {
 
     final Async async = context.async();
 
-    vertx.createHttpClient().getNow(8080, "localhost", "/api/products", response -> {
+    vertx.createHttpClient().getNow(HTTP_PORT, "localhost", "/api/products", response -> {
       context.assertEquals(200, response.statusCode());
       response.handler(body -> {
         final JsonObject json = body.toJsonObject();
@@ -44,7 +44,7 @@ public class GetProductListHandlerIntegrationTest extends IntegrationTest {
 
     final Async async = context.async();
 
-    vertx.createHttpClient().getNow(8080, "localhost", "/api/products", response -> {
+    vertx.createHttpClient().getNow(HTTP_PORT, "localhost", "/api/products", response -> {
       context.assertEquals(500, response.statusCode());
       verify(dao, never()).getList(anyInt(), anyInt(), anyString(), any(SortOrder.class));
       async.complete();
@@ -59,7 +59,7 @@ public class GetProductListHandlerIntegrationTest extends IntegrationTest {
 
     final Async async = context.async();
 
-    vertx.createHttpClient().getNow(8080, "localhost", "/api/products", response -> {
+    vertx.createHttpClient().getNow(HTTP_PORT, "localhost", "/api/products", response -> {
       context.assertEquals(500, response.statusCode());
       async.complete();
     });
