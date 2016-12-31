@@ -47,8 +47,7 @@ final class LoginHandler implements Handler<RoutingContext> {
       final String passwordHash = Hashing.sha1().hashString(loginRequest.getPassword(), Charsets.UTF_8).toString();
 
       if (user.getPasswordHash().equals(passwordHash)) {
-        final String token = createToken(user);
-        final JsonObject response = new JsonObject().put("token", token);
+        final JsonObject response = createResponse(user);
         routingContext.response()
           .putHeader("Content-Type", "application/json; charset=utf-8")
           .end(Json.encodePrettily(response));
@@ -60,11 +59,12 @@ final class LoginHandler implements Handler<RoutingContext> {
 
   }
 
-  private String createToken(final User user) {
+  private JsonObject createResponse(final User user) {
     final JsonObject claims = new JsonObject()
         .put("username", user.getUsername())
         .put("role", user.getRole());
-    return jwtAuth.generateToken(claims, new JWTOptions());
+    final String token = jwtAuth.generateToken(claims, new JWTOptions());
+    return new JsonObject().put("token", token);
   }
 
 }
