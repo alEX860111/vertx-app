@@ -63,14 +63,14 @@ public class RoutingContextHelperImplTest {
   public void getParamAsEnum() {
     when(request.getParam("sortorder")).thenReturn("asc");
     when(routingContext.request()).thenReturn(request);
-    Optional<SortOrder> sortOrderOptional = routingContextHelper.getParamAsEnum(routingContext, "sortorder", SortOrder::valueOf);
+    Optional<SortOrder> sortOrderOptional = routingContextHelper.getParamAsEnum(routingContext, "sortorder", SortOrder.class);
     assertEquals(SortOrder.ASC, sortOrderOptional.get());
   }
 
   @Test
   public void getParamAsEnum_Empty() {
     when(routingContext.request()).thenReturn(request);
-    Optional<SortOrder> sortOrderOptional = routingContextHelper.getParamAsEnum(routingContext, "sortorder", SortOrder::valueOf);
+    Optional<SortOrder> sortOrderOptional = routingContextHelper.getParamAsEnum(routingContext, "sortorder", SortOrder.class);
     assertFalse(sortOrderOptional.isPresent());
   }
 
@@ -78,7 +78,7 @@ public class RoutingContextHelperImplTest {
   public void getParamAsEnum_Exception() {
     when(request.getParam("sortorder")).thenReturn("some value");
     when(routingContext.request()).thenReturn(request);
-    routingContextHelper.getParamAsEnum(routingContext, "sortorder", SortOrder::valueOf);
+    routingContextHelper.getParamAsEnum(routingContext, "sortorder", SortOrder.class);
   }
 
 }

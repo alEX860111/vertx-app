@@ -2,7 +2,6 @@ package net.brainified.http;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.Json;
@@ -23,13 +22,13 @@ final class RoutingContextHelperImpl implements RoutingContextHelper {
   }
 
   @Override
-  public <T extends Enum<T>> Optional<T> getParamAsEnum(final RoutingContext routingContext, final String paramName, final Function<String, T> mappingFunction) {
+  public <T extends Enum<T>> Optional<T> getParamAsEnum(final RoutingContext routingContext, final String paramName, final Class<T> clazz) {
     final String parameter = routingContext.request().getParam(paramName);
     if (Objects.isNull(parameter)) {
       return Optional.empty();
     }
     try {
-      return Optional.of(mappingFunction.apply(parameter.toUpperCase()));
+      return Optional.of(Enum.valueOf(clazz, parameter.toUpperCase()));
     } catch (IllegalArgumentException e) {
       throw new HandlerException(String.format("Invalid value '%s' for parameter '%s'", parameter, paramName), e, 400);
     }

@@ -55,10 +55,10 @@ final class GetProductListHandler implements Handler<RoutingContext> {
       return;
     }
 
-    final SortOrder sortOrder = routingContextHelper.getParamAsEnum(routingContext, "sortorder", SortOrder::valueOf)
+    final SortOrder sortOrder = routingContextHelper.getParamAsEnum(routingContext, "sortorder", SortOrder.class)
         .orElse(SortOrder.DESC);
 
-    final Product.SortKey sortKey = routingContextHelper.getParamAsEnum(routingContext, "sortkey", Product.SortKey::valueOf)
+    final Product.SortKey sortKey = routingContextHelper.getParamAsEnum(routingContext, "sortkey", Product.SortKey.class)
         .orElse(Product.SortKey.CREATEDAT);
 
     dao.getCount().subscribe(count -> {
