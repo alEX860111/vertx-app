@@ -17,7 +17,7 @@ import net.brainified.db.User;
 import net.brainified.http.HandlerConfiguration;
 import net.brainified.http.RoutingContextHelper;
 
-@HandlerConfiguration(path = "/login", method = HttpMethod.POST)
+@HandlerConfiguration(path = "/login", method = HttpMethod.POST, requiresAuthentication = false)
 final class LoginHandler implements Handler<RoutingContext> {
 
   private RoutingContextHelper routingContextHelper;

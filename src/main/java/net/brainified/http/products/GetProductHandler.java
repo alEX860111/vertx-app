@@ -12,7 +12,7 @@ import net.brainified.db.Dao;
 import net.brainified.db.Product;
 import net.brainified.http.HandlerConfiguration;
 
-@HandlerConfiguration(path = "/api/products/:id", method = HttpMethod.GET)
+@HandlerConfiguration(path = "/products/:id", method = HttpMethod.GET, requiresAuthentication = true)
 final class GetProductHandler implements Handler<RoutingContext> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetProductHandler.class);

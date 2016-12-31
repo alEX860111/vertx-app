@@ -13,7 +13,7 @@ import net.brainified.db.Product;
 import net.brainified.http.HandlerConfiguration;
 import net.brainified.http.RoutingContextHelper;
 
-@HandlerConfiguration(path = "/api/products", method = HttpMethod.POST)
+@HandlerConfiguration(path = "/products", method = HttpMethod.POST, requiresAuthentication = true)
 final class AddProductHandler implements Handler<RoutingContext> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AddProductHandler.class);

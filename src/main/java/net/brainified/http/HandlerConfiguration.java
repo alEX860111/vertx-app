@@ -12,4 +12,5 @@ import io.vertx.core.http.HttpMethod;
 public @interface HandlerConfiguration {
   String path();
   HttpMethod method();
+  boolean requiresAuthentication();
 }

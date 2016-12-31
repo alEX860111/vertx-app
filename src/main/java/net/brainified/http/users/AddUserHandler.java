@@ -16,7 +16,7 @@ import net.brainified.db.User;
 import net.brainified.http.HandlerConfiguration;
 import net.brainified.http.RoutingContextHelper;
 
-@HandlerConfiguration(path = "/api/users", method = HttpMethod.POST)
+@HandlerConfiguration(path = "/users", method = HttpMethod.POST, requiresAuthentication = true)
 final class AddUserHandler implements Handler<RoutingContext> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AddUserHandler.class);

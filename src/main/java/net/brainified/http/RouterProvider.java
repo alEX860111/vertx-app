@@ -49,6 +49,7 @@ final class RouterProvider implements Provider<Router> {
 
     router.route().handler(corsHandler);
     router.route().handler(BodyHandler.create());
+    router.route().failureHandler(failureHandler);
 
     if (!"test".equals(System.getProperty("environment"))) {
       router.route("/api/*").handler(authHandler);
@@ -56,14 +57,14 @@ final class RouterProvider implements Provider<Router> {
 
     handlers.forEach(handler -> registerHandler(router, handler));
 
-    router.route().failureHandler(failureHandler);
     return router;
   }
 
   private void registerHandler(final Router router, final Handler<RoutingContext> handler) {
     final HandlerConfiguration config = handler.getClass().getAnnotation(HandlerConfiguration.class);
     Preconditions.checkNotNull(config, "Missing HandlerConfiguration");
-    router.route(config.method(), config.path()).handler(handler);
+    final String path = config.requiresAuthentication() ? "/api" + config.path() : config.path();
+    router.route(config.method(), path).handler(handler);
   }
 
 }

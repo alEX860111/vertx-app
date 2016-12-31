@@ -16,8 +16,7 @@ import net.brainified.db.SortOrder;
 import net.brainified.http.HandlerConfiguration;
 import net.brainified.http.RoutingContextHelper;
 
-@HandlerConfiguration(path = "/api/products", method = HttpMethod.GET)
-
+@HandlerConfiguration(path = "/products", method = HttpMethod.GET, requiresAuthentication = true)
 final class GetProductListHandler implements Handler<RoutingContext> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetProductListHandler.class);

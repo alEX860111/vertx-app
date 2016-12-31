@@ -11,7 +11,7 @@ import net.brainified.db.Dao;
 import net.brainified.db.Product;
 import net.brainified.http.HandlerConfiguration;
 
-@HandlerConfiguration(path = "/api/products/:id", method = HttpMethod.DELETE)
+@HandlerConfiguration(path = "/products/:id", method = HttpMethod.DELETE, requiresAuthentication = true)
 final class DeleteProductHandler implements Handler<RoutingContext> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(DeleteProductHandler.class);
