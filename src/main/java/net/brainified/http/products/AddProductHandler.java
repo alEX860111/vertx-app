@@ -40,7 +40,7 @@ final class AddProductHandler implements Handler<RoutingContext> {
         .putHeader("Location", routingContext.request().absoluteURI() + "/" + savedProduct.get_id())
         .end(Json.encodePrettily(savedProduct));
     }, error -> {
-      LOGGER.error(error.getMessage());
+      LOGGER.error(error.getMessage(), error);
       routingContext.response().setStatusCode(500).end();
     });
 

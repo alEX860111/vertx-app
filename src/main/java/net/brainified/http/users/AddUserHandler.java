@@ -48,7 +48,7 @@ final class AddUserHandler implements Handler<RoutingContext> {
         .putHeader("Location", routingContext.request().absoluteURI() + "/" + savedUser.get_id())
         .end(Json.encodePrettily(savedUser));
     }, error -> {
-      LOGGER.error(error.getMessage());
+      LOGGER.error(error.getMessage(), error);
       routingContext.response().setStatusCode(500).end();
     });
 

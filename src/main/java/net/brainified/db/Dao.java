@@ -19,6 +19,6 @@ public interface Dao<T> {
 
   Observable<Long> update(T object);
 
-  Observable<Long> delete(String id);
+  Observable<Boolean> delete(String id);
 
 }

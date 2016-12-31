@@ -27,14 +27,11 @@ final class DeleteProductHandler implements Handler<RoutingContext> {
   public void handle(RoutingContext routingContext) {
     final String id = routingContext.request().getParam("id");
 
-    dao.delete(id).subscribe(numDeleted -> {
-      if (numDeleted == 0) {
-        routingContext.response().setStatusCode(404).end();
-      } else {
-        routingContext.response().setStatusCode(204).end();
-      }
+    dao.delete(id).subscribe(deleted -> {
+      final int statusCode = deleted ? 204 : 404;
+      routingContext.response().setStatusCode(statusCode).end();
     }, error -> {
-      LOGGER.error(error.getMessage());
+      LOGGER.error(error.getMessage(), error);
       routingContext.response().setStatusCode(500).end();
     });
   }

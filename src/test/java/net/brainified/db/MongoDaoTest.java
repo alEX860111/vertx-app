@@ -154,7 +154,7 @@ public class MongoDaoTest {
 
     when(client.removeDocumentObservable(COLLECTION_NAME, query)).thenReturn(Observable.just(result));
 
-    dao.delete(ID).subscribe(numDeleted -> assertEquals(Long.valueOf(1L), numDeleted));
+    dao.delete(ID).subscribe(deleted -> assertTrue(deleted));
 
     verify(client).removeDocumentObservable(COLLECTION_NAME, query);
   }

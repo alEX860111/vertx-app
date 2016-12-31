@@ -98,10 +98,16 @@ class MongoDao<T extends MongoObject> implements Dao<T> {
   }
 
   @Override
-  public Observable<Long> delete(final String id) {
+  public Observable<Boolean> delete(final String id) {
     final JsonObject query = new JsonObject().put("_id", id);
     return client.removeDocumentObservable(collectionName, query).map(result -> {
-      return result.getRemovedCount();
+      if (result.getRemovedCount() == 1) {
+        return true;
+      }
+      if (result.getRemovedCount() == 0) {
+        return false;
+      }
+      throw new IllegalStateException(String.format("Removed %s documents for id '%s'. The id should be unique.", result.getRemovedCount(), id));
     });
   }
 

@@ -40,7 +40,7 @@ final class UpdateProductHandler implements Handler<RoutingContext> {
         routingContext.response().setStatusCode(204).end();
       }
     }, error -> {
-      LOGGER.error(error.getMessage());
+      LOGGER.error(error.getMessage(), error);
       routingContext.response().setStatusCode(500).end();
     });
   }

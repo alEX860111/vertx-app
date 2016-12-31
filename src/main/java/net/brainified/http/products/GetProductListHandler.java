@@ -53,16 +53,12 @@ final class GetProductListHandler implements Handler<RoutingContext> {
           .putHeader("Content-Type", "application/json; charset=utf-8")
           .end(Json.encodePrettily(container));
       }, error -> {
-        LOGGER.error(error.getMessage());
-        routingContext.response()
-          .setStatusCode(500)
-          .end();
+        LOGGER.error(error.getMessage(), error);
+        routingContext.response().setStatusCode(500).end();
       });
     }, error -> {
-        LOGGER.error(error.getMessage());
-        routingContext.response()
-          .setStatusCode(500)
-          .end();
+      LOGGER.error(error.getMessage(), error);
+        routingContext.response().setStatusCode(500).end();
     });
 
   }
