@@ -34,7 +34,7 @@ final class GetUserHandler implements Handler<RoutingContext> {
           .putHeader("Content-Type", "application/json; charset=utf-8")
           .end(Json.encodePrettily(user.get()));
       } else {
-        routingContext.response().setStatusCode(404).end("not found");
+        routingContext.response().setStatusCode(404).end();
       }
     }, error -> {
       LOGGER.error(error.getMessage());

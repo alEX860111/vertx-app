@@ -39,7 +39,7 @@ final class LoginHandler implements Handler<RoutingContext> {
 
     userDao.getByKey("username", loginRequest.getUsername()).subscribe(userOptional -> {
       if (!userOptional.isPresent()) {
-        routingContext.response().setStatusCode(403).end("login failed");
+        routingContext.response().setStatusCode(403).end();
         return;
       }
 
@@ -53,7 +53,7 @@ final class LoginHandler implements Handler<RoutingContext> {
           .putHeader("Content-Type", "application/json; charset=utf-8")
           .end(Json.encodePrettily(response));
       } else {
-        routingContext.response().setStatusCode(403).end("login failed");
+        routingContext.response().setStatusCode(403).end();
       }
 
     });
