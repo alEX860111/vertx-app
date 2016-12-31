@@ -18,7 +18,7 @@ final class AddProductHandler implements Handler<RoutingContext> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AddProductHandler.class);
 
-  private RoutingContextHelper routingContextHelper;
+  private final RoutingContextHelper routingContextHelper;
 
   private final Dao<Product> dao;
 

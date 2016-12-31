@@ -20,7 +20,7 @@ import net.brainified.http.RoutingContextHelper;
 @HandlerConfiguration(path = "/login", method = HttpMethod.POST, requiresAuthentication = false)
 final class LoginHandler implements Handler<RoutingContext> {
 
-  private RoutingContextHelper routingContextHelper;
+  private final RoutingContextHelper routingContextHelper;
 
   private final JWTAuth jwtAuth;
 
@@ -64,8 +64,7 @@ final class LoginHandler implements Handler<RoutingContext> {
     final JsonObject claims = new JsonObject()
         .put("username", user.getUsername())
         .put("role", user.getRole());
-    final String token = jwtAuth.generateToken(claims, new JWTOptions());
-    return token;
+    return jwtAuth.generateToken(claims, new JWTOptions());
   }
 
 }

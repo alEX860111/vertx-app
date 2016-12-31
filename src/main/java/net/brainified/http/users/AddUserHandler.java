@@ -21,7 +21,7 @@ final class AddUserHandler implements Handler<RoutingContext> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AddUserHandler.class);
 
-  private RoutingContextHelper routingContextHelper;
+  private final RoutingContextHelper routingContextHelper;
 
   private final Dao<User> dao;
 
