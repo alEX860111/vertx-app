@@ -48,7 +48,7 @@ final class RouterProvider implements Provider<Router> {
         .allowedMethod(HttpMethod.DELETE);
 
     router.route().handler(corsHandler);
-    router.route("/*").handler(BodyHandler.create());
+    router.route().handler(BodyHandler.create());
 
     if (!"test".equals(System.getProperty("environment"))) {
       router.route("/api/*").handler(authHandler);
