@@ -19,6 +19,7 @@ public final class LoginModule extends AbstractModule {
     bind(JWTAuth.class).toProvider(JWTAuthProvider.class);
     bind(JWTAuthHandler.class).toProvider(JWTAuthHandlerProvider.class);
     bind(LoginService.class).to(LoginServiceImpl.class);
+    bind(HashService.class).to(HashServiceImpl.class);
   }
 
 }

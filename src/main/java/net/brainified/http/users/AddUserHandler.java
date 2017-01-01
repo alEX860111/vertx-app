@@ -2,9 +2,6 @@ package net.brainified.http.users;
 
 import javax.inject.Inject;
 
-import com.google.common.base.Charsets;
-import com.google.common.hash.Hashing;
-
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.Json;
@@ -15,6 +12,7 @@ import net.brainified.db.Dao;
 import net.brainified.db.User;
 import net.brainified.http.HandlerConfiguration;
 import net.brainified.http.RoutingContextHelper;
+import net.brainified.http.login.HashService;
 
 @HandlerConfiguration(path = "/users", method = HttpMethod.POST, requiresAuthentication = true)
 final class AddUserHandler implements Handler<RoutingContext> {
@@ -23,11 +21,14 @@ final class AddUserHandler implements Handler<RoutingContext> {
 
   private final RoutingContextHelper routingContextHelper;
 
+  private final HashService hashService;
+
   private final Dao<User> dao;
 
   @Inject
-  public AddUserHandler(final RoutingContextHelper routingContextHelper, final Dao<User> dao) {
+  public AddUserHandler(final RoutingContextHelper routingContextHelper, final HashService hashService, final Dao<User> dao) {
     this.routingContextHelper = routingContextHelper;
+    this.hashService = hashService;
     this.dao = dao;
   }
 
@@ -37,7 +38,7 @@ final class AddUserHandler implements Handler<RoutingContext> {
 
     final User user = new User();
     user.setUsername(addUserRequest.getUsername());
-    user.setPasswordHash(Hashing.sha1().hashString(addUserRequest.getPassword(), Charsets.UTF_8).toString());
+    user.setPasswordHash(hashService.hash(addUserRequest.getPassword()));
     user.setRole(addUserRequest.getRole());
 
     dao.add(user).subscribe(savedUser -> {

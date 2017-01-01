@@ -4,9 +4,6 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
-import com.google.common.base.Charsets;
-import com.google.common.hash.Hashing;
-
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.jwt.JWTOptions;
 import io.vertx.rxjava.ext.auth.jwt.JWTAuth;
@@ -18,11 +15,14 @@ final class LoginServiceImpl implements LoginService {
 
   private final Dao<User> userDao;
 
+  private final HashService hashService;
+
   private final JWTAuth jwtAuth;
 
   @Inject
-  public LoginServiceImpl(final Dao<User> userDao, final JWTAuth jwtAuth) {
+  public LoginServiceImpl(final Dao<User> userDao, final HashService hashService, final JWTAuth jwtAuth) {
     this.userDao = userDao;
+    this.hashService = hashService;
     this.jwtAuth = jwtAuth;
   }
 
@@ -34,7 +34,7 @@ final class LoginServiceImpl implements LoginService {
       }
 
       final User user = userOptional.get();
-      final String passwordHash = Hashing.sha1().hashString(loginRequest.getPassword(), Charsets.UTF_8).toString();
+      final String passwordHash = hashService.hash(loginRequest.getPassword());
 
       if (user.getPasswordHash().equals(passwordHash)) {
         return Optional.of(createResponse(user));
