@@ -11,6 +11,8 @@ import io.vertx.rxjava.ext.web.Router;
 
 public final class HttpServerVerticle extends AbstractVerticle {
 
+  private static final int DEFAULT_HTTP_PORT = 8080;
+
   private static final Logger LOGGER = LoggerFactory.getLogger(HttpServerVerticle.class);
 
   private final Vertx vertx;
@@ -25,7 +27,7 @@ public final class HttpServerVerticle extends AbstractVerticle {
 
   @Override
   public void start(final Future<Void> fut) {
-    vertx.createHttpServer().requestHandler(router::accept).listen(config().getInteger("http.port", 8080), result -> {
+    vertx.createHttpServer().requestHandler(router::accept).listen(config().getInteger("http.port", DEFAULT_HTTP_PORT), result -> {
       if (result.succeeded()) {
         LOGGER.info(this.getClass() + " initialized and listening on port " + result.result().actualPort() + ".");
         fut.complete();

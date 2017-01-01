@@ -20,7 +20,7 @@ final class RouterProvider implements Provider<Router> {
 
   private final Vertx vertx;
 
-  private Set<Handler<RoutingContext>> handlers;
+  private final Set<Handler<RoutingContext>> handlers;
 
   private final AuthHandler authHandler;
 
