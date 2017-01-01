@@ -93,10 +93,10 @@ class MongoDao<T extends MongoObject> implements Dao<T> {
     final JsonObject update = new JsonObject().put("$set", document);
 
     return client.updateCollectionObservable(collectionName, query, update).map(result -> {
-      if (result.getDocModified() == 1) {
+      if (result.getDocMatched() == 1) {
         return true;
       }
-      if (result.getDocModified() == 0) {
+      if (result.getDocMatched() == 0) {
         return false;
       }
       throw new IllegalStateException(String.format("Modified %s documents for id '%s'. The id should be unique.", result.getDocModified(), object.get_id()));

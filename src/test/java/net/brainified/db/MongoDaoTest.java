@@ -133,7 +133,7 @@ public class MongoDaoTest {
     final JsonObject update = new JsonObject().put("$set", document);
 
     final MongoClientUpdateResult result = Mockito.mock(MongoClientUpdateResult.class);
-    when(result.getDocModified()).thenReturn(1L);
+    when(result.getDocMatched()).thenReturn(1L);
 
     when(client.updateCollectionObservable(COLLECTION_NAME, query, update)).thenReturn(Observable.just(result));
 
