@@ -14,6 +14,7 @@ public final class UsersHandlerModule extends AbstractModule {
     final Multibinder<Handler<RoutingContext>> handlers = Multibinder.newSetBinder(binder(), new TypeLiteral<Handler<RoutingContext>>() {});
     handlers.addBinding().to(AddUserHandler.class);
     handlers.addBinding().to(GetUserHandler.class);
+    handlers.addBinding().to(UpdateUserHandler.class);
   }
 
 }
