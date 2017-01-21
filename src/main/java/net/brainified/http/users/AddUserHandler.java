@@ -9,6 +9,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rxjava.ext.web.RoutingContext;
 import net.brainified.db.Dao;
+import net.brainified.db.DaoDuplicateKeyException;
 import net.brainified.db.User;
 import net.brainified.http.HandlerConfiguration;
 import net.brainified.http.RoutingContextHelper;
@@ -49,8 +50,12 @@ final class AddUserHandler implements Handler<RoutingContext> {
         .putHeader("Location", routingContext.request().absoluteURI() + "/" + savedUser.get_id())
         .end(Json.encodePrettily(savedUser));
     }, error -> {
-      LOGGER.error(error.getMessage(), error);
-      routingContext.response().setStatusCode(500).end();
+      if (error instanceof DaoDuplicateKeyException) {
+        routingContext.response().setStatusCode(400).end();
+      } else {
+        LOGGER.error(error.getMessage(), error);
+        routingContext.response().setStatusCode(500).end();
+      }
     });
 
   }

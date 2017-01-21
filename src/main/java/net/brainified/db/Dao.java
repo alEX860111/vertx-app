@@ -15,6 +15,9 @@ public interface Dao<T> {
 
   Observable<Optional<T>> getByKey(String key, String value);
 
+  /**
+   * @throws DaoDuplicateKeyException if unique key already exists
+   */
   Observable<T> add(T object);
 
   Observable<Boolean> update(T object);
