@@ -33,7 +33,7 @@ final class UpdateUserHandler implements Handler<RoutingContext> {
 
   @Override
   public void handle(RoutingContext routingContext) {
-    final UpdateUserRequest updateUserRequest = routingContextHelper.getBody(routingContext, UpdateUserRequest.class);
+    final ChangePasswordRequest changePasswordRequest = routingContextHelper.getBody(routingContext, ChangePasswordRequest.class);
 
     final String userId = routingContext.request().getParam("id");
 
@@ -43,12 +43,12 @@ final class UpdateUserHandler implements Handler<RoutingContext> {
         return;
       }
       final User user = userOptional.get();
-      final String passwordHash = service.hash(updateUserRequest.getOldPassword());
+      final String passwordHash = service.hash(changePasswordRequest.getOldPassword());
       if (!user.getPasswordHash().equals(passwordHash)) {
         routingContext.response().setStatusCode(403).end();
         return;
       }
-      user.setPasswordHash(service.hash(updateUserRequest.getNewPassword()));
+      user.setPasswordHash(service.hash(changePasswordRequest.getNewPassword()));
       dao.update(user).subscribe(updated -> {
         final int statusCode = updated ? 204 : 404;
         routingContext.response().setStatusCode(statusCode).end();

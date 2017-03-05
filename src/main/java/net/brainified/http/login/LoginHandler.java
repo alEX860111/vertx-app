@@ -42,7 +42,6 @@ final class LoginHandler implements Handler<RoutingContext> {
       LOGGER.error(error.getMessage(), error);
       routingContext.response().setStatusCode(500).end();
       });
-
   }
 
 }
