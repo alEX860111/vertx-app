@@ -30,11 +30,11 @@ final class LoginHandler implements Handler<RoutingContext> {
   public void handle(final RoutingContext routingContext) {
     final LoginRequest loginRequest = routingContextHelper.getBody(routingContext, LoginRequest.class);
 
-    loginService.login(loginRequest).subscribe(loginResponseOptional -> {
-      if (loginResponseOptional.isPresent()) {
+    loginService.login(loginRequest).subscribe(sessionOptional -> {
+      if (sessionOptional.isPresent()) {
         routingContext.response()
         .putHeader("Content-Type", "application/json; charset=utf-8")
-        .end(Json.encodePrettily(loginResponseOptional.get()));
+        .end(Json.encodePrettily(sessionOptional.get()));
       } else {
         routingContext.response().setStatusCode(403).end();
       }
