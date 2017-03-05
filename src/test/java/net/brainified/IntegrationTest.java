@@ -10,6 +10,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.TypeLiteral;
 import com.google.inject.util.Modules;
+import io.vertx.rxjava.ext.mongo.MongoClient;
 
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.json.JsonObject;
@@ -30,6 +31,9 @@ public abstract class IntegrationTest {
   @Mock
   protected Dao<Product> dao;
 
+  @Mock
+  private MongoClient mongoClient;
+
   @Before
   public void setUp(TestContext context) {
     System.setProperty("environment", "test");
@@ -42,6 +46,7 @@ public abstract class IntegrationTest {
       @Override
       protected void configure() {
         bind(new TypeLiteral<Dao<Product>>() { }).toInstance(dao);
+        bind(MongoClient.class).toInstance(mongoClient);
       }
 
     }));
