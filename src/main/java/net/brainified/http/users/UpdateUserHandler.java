@@ -49,7 +49,6 @@ final class UpdateUserHandler implements Handler<RoutingContext> {
         return;
       }
       user.setPasswordHash(service.hash(updateUserRequest.getNewPassword()));
-      user.setRole(updateUserRequest.getRole());
       dao.update(user).subscribe(updated -> {
         final int statusCode = updated ? 204 : 404;
         routingContext.response().setStatusCode(statusCode).end();
