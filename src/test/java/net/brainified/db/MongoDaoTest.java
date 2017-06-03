@@ -85,7 +85,7 @@ public class MongoDaoTest {
   }
 
   @Test
-  public void testGet() {
+  public void testGetById() {
     final JsonObject query = new JsonObject().put("_id", ID);
 
     final JsonObject fields = new JsonObject();
@@ -97,6 +97,21 @@ public class MongoDaoTest {
       final MongoObject object = objectOptional.get();
       assertEquals(ID, object.get_id());
       assertEquals(CREATED_AT_DATE, object.getCreatedAt());
+    });
+
+    verify(client).findOneObservable(COLLECTION_NAME, query, fields);
+  }
+
+  @Test
+  public void testGetById_Empty() {
+    final JsonObject query = new JsonObject().put("_id", ID);
+
+    final JsonObject fields = new JsonObject();
+
+    when(client.findOneObservable(COLLECTION_NAME, query, fields)).thenReturn(Observable.just(null));
+
+    dao.getById(ID).subscribe(objectOptional -> {
+      assertFalse(objectOptional.isPresent());
     });
 
     verify(client).findOneObservable(COLLECTION_NAME, query, fields);
