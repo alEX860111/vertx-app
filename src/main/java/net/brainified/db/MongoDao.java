@@ -36,7 +36,8 @@ class MongoDao<T extends MongoObject> implements Dao<T> {
   }
 
   @Override
-  public Observable<List<T>> getList(final Integer page, final Integer perpage, final String sortKey, final SortOrder sortOrder) {
+  public Observable<List<T>> getList(final Integer page, final Integer perpage, final String sortKey,
+      final SortOrder sortOrder) {
     final JsonObject query = new JsonObject();
     final JsonObject sort = new JsonObject().put(sortKey, sortOrder.getValue());
     final FindOptions options = new FindOptions().setLimit(perpage).setSkip((page - 1) * perpage).setSort(sort);
@@ -54,6 +55,12 @@ class MongoDao<T extends MongoObject> implements Dao<T> {
     return getOne(query);
   }
 
+  @Override
+  public Observable<Optional<T>> getByKey(final String key, final String value) {
+    final JsonObject query = new JsonObject().put(key, value);
+    return getOne(query);
+  }
+
   private Observable<Optional<T>> getOne(final JsonObject query) {
     final JsonObject fields = new JsonObject();
 
@@ -61,15 +68,9 @@ class MongoDao<T extends MongoObject> implements Dao<T> {
       if (Objects.isNull(document)) {
         return Optional.empty();
       }
-      final T object = Json.decodeValue(Json.encode(document), clazz);
+      final T object = Json.mapper.convertValue(document, clazz);
       return Optional.of(object);
     });
-  }
-
-  @Override
-  public Observable<Optional<T>> getByKey(final String key, final String value) {
-    final JsonObject query = new JsonObject().put(key, value);
-    return getOne(query);
   }
 
   @Override
@@ -109,7 +110,8 @@ class MongoDao<T extends MongoObject> implements Dao<T> {
       if (result.getDocMatched() == 0) {
         return false;
       }
-      throw new IllegalStateException(String.format("Modified %s documents for id '%s'. The id should be unique.", result.getDocModified(), object.get_id()));
+      throw new IllegalStateException(String.format("Modified %s documents for id '%s'. The id should be unique.",
+          result.getDocModified(), object.get_id()));
     });
   }
 
@@ -123,7 +125,8 @@ class MongoDao<T extends MongoObject> implements Dao<T> {
       if (result.getRemovedCount() == 0) {
         return false;
       }
-      throw new IllegalStateException(String.format("Removed %s documents for id '%s'. The id should be unique.", result.getRemovedCount(), id));
+      throw new IllegalStateException(
+          String.format("Removed %s documents for id '%s'. The id should be unique.", result.getRemovedCount(), id));
     });
   }
 
