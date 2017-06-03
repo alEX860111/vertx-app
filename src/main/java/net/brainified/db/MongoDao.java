@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import com.mongodb.ErrorCategory;
 import com.mongodb.MongoWriteException;
+import com.mongodb.WriteError;
 
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
@@ -90,8 +91,11 @@ class MongoDao<T extends MongoObject> implements Dao<T> {
     }).onErrorResumeNext(throwable -> {
       if (throwable instanceof MongoWriteException) {
         final MongoWriteException mongoWriteException = (MongoWriteException) throwable;
-        ErrorCategory.DUPLICATE_KEY.equals(mongoWriteException.getError().getCategory());
-        return Observable.error(new DaoDuplicateKeyException(mongoWriteException.getError().getMessage(), throwable));
+        final WriteError error = mongoWriteException.getError();
+
+        if (ErrorCategory.DUPLICATE_KEY.equals(error.getCategory())) {
+          return Observable.error(new DaoDuplicateKeyException(error.getMessage(), throwable));
+        }
       }
       return Observable.error(throwable);
     });
