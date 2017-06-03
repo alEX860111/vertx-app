@@ -10,7 +10,7 @@ repositories {
 }
 
 ext {
-    vertxVersion = '3.3.3'
+    vertxVersion = '3.4.1'
     guiceVersion = '4.1.0'
     mockitoVersion = '2.2.1'
     junitVersion = '4.12'
