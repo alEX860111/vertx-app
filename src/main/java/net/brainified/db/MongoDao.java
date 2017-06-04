@@ -94,7 +94,7 @@ class MongoDao<T extends MongoObject> implements Dao<T> {
         final WriteError error = mongoWriteException.getError();
 
         if (ErrorCategory.DUPLICATE_KEY.equals(error.getCategory())) {
-          return Observable.error(new DaoDuplicateKeyException(error.getMessage(), throwable));
+          return Observable.error(new IllegalArgumentException(error.getMessage(), throwable));
         }
       }
       return Observable.error(throwable);

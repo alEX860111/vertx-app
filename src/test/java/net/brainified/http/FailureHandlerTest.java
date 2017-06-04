@@ -5,9 +5,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
+import java.util.Optional;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -22,13 +24,12 @@ public class FailureHandlerTest {
 
   @Mock
   private HttpServerResponse response;
+  
+  @Mock
+  private StatusCodeRegistry registry;
 
+  @InjectMocks
   private FailureHandler failureHandler;
-
-  @Before
-  public void setUp() {
-    failureHandler = new FailureHandler();
-  }
 
   @Test
   public void testHandle_RuntimeException() {
@@ -40,7 +41,11 @@ public class FailureHandlerTest {
 
   @Test
   public void testHandle_HandlerException() {
-    when(routingContext.failure()).thenReturn(new HandlerException("msg", 400));
+    IllegalArgumentException exception = new IllegalArgumentException("msg");
+
+    when(registry.getStatusCode(exception)).thenReturn(Optional.of(400));
+
+    when(routingContext.failure()).thenReturn(exception);
     when(routingContext.response()).thenReturn(response);
     when(response.putHeader("Content-Type", "application/json; charset=utf-8")).thenReturn(response);
     when(response.setStatusCode(400)).thenReturn(response);

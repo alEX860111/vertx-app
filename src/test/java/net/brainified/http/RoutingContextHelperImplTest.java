@@ -56,7 +56,7 @@ public class RoutingContextHelperImplTest {
     assertEquals("joe", person.getName());
   }
 
-  @Test(expected = HandlerException.class)
+  @Test(expected = IllegalArgumentException.class)
   public void testGetBody_Exception() {
     when(routingContext.getBodyAsString()).thenReturn("{\"firstName\":\"joe\"}");
     routingContextHelper.getBody(routingContext, Person.class);
@@ -75,7 +75,7 @@ public class RoutingContextHelperImplTest {
     assertFalse(sortOrderOptional.isPresent());
   }
 
-  @Test(expected = HandlerException.class)
+  @Test(expected = IllegalArgumentException.class)
   public void testGetParamAsEnum_Exception() {
     when(request.getParam("sortorder")).thenReturn("some value");
     routingContextHelper.getParamAsEnum(routingContext, "sortorder", SortOrder.class);
@@ -94,13 +94,13 @@ public class RoutingContextHelperImplTest {
     assertFalse(pageOptional.isPresent());
   }
 
-  @Test(expected = HandlerException.class)
+  @Test(expected = IllegalArgumentException.class)
   public void testGetParamAsInteger_NotAnInteger() {
     when(request.getParam("page")).thenReturn("some value");
     routingContextHelper.getParamAsInteger(routingContext, "page", Range.closed(1, 20));
   }
 
-  @Test(expected = HandlerException.class)
+  @Test(expected = IllegalArgumentException.class)
   public void testGetParamAsInteger_NotInRange() {
     when(request.getParam("page")).thenReturn("30");
     routingContextHelper.getParamAsInteger(routingContext, "page", Range.closed(1, 20));

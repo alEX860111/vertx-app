@@ -20,6 +20,8 @@ public final class HttpModule extends AbstractModule {
     bind(Router.class).toProvider(RouterProvider.class);
     bind(RoutingContextHelper.class).to(RoutingContextHelperImpl.class);
     bind(AuthHandler.class).to(JWTAuthHandler.class);
+
+    bind(StatusCodeRegistry.class).toProvider(StatusCodeRegistryProvider.class);
   }
 
 }

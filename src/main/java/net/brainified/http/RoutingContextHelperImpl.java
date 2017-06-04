@@ -18,7 +18,7 @@ final class RoutingContextHelperImpl implements RoutingContextHelper {
     try {
       return Json.decodeValue(body, clazz);
     } catch (final DecodeException e) {
-      throw new HandlerException("Invalid JSON in body.", 400, e);
+      throw new IllegalArgumentException("Invalid JSON in body.", e);
     }
   }
 
@@ -31,7 +31,7 @@ final class RoutingContextHelperImpl implements RoutingContextHelper {
     try {
       return Optional.of(Enum.valueOf(clazz, parameter.toUpperCase()));
     } catch (IllegalArgumentException e) {
-      throw new HandlerException(String.format("Invalid value '%s' for parameter '%s'.", parameter, paramName), 400, e);
+      throw new IllegalArgumentException(String.format("Invalid value '%s' for parameter '%s'.", parameter, paramName), e);
     }
   }
 
@@ -43,10 +43,10 @@ final class RoutingContextHelperImpl implements RoutingContextHelper {
     }
     final Integer paramAsInteger = Ints.tryParse(parameter);
     if (Objects.isNull(paramAsInteger)) {
-      throw new HandlerException(String.format("Invalid value '%s' for parameter '%s'. Must be an integer.", parameter, paramName), 400);
+      throw new IllegalArgumentException(String.format("Invalid value '%s' for parameter '%s'. Must be an integer.", parameter, paramName));
     }
     if (!allowedValues.contains(paramAsInteger)) {
-      throw new HandlerException(String.format("Invalid value '%s' for parameter '%s'. Must be in range %s.", parameter, paramName, allowedValues), 400);
+      throw new IllegalArgumentException(String.format("Invalid value '%s' for parameter '%s'. Must be in range %s.", parameter, paramName, allowedValues));
     }
     return Optional.of(paramAsInteger);
   }

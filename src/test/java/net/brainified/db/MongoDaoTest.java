@@ -146,7 +146,7 @@ public class MongoDaoTest {
   }
 
   @Test
-  public void testAdd_DupliceKeyException() {
+  public void testAdd_IllegalArgumentException() {
     final MongoWriteException writeException = Mockito.mock(MongoWriteException.class);
 
     final WriteError writeError = Mockito.mock(WriteError.class);
@@ -161,7 +161,7 @@ public class MongoDaoTest {
     dao.add(object).subscribe(savedObject -> {
       fail();
     }, error -> {
-      assertTrue(error instanceof DaoDuplicateKeyException);
+      assertTrue(error instanceof IllegalArgumentException);
     });
 
   }
