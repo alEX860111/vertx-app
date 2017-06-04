@@ -1,6 +1,7 @@
 package net.brainified.http;
 
 import io.vertx.core.Handler;
+import io.vertx.core.json.Json;
 import io.vertx.rxjava.ext.web.RoutingContext;
 
 final class FailureHandler implements Handler<RoutingContext> {
@@ -11,9 +12,9 @@ final class FailureHandler implements Handler<RoutingContext> {
     if (failure instanceof HandlerException) {
       final HandlerException handlerException = (HandlerException) failure;
       routingContext.response()
-        .putHeader("Content-Type", "text/plain; charset=utf-8")
+        .putHeader("Content-Type", "application/json; charset=utf-8")
         .setStatusCode(handlerException.getStatusCode())
-        .end(handlerException.getMessage());
+        .end(Json.encodePrettily(FailureMessage.create(handlerException.getMessage())));
     } else {
       routingContext.next();
     }
