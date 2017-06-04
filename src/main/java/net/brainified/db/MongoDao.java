@@ -82,7 +82,7 @@ class MongoDao<T extends MongoObject> implements Dao<T> {
   public Observable<T> add(final T object) {
     object.setCreatedAt(Instant.now().toString());
 
-    final JsonObject document = new JsonObject(Json.encodePrettily(object));
+    final JsonObject document = new JsonObject(Json.encode(object));
     document.remove("_id");
 
     return client.insertObservable(collectionName, document).map(id -> {
