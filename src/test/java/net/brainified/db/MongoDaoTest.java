@@ -153,14 +153,14 @@ public class MongoDaoTest {
     when(writeError.getCategory()).thenReturn(ErrorCategory.DUPLICATE_KEY);
 
     when(writeException.getError()).thenReturn(writeError);
+
     when(client.insertObservable(eq(COLLECTION_NAME), any(JsonObject.class))).thenReturn(Observable.error(writeException));
 
     final MongoObject object = new MongoObject();
 
     dao.add(object).subscribe(savedObject -> {
-      fail("");
+      fail();
     }, error -> {
-      System.out.println(error.getMessage());
       assertTrue(error instanceof DaoDuplicateKeyException);
     });
 
