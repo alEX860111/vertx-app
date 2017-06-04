@@ -78,7 +78,7 @@ public class UpdateProductHandlerIntegrationTest extends IntegrationTest {
     vertx.createHttpClient().put(HTTP_PORT, "localhost", "/api/products/1", response -> {
       context.assertEquals(400, response.statusCode());
       response.handler(body -> {
-        context.assertEquals("Invalid JSON in body.", body.toString());
+        context.assertTrue(body.toString().contains("Invalid JSON in body."));
         verifyZeroInteractions(dao);
         async.complete();
       });

@@ -4,8 +4,6 @@ import javax.inject.Inject;
 
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rxjava.ext.web.RoutingContext;
 import net.brainified.db.Dao;
 import net.brainified.db.Product;
@@ -13,8 +11,6 @@ import net.brainified.http.HandlerConfiguration;
 
 @HandlerConfiguration(path = "/products/:id", method = HttpMethod.DELETE, requiresAuthentication = true)
 final class DeleteProductHandler implements Handler<RoutingContext> {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(DeleteProductHandler.class);
 
   private final Dao<Product> dao;
 
@@ -30,10 +26,7 @@ final class DeleteProductHandler implements Handler<RoutingContext> {
     dao.delete(id).subscribe(deleted -> {
       final int statusCode = deleted ? 204 : 404;
       routingContext.response().setStatusCode(statusCode).end();
-    }, error -> {
-      LOGGER.error(error.getMessage(), error);
-      routingContext.response().setStatusCode(500).end();
-    });
+    }, routingContext::fail);
   }
 
 }

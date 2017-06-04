@@ -4,8 +4,6 @@ import javax.inject.Inject;
 
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rxjava.ext.web.RoutingContext;
 import net.brainified.db.Dao;
 import net.brainified.db.Product;
@@ -14,8 +12,6 @@ import net.brainified.http.RoutingContextHelper;
 
 @HandlerConfiguration(path = "/products/:id", method = HttpMethod.PUT, requiresAuthentication = true)
 final class UpdateProductHandler implements Handler<RoutingContext> {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(UpdateProductHandler.class);
 
   private final RoutingContextHelper routingContextHelper;
 
@@ -36,10 +32,7 @@ final class UpdateProductHandler implements Handler<RoutingContext> {
     dao.update(product).subscribe(updated -> {
       final int statusCode = updated ? 204 : 404;
       routingContext.response().setStatusCode(statusCode).end();
-    }, error -> {
-      LOGGER.error(error.getMessage(), error);
-      routingContext.response().setStatusCode(500).end();
-    });
+    }, routingContext::fail);
   }
 
 }

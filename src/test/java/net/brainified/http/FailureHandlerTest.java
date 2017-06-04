@@ -1,5 +1,6 @@
 package net.brainified.http;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -41,13 +42,15 @@ public class FailureHandlerTest {
   public void testHandle_HandlerException() {
     when(routingContext.failure()).thenReturn(new HandlerException("msg", 400));
     when(routingContext.response()).thenReturn(response);
-    when(response.putHeader("Content-Type", "text/plain; charset=utf-8")).thenReturn(response);
+    when(response.putHeader("Content-Type", "application/json; charset=utf-8")).thenReturn(response);
     when(response.setStatusCode(400)).thenReturn(response);
+
     failureHandler.handle(routingContext);
+
     verify(routingContext).response();
-    verify(response).putHeader("Content-Type", "text/plain; charset=utf-8");
+    verify(response).putHeader("Content-Type", "application/json; charset=utf-8");
     verify(response).setStatusCode(400);
-    verify(response).end("msg");
+    verify(response).end(anyString());
     verify(routingContext, never()).next();
   }
 

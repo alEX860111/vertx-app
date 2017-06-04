@@ -5,8 +5,6 @@ import javax.inject.Inject;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.Json;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rxjava.ext.web.RoutingContext;
 import net.brainified.db.Dao;
 import net.brainified.db.Product;
@@ -14,8 +12,6 @@ import net.brainified.http.HandlerConfiguration;
 
 @HandlerConfiguration(path = "/products/:id", method = HttpMethod.GET, requiresAuthentication = true)
 final class GetProductHandler implements Handler<RoutingContext> {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(GetProductHandler.class);
 
   private final Dao<Product> dao;
 
@@ -36,10 +32,7 @@ final class GetProductHandler implements Handler<RoutingContext> {
       } else {
         routingContext.response().setStatusCode(404).end();
       }
-    }, error -> {
-      LOGGER.error(error.getMessage(), error);
-      routingContext.response().setStatusCode(500).end();
-    });
+    }, routingContext::fail);
 
   }
 

@@ -7,8 +7,6 @@ import com.google.common.collect.Range;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.Json;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rxjava.ext.web.RoutingContext;
 import net.brainified.db.Dao;
 import net.brainified.db.Product;
@@ -18,8 +16,6 @@ import net.brainified.http.RoutingContextHelper;
 
 @HandlerConfiguration(path = "/products", method = HttpMethod.GET, requiresAuthentication = true)
 final class GetProductListHandler implements Handler<RoutingContext> {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(GetProductListHandler.class);
 
   private static final Integer PAGE_MIN = 1;
   private static final Integer PAGE_DEFAULT = 1;
@@ -52,14 +48,8 @@ final class GetProductListHandler implements Handler<RoutingContext> {
         routingContext.response()
           .putHeader("Content-Type", "application/json; charset=utf-8")
           .end(Json.encodePrettily(container));
-      }, error -> {
-        LOGGER.error(error.getMessage(), error);
-        routingContext.response().setStatusCode(500).end();
-      });
-    }, error -> {
-      LOGGER.error(error.getMessage(), error);
-        routingContext.response().setStatusCode(500).end();
-    });
+      }, routingContext::fail);
+    }, routingContext::fail);
 
   }
 
