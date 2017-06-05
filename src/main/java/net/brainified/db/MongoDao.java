@@ -6,10 +6,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.mongodb.ErrorCategory;
-import com.mongodb.MongoWriteException;
-import com.mongodb.WriteError;
-
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.FindOptions;
@@ -88,16 +84,6 @@ class MongoDao<T extends MongoObject> implements Dao<T> {
     return client.insertObservable(collectionName, document).map(id -> {
       object.set_id(id);
       return object;
-    }).onErrorResumeNext(throwable -> {
-      if (throwable instanceof MongoWriteException) {
-        final MongoWriteException mongoWriteException = (MongoWriteException) throwable;
-        final WriteError error = mongoWriteException.getError();
-
-        if (ErrorCategory.DUPLICATE_KEY.equals(error.getCategory())) {
-          return Observable.error(new IllegalArgumentException(error.getMessage(), throwable));
-        }
-      }
-      return Observable.error(throwable);
     });
   }
 

@@ -7,7 +7,7 @@ final class StatusCodeRegistryProvider implements Provider<StatusCodeRegistry> {
   @Override
   public StatusCodeRegistry get() {
     return new StatusCodeRegistryImpl()
-        .registerThrowable(IllegalArgumentException.class, 400);
+        .registerThrowable(InvalidParametersException.class, 400);
   }
 
 }

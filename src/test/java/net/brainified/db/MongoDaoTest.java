@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -19,10 +18,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import com.mongodb.ErrorCategory;
-import com.mongodb.MongoWriteException;
-import com.mongodb.WriteError;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.FindOptions;
@@ -143,27 +138,6 @@ public class MongoDaoTest {
     final JsonObject savedDocument = documentCaptor.getValue();
     assertFalse(savedDocument.containsKey("_id"));
     assertTrue(savedDocument.containsKey("createdAt"));
-  }
-
-  @Test
-  public void testAdd_IllegalArgumentException() {
-    final MongoWriteException writeException = Mockito.mock(MongoWriteException.class);
-
-    final WriteError writeError = Mockito.mock(WriteError.class);
-    when(writeError.getCategory()).thenReturn(ErrorCategory.DUPLICATE_KEY);
-
-    when(writeException.getError()).thenReturn(writeError);
-
-    when(client.insertObservable(eq(COLLECTION_NAME), any(JsonObject.class))).thenReturn(Observable.error(writeException));
-
-    final MongoObject object = new MongoObject();
-
-    dao.add(object).subscribe(savedObject -> {
-      fail();
-    }, error -> {
-      assertTrue(error instanceof IllegalArgumentException);
-    });
-
   }
 
   @Test
