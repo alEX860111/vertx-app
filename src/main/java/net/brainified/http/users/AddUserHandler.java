@@ -23,7 +23,8 @@ final class AddUserHandler implements Handler<RoutingContext> {
   private final Dao<User> dao;
 
   @Inject
-  public AddUserHandler(final RoutingContextHelper routingContextHelper, final HashService hashService, final Dao<User> dao) {
+  public AddUserHandler(final RoutingContextHelper routingContextHelper, final HashService hashService,
+      final Dao<User> dao) {
     this.routingContextHelper = routingContextHelper;
     this.hashService = hashService;
     this.dao = dao;
@@ -38,19 +39,18 @@ final class AddUserHandler implements Handler<RoutingContext> {
     user.setPasswordHash(hashService.hash(addUserRequest.getPassword()));
     user.setRole(addUserRequest.getRole());
 
-    dao.getByKey("username", user.getUsername()).subscribe(userOptional -> {
+    dao.getByKey("username", user.getUsername()).flatMap(userOptional -> {
       if (userOptional.isPresent()) {
         throw new InvalidParametersException(String.format("Username '%s' already exists.", user.getUsername()));
       } else {
-        dao.add(user).subscribe(savedUser -> {
-          routingContext
-            .response()
-            .setStatusCode(201)
-            .putHeader("Content-Type", "application/json; charset=utf-8")
-            .putHeader("Location", routingContext.request().absoluteURI() + "/" + savedUser.get_id())
-            .end(Json.encodePrettily(savedUser));
-        }, routingContext::fail);
+        return dao.add(user);
       }
+    }).subscribe(savedUser -> {
+      routingContext.response()
+        .setStatusCode(201)
+        .putHeader("Content-Type", "application/json; charset=utf-8")
+        .putHeader("Location", routingContext.request().absoluteURI() + "/" + savedUser.get_id())
+        .end(Json.encodePrettily(savedUser));
     }, routingContext::fail);
 
   }
