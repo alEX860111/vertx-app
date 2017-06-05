@@ -1,6 +1,6 @@
 package net.brainified.http.users;
 
-final class ChangePasswordRequest {
+final class UpdateUserRequest {
 
   private String oldPassword;
 
