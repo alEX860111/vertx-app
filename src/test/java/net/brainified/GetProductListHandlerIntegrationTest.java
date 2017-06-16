@@ -33,8 +33,8 @@ public class GetProductListHandlerIntegrationTest extends IntegrationTest {
       context.assertEquals(200, response.statusCode());
       response.handler(body -> {
         final JsonObject json = body.toJsonObject();
-        context.assertEquals(42L, json.getLong("numberOfProducts"));
-        context.assertTrue(json.getJsonArray("products").isEmpty());
+        context.assertEquals(42L, json.getLong("count"));
+        context.assertTrue(json.getJsonArray("items").isEmpty());
         async.complete();
       });
     });

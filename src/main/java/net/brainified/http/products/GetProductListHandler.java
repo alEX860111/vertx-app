@@ -40,10 +40,7 @@ final class GetProductListHandler implements Handler<RoutingContext> {
     final SortOrder sortOrder = routingContextHelper.getParamAsEnum(routingContext, "sortorder", SortOrder.class).orElse(SortOrder.DESC);
     final Product.SortKey sortKey = routingContextHelper.getParamAsEnum(routingContext, "sortkey", Product.SortKey.class).orElse(Product.SortKey.CREATEDAT);
 
-    dao.getList(page, perpage, sortKey.getSortKey(), sortOrder).subscribe(itemContainer -> {
-      final ProductContainer container = new ProductContainer();
-      container.setProducts(itemContainer.getItems());
-      container.setNumberOfProducts(itemContainer.getCount());
+    dao.getList(page, perpage, sortKey.getSortKey(), sortOrder).subscribe(container -> {
       routingContext.response()
         .putHeader("Content-Type", "application/json; charset=utf-8")
         .end(Json.encodePrettily(container));
