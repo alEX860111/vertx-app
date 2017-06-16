@@ -27,13 +27,7 @@ class MongoDao<T extends MongoObject> implements Dao<T> {
   }
 
   @Override
-  public Observable<Long> getCount() {
-    final JsonObject query = new JsonObject();
-    return client.countObservable(collectionName, query);
-  }
-
-  @Override
-  public Observable<List<T>> getList(final Integer page, final Integer perpage, final String sortKey, final SortOrder sortOrder) {
+  public Observable<ItemContainer<T>> getList(final Integer page, final Integer perpage, final String sortKey, final SortOrder sortOrder) {
     final JsonObject query = new JsonObject();
     final JsonObject sort = new JsonObject().put(sortKey, sortOrder.getValue());
 
@@ -42,12 +36,17 @@ class MongoDao<T extends MongoObject> implements Dao<T> {
         .setSkip((page - 1) * perpage)
         .setSort(sort);
 
-    return client.findWithOptionsObservable(collectionName, query, options).map(documents -> {
-      return documents
+    final Observable<Long> countObservable = client.countObservable(collectionName, query);
+    final Observable<List<JsonObject>> documentsObservable = client.findWithOptionsObservable(collectionName, query, options);
+
+    return Observable.zip(countObservable, documentsObservable, (count, documents) -> {
+      final List<T> items = documents
           .stream()
           .map(document -> Json.mapper.convertValue(document, clazz))
           .collect(Collectors.toList());
+        return new ItemContainer<>(count, items);
     });
+
   }
 
   @Override

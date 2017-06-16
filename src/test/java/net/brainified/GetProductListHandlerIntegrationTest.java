@@ -1,8 +1,8 @@
 package net.brainified;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -14,6 +14,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import net.brainified.db.ItemContainer;
+import net.brainified.db.Product;
 import net.brainified.db.SortOrder;
 import rx.Observable;
 
@@ -22,8 +24,8 @@ public class GetProductListHandlerIntegrationTest extends IntegrationTest {
 
   @Test
   public void testGetProducts(TestContext context) {
-    when(dao.getCount()).thenReturn(Observable.just(42L));
-    when(dao.getList(anyInt(), anyInt(), anyString(), any(SortOrder.class))).thenReturn(Observable.just(Collections.emptyList()));
+    final ItemContainer<Product> container = new ItemContainer<>(42L, Collections.emptyList());
+    when(dao.getList(anyInt(), anyInt(), anyString(), any(SortOrder.class))).thenReturn(Observable.just(container));
 
     final Async async = context.async();
 
@@ -39,22 +41,7 @@ public class GetProductListHandlerIntegrationTest extends IntegrationTest {
   }
 
   @Test
-  public void testGetProducts_countError(TestContext context) {
-    when(dao.getCount()).thenReturn(Observable.error(new RuntimeException("error")));
-
-    final Async async = context.async();
-
-    vertx.createHttpClient().getNow(HTTP_PORT, "localhost", "/api/products", response -> {
-      context.assertEquals(500, response.statusCode());
-      verify(dao, never()).getList(anyInt(), anyInt(), anyString(), any(SortOrder.class));
-      async.complete();
-    });
-  }
-
-  @Test
   public void testGetProducts_getListError(TestContext context) {
-    when(dao.getCount()).thenReturn(Observable.just(42L));
-
     when(dao.getList(anyInt(), anyInt(), anyString(), any(SortOrder.class))).thenReturn(Observable.error(new RuntimeException("error")));
 
     final Async async = context.async();

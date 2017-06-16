@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -49,25 +50,20 @@ public class MongoDaoTest {
   }
 
   @Test
-  public void testGetCount() {
-    final JsonObject query = new JsonObject();
-    when(client.countObservable(COLLECTION_NAME, query)).thenReturn(Observable.just(42L));
-
-    dao.getCount().subscribe(count -> assertEquals(Long.valueOf(42L), count));
-
-    verify(client).countObservable(COLLECTION_NAME, query);
-  }
-
-  @Test
   public void testGetList() {
     final JsonObject query = new JsonObject();
 
     final ArgumentCaptor<FindOptions> optionsCaptor = ArgumentCaptor.forClass(FindOptions.class);
 
+    when(client.countObservable(COLLECTION_NAME, query)).thenReturn(Observable.just(42L));
+
     when(client.findWithOptionsObservable(eq(COLLECTION_NAME), eq(query), optionsCaptor.capture()))
         .thenReturn(Observable.just(Arrays.asList(document)));
 
-    dao.getList(1, 10, "createdAt", SortOrder.DESC).subscribe(objects -> {
+    dao.getList(1, 10, "createdAt", SortOrder.DESC).subscribe(container -> {
+      assertEquals(Long.valueOf(42L), container.getCount());
+
+      List<MongoObject> objects = container.getItems();
       assertEquals(1, objects.size());
       final MongoObject object = objects.get(0);
       assertEquals(ID, object.get_id());

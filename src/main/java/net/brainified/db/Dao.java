@@ -1,15 +1,12 @@
 package net.brainified.db;
 
-import java.util.List;
 import java.util.Optional;
 
 import rx.Observable;
 
 public interface Dao<T> {
 
-  Observable<Long> getCount();
-
-  Observable<List<T>> getList(Integer page, Integer perpage, String sortKey, SortOrder sortOrder);
+  Observable<ItemContainer<T>> getList(Integer page, Integer perpage, String sortKey, SortOrder sortOrder);
 
   Observable<Optional<T>> getById(String id);
 
