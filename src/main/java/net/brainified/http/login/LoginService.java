@@ -6,6 +6,6 @@ import rx.Observable;
 
 interface LoginService {
 
-  public Observable<Optional<Session>> login(LoginRequest loginRequest);
+  public Observable<Optional<LoginResponse>> login(LoginRequest loginRequest);
 
 }

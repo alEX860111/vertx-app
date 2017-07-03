@@ -27,7 +27,7 @@ final class LoginServiceImpl implements LoginService {
   }
 
   @Override
-  public Observable<Optional<Session>> login(final LoginRequest loginRequest) {
+  public Observable<Optional<LoginResponse>> login(final LoginRequest loginRequest) {
     return userDao.getByKey("username", loginRequest.getUsername()).map(userOptional -> {
       if (!userOptional.isPresent()) {
         return Optional.empty();
@@ -44,14 +44,21 @@ final class LoginServiceImpl implements LoginService {
     });
   }
 
-  private Session createSession(final User user) {
-    final JsonObject claims = new JsonObject().put("username", user.getUsername()).put("role", user.getRole());
-    final String token = jwtAuth.generateToken(claims, new JWTOptions());
-    final Session session = new Session();
-    session.setToken(token);
-    session.setUsername(user.getUsername());
-    session.setUserId(user.get_id());
-    return session;
+  private LoginResponse createSession(final User user) {
+    final LoginResponse response = new LoginResponse();
+
+    final String token = createToken(user);
+    response.setToken(token);
+
+    return response;
+  }
+
+  private String createToken(final User user) {
+    final JsonObject claims = new JsonObject()
+        .put("username", user.getUsername())
+        .put("role", user.getRole())
+        .put("userId", user.get_id());
+    return jwtAuth.generateToken(claims, new JWTOptions());
   }
 
 }
