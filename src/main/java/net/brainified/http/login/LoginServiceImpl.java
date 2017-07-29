@@ -59,7 +59,7 @@ final class LoginServiceImpl implements LoginService {
         .put("role", user.getRole())
         .put("userId", user.get_id());
     final JWTOptions options = new JWTOptions();
-    options.setExpiresInMinutes(1L);
+    options.setExpiresInMinutes(60L);
     return jwtAuth.generateToken(claims, options);
   }
 
