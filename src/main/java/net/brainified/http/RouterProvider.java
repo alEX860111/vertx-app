@@ -51,10 +51,6 @@ final class RouterProvider implements Provider<Router> {
     router.route().handler(BodyHandler.create());
     router.route().failureHandler(failureHandler);
 
-    if (!"test".equals(System.getProperty("environment"))) {
-      router.route("/api/*").handler(authHandler);
-    }
-
     handlers.forEach(handler -> registerHandler(router, handler));
 
     return router;
@@ -63,8 +59,11 @@ final class RouterProvider implements Provider<Router> {
   private void registerHandler(final Router router, final Handler<RoutingContext> handler) {
     final HandlerConfiguration config = handler.getClass().getAnnotation(HandlerConfiguration.class);
     Preconditions.checkNotNull(config, "Missing HandlerConfiguration");
-    final String path = config.requiresAuthentication() ? "/api" + config.path() : config.path();
-    router.route(config.method(), path).handler(handler);
+
+    if (config.requiresAuthentication() && !"test".equals(System.getProperty("environment"))) {
+      router.route(config.method(), config.path()).handler(authHandler);
+    }
+    router.route(config.method(), config.path()).handler(handler);
   }
 
 }

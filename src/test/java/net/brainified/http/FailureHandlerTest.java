@@ -2,7 +2,7 @@ package net.brainified.http;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -24,12 +24,21 @@ public class FailureHandlerTest {
 
   @Mock
   private HttpServerResponse response;
-  
+
   @Mock
   private StatusCodeRegistry registry;
 
   @InjectMocks
   private FailureHandler failureHandler;
+
+  @Test
+  public void testHandle_FailureNull() {
+    when(routingContext.failure()).thenReturn(null);
+    failureHandler.handle(routingContext);
+    verify(routingContext, never()).response();
+    verify(routingContext).next();
+    verifyZeroInteractions(registry);
+  }
 
   @Test
   public void testHandle_RuntimeException() {

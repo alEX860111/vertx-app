@@ -1,5 +1,6 @@
 package net.brainified.http;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -24,6 +25,10 @@ final class FailureHandler implements Handler<RoutingContext> {
   @Override
   public void handle(final RoutingContext routingContext) {
     final Throwable failure = routingContext.failure();
+    if (Objects.isNull(failure)) {
+      routingContext.next();
+      return;
+    }
 
     LOGGER.error(failure.getMessage(), failure);
 

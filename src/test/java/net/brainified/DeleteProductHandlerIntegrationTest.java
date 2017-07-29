@@ -19,7 +19,7 @@ public class DeleteProductHandlerIntegrationTest extends IntegrationTest {
 
     final Async async = context.async();
 
-    vertx.createHttpClient().delete(HTTP_PORT, "localhost", "/api/products/1", response -> {
+    vertx.createHttpClient().delete(HTTP_PORT, "localhost", "/products/1", response -> {
       context.assertEquals(204, response.statusCode());
       async.complete();
     }).end();
@@ -31,7 +31,7 @@ public class DeleteProductHandlerIntegrationTest extends IntegrationTest {
 
     final Async async = context.async();
 
-    vertx.createHttpClient().delete(HTTP_PORT, "localhost", "/api/products/1", response -> {
+    vertx.createHttpClient().delete(HTTP_PORT, "localhost", "/products/1", response -> {
       context.assertEquals(404, response.statusCode());
       async.complete();
     }).end();
@@ -43,7 +43,7 @@ public class DeleteProductHandlerIntegrationTest extends IntegrationTest {
 
     final Async async = context.async();
 
-    vertx.createHttpClient().delete(HTTP_PORT, "localhost", "/api/products/1", response -> {
+    vertx.createHttpClient().delete(HTTP_PORT, "localhost", "/products/1", response -> {
       context.assertEquals(500, response.statusCode());
       async.complete();
     }).end();

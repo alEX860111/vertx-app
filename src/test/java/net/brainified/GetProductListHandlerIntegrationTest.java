@@ -29,7 +29,7 @@ public class GetProductListHandlerIntegrationTest extends IntegrationTest {
 
     final Async async = context.async();
 
-    vertx.createHttpClient().getNow(HTTP_PORT, "localhost", "/api/products", response -> {
+    vertx.createHttpClient().getNow(HTTP_PORT, "localhost", "/products", response -> {
       context.assertEquals(200, response.statusCode());
       response.handler(body -> {
         final JsonObject json = body.toJsonObject();
@@ -46,7 +46,7 @@ public class GetProductListHandlerIntegrationTest extends IntegrationTest {
 
     final Async async = context.async();
 
-    vertx.createHttpClient().getNow(HTTP_PORT, "localhost", "/api/products", response -> {
+    vertx.createHttpClient().getNow(HTTP_PORT, "localhost", "/products", response -> {
       context.assertEquals(500, response.statusCode());
       async.complete();
     });
