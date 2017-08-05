@@ -7,13 +7,14 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.Json;
 import io.vertx.rxjava.ext.web.RoutingContext;
 import net.brainified.db.Dao;
+import net.brainified.db.Role;
 import net.brainified.db.User;
 import net.brainified.http.HandlerConfiguration;
 import net.brainified.http.InvalidParametersException;
 import net.brainified.http.RoutingContextHelper;
 import net.brainified.http.login.HashService;
 
-@HandlerConfiguration(path = "/users", method = HttpMethod.POST, requiresAuthentication = true)
+@HandlerConfiguration(path = "/users", method = HttpMethod.POST, allowedRoles = Role.ADMIN)
 final class AddUserHandler implements Handler<RoutingContext> {
 
   private final RoutingContextHelper routingContextHelper;

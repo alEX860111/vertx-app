@@ -6,13 +6,14 @@ import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.rxjava.ext.web.RoutingContext;
 import net.brainified.db.Dao;
+import net.brainified.db.Role;
 import net.brainified.db.User;
 import net.brainified.http.HandlerConfiguration;
 import net.brainified.http.RoutingContextHelper;
 import net.brainified.http.login.HashService;
 import rx.Observable;
 
-@HandlerConfiguration(path = "/users/:id", method = HttpMethod.PUT, requiresAuthentication = true)
+@HandlerConfiguration(path = "/users/:id", method = HttpMethod.PUT, allowedRoles = { Role.USER, Role.ADMIN })
 final class UpdateUserHandler implements Handler<RoutingContext> {
 
   private final RoutingContextHelper routingContextHelper;

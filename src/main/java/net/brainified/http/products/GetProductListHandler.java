@@ -10,11 +10,12 @@ import io.vertx.core.json.Json;
 import io.vertx.rxjava.ext.web.RoutingContext;
 import net.brainified.db.Dao;
 import net.brainified.db.Product;
+import net.brainified.db.Role;
 import net.brainified.db.SortOrder;
 import net.brainified.http.HandlerConfiguration;
 import net.brainified.http.RoutingContextHelper;
 
-@HandlerConfiguration(path = "/products", method = HttpMethod.GET, requiresAuthentication = true)
+@HandlerConfiguration(path = "/products", method = HttpMethod.GET, allowedRoles = { Role.USER, Role.ADMIN })
 final class GetProductListHandler implements Handler<RoutingContext> {
 
   private static final Integer PAGE_MIN = 1;
@@ -35,15 +36,18 @@ final class GetProductListHandler implements Handler<RoutingContext> {
 
   @Override
   public void handle(RoutingContext routingContext) {
-    final Integer page = routingContextHelper.getParamAsInteger(routingContext, "page", Range.atLeast(PAGE_MIN)).orElse(PAGE_DEFAULT);
-    final Integer perpage = routingContextHelper.getParamAsInteger(routingContext, "perpage", Range.atLeast(PER_PAGE_MIN)).orElse(PER_PAGE_DEFAULT);
-    final SortOrder sortOrder = routingContextHelper.getParamAsEnum(routingContext, "sortorder", SortOrder.class).orElse(SortOrder.DESC);
-    final Product.SortKey sortKey = routingContextHelper.getParamAsEnum(routingContext, "sortkey", Product.SortKey.class).orElse(Product.SortKey.CREATEDAT);
+    final Integer page = routingContextHelper.getParamAsInteger(routingContext, "page", Range.atLeast(PAGE_MIN))
+        .orElse(PAGE_DEFAULT);
+    final Integer perpage = routingContextHelper
+        .getParamAsInteger(routingContext, "perpage", Range.atLeast(PER_PAGE_MIN)).orElse(PER_PAGE_DEFAULT);
+    final SortOrder sortOrder = routingContextHelper.getParamAsEnum(routingContext, "sortorder", SortOrder.class)
+        .orElse(SortOrder.DESC);
+    final Product.SortKey sortKey = routingContextHelper
+        .getParamAsEnum(routingContext, "sortkey", Product.SortKey.class).orElse(Product.SortKey.CREATEDAT);
 
     dao.getList(page, perpage, sortKey.getSortKey(), sortOrder).subscribe(container -> {
-      routingContext.response()
-        .putHeader("Content-Type", "application/json; charset=utf-8")
-        .end(Json.encodePrettily(container));
+      routingContext.response().putHeader("Content-Type", "application/json; charset=utf-8")
+          .end(Json.encodePrettily(container));
     }, routingContext::fail);
 
   }

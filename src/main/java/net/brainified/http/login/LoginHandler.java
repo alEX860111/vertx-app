@@ -11,7 +11,7 @@ import io.vertx.rxjava.ext.web.RoutingContext;
 import net.brainified.http.HandlerConfiguration;
 import net.brainified.http.RoutingContextHelper;
 
-@HandlerConfiguration(path = "/login", method = HttpMethod.POST, requiresAuthentication = false)
+@HandlerConfiguration(path = "/login", method = HttpMethod.POST)
 final class LoginHandler implements Handler<RoutingContext> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(LoginHandler.class);

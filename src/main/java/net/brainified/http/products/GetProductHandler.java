@@ -8,9 +8,10 @@ import io.vertx.core.json.Json;
 import io.vertx.rxjava.ext.web.RoutingContext;
 import net.brainified.db.Dao;
 import net.brainified.db.Product;
+import net.brainified.db.Role;
 import net.brainified.http.HandlerConfiguration;
 
-@HandlerConfiguration(path = "/products/:id", method = HttpMethod.GET, requiresAuthentication = true)
+@HandlerConfiguration(path = "/products/:id", method = HttpMethod.GET, allowedRoles = { Role.USER, Role.ADMIN })
 final class GetProductHandler implements Handler<RoutingContext> {
 
   private final Dao<Product> dao;
@@ -26,9 +27,8 @@ final class GetProductHandler implements Handler<RoutingContext> {
 
     dao.getById(id).subscribe(product -> {
       if (product.isPresent()) {
-        routingContext.response()
-          .putHeader("Content-Type", "application/json; charset=utf-8")
-          .end(Json.encodePrettily(product.get()));
+        routingContext.response().putHeader("Content-Type", "application/json; charset=utf-8")
+            .end(Json.encodePrettily(product.get()));
       } else {
         routingContext.response().setStatusCode(404).end();
       }

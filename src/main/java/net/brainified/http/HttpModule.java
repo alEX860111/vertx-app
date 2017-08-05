@@ -22,6 +22,7 @@ public final class HttpModule extends AbstractModule {
     bind(AuthHandler.class).to(JWTAuthHandler.class);
 
     bind(StatusCodeRegistry.class).toProvider(StatusCodeRegistryProvider.class);
+    bind(AuthorisationHandlerFactory.class).to(AuthorisationHandlerFactoryImpl.class);
   }
 
 }

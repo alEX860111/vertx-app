@@ -7,10 +7,11 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.rxjava.ext.web.RoutingContext;
 import net.brainified.db.Dao;
 import net.brainified.db.Product;
+import net.brainified.db.Role;
 import net.brainified.http.HandlerConfiguration;
 import net.brainified.http.RoutingContextHelper;
 
-@HandlerConfiguration(path = "/products/:id", method = HttpMethod.PUT, requiresAuthentication = true)
+@HandlerConfiguration(path = "/products/:id", method = HttpMethod.PUT, allowedRoles = Role.ADMIN)
 final class UpdateProductHandler implements Handler<RoutingContext> {
 
   private final RoutingContextHelper routingContextHelper;

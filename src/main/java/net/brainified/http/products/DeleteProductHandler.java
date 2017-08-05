@@ -7,9 +7,10 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.rxjava.ext.web.RoutingContext;
 import net.brainified.db.Dao;
 import net.brainified.db.Product;
+import net.brainified.db.Role;
 import net.brainified.http.HandlerConfiguration;
 
-@HandlerConfiguration(path = "/products/:id", method = HttpMethod.DELETE, requiresAuthentication = true)
+@HandlerConfiguration(path = "/products/:id", method = HttpMethod.DELETE, allowedRoles = Role.ADMIN)
 final class DeleteProductHandler implements Handler<RoutingContext> {
 
   private final Dao<Product> dao;

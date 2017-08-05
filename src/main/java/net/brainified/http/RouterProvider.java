@@ -22,17 +22,20 @@ final class RouterProvider implements Provider<Router> {
 
   private final Set<Handler<RoutingContext>> handlers;
 
-  private final AuthHandler authHandler;
+  private final AuthHandler authenticationHandler;
 
   private final FailureHandler failureHandler;
 
+  private final AuthorisationHandlerFactory authorisationHandlerFactory;
+
   @Inject
   public RouterProvider(final Vertx vertx, final Set<Handler<RoutingContext>> handlers, final AuthHandler authHandler,
-      final FailureHandler failureHandler) {
+      final FailureHandler failureHandler, final AuthorisationHandlerFactory authorisationHandlerFactory) {
     this.vertx = vertx;
     this.handlers = handlers;
-    this.authHandler = authHandler;
+    this.authenticationHandler = authHandler;
     this.failureHandler = failureHandler;
+    this.authorisationHandlerFactory = authorisationHandlerFactory;
   }
 
   @Override
@@ -60,8 +63,11 @@ final class RouterProvider implements Provider<Router> {
     final HandlerConfiguration config = handler.getClass().getAnnotation(HandlerConfiguration.class);
     Preconditions.checkNotNull(config, "Missing HandlerConfiguration");
 
-    if (config.requiresAuthentication() && !"test".equals(System.getProperty("environment"))) {
-      router.route(config.method(), config.path()).handler(authHandler);
+    if (config.allowedRoles().length != 0 && !"test".equals(System.getProperty("environment"))) {
+      router.route(config.method(), config.path()).handler(authenticationHandler);
+
+      final Handler<RoutingContext> authorisationHandler = authorisationHandlerFactory.createAuthorisationHandler(config.allowedRoles());
+      router.route(config.method(), config.path()).handler(authorisationHandler);
     }
     router.route(config.method(), config.path()).handler(handler);
   }

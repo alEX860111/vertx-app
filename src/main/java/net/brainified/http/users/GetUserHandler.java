@@ -7,10 +7,11 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.Json;
 import io.vertx.rxjava.ext.web.RoutingContext;
 import net.brainified.db.Dao;
+import net.brainified.db.Role;
 import net.brainified.db.User;
 import net.brainified.http.HandlerConfiguration;
 
-@HandlerConfiguration(path = "/users/:id", method = HttpMethod.GET, requiresAuthentication = true)
+@HandlerConfiguration(path = "/users/:id", method = HttpMethod.GET, allowedRoles = { Role.USER, Role.ADMIN })
 final class GetUserHandler implements Handler<RoutingContext> {
 
   private final Dao<User> dao;
