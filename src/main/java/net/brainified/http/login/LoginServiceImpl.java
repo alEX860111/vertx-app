@@ -9,7 +9,7 @@ import io.vertx.ext.auth.jwt.JWTOptions;
 import io.vertx.rxjava.ext.auth.jwt.JWTAuth;
 import net.brainified.db.Dao;
 import net.brainified.db.User;
-import rx.Observable;
+import rx.Single;
 
 final class LoginServiceImpl implements LoginService {
 
@@ -27,7 +27,7 @@ final class LoginServiceImpl implements LoginService {
   }
 
   @Override
-  public Observable<Optional<LoginResponse>> login(final LoginRequest loginRequest) {
+  public Single<Optional<LoginResponse>> login(final LoginRequest loginRequest) {
     return userDao.getByKey("username", loginRequest.getUsername()).map(userOptional -> {
       if (!userOptional.isPresent()) {
         return Optional.empty();

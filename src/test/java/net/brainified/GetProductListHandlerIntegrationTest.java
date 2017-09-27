@@ -17,7 +17,7 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import net.brainified.db.ItemContainer;
 import net.brainified.db.Product;
 import net.brainified.db.SortOrder;
-import rx.Observable;
+import rx.Single;
 
 @RunWith(VertxUnitRunner.class)
 public class GetProductListHandlerIntegrationTest extends IntegrationTest {
@@ -25,7 +25,7 @@ public class GetProductListHandlerIntegrationTest extends IntegrationTest {
   @Test
   public void testGetProducts(TestContext context) {
     final ItemContainer<Product> container = new ItemContainer<>(42L, Collections.emptyList());
-    when(dao.getList(anyInt(), anyInt(), anyString(), any(SortOrder.class))).thenReturn(Observable.just(container));
+    when(dao.getList(anyInt(), anyInt(), anyString(), any(SortOrder.class))).thenReturn(Single.just(container));
 
     final Async async = context.async();
 
@@ -42,7 +42,7 @@ public class GetProductListHandlerIntegrationTest extends IntegrationTest {
 
   @Test
   public void testGetProducts_getListError(TestContext context) {
-    when(dao.getList(anyInt(), anyInt(), anyString(), any(SortOrder.class))).thenReturn(Observable.error(new RuntimeException("error")));
+    when(dao.getList(anyInt(), anyInt(), anyString(), any(SortOrder.class))).thenReturn(Single.error(new RuntimeException("error")));
 
     final Async async = context.async();
 

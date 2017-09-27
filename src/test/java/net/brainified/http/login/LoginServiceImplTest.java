@@ -21,7 +21,7 @@ import io.vertx.ext.auth.jwt.JWTOptions;
 import io.vertx.rxjava.ext.auth.jwt.JWTAuth;
 import net.brainified.db.Dao;
 import net.brainified.db.User;
-import rx.Observable;
+import rx.Single;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LoginServiceImplTest {
@@ -57,7 +57,7 @@ public class LoginServiceImplTest {
 
   @Test
   public void testLogin() {
-    when(userDao.getByKey("username", "zoe")).thenReturn(Observable.just(Optional.of(user)));
+    when(userDao.getByKey("username", "zoe")).thenReturn(Single.just(Optional.of(user)));
     when(hashService.hash("password")).thenReturn("passwordHash");
     when(jwtAuth.generateToken(any(JsonObject.class), any(JWTOptions.class))).thenReturn(TOKEN);
 
@@ -69,7 +69,7 @@ public class LoginServiceImplTest {
 
   @Test
   public void testLogin_UserNotFound() {
-    when(userDao.getByKey("username", "zoe")).thenReturn(Observable.just(Optional.empty()));
+    when(userDao.getByKey("username", "zoe")).thenReturn(Single.just(Optional.empty()));
 
     loginService.login(loginRequest).subscribe(loginResponseOptional -> {
       assertFalse(loginResponseOptional.isPresent());
@@ -80,7 +80,7 @@ public class LoginServiceImplTest {
 
   @Test
   public void testLogin_PasswordDoNotMatch() {
-    when(userDao.getByKey("username", "zoe")).thenReturn(Observable.just(Optional.of(user)));
+    when(userDao.getByKey("username", "zoe")).thenReturn(Single.just(Optional.of(user)));
     when(hashService.hash("password")).thenReturn("some value");
 
     loginService.login(loginRequest).subscribe(loginResponseOptional -> {

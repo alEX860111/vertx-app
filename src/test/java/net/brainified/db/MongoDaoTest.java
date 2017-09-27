@@ -25,7 +25,7 @@ import io.vertx.ext.mongo.FindOptions;
 import io.vertx.ext.mongo.MongoClientDeleteResult;
 import io.vertx.ext.mongo.MongoClientUpdateResult;
 import io.vertx.rxjava.ext.mongo.MongoClient;
-import rx.Observable;
+import rx.Single;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MongoDaoTest {
@@ -55,10 +55,10 @@ public class MongoDaoTest {
 
     final ArgumentCaptor<FindOptions> optionsCaptor = ArgumentCaptor.forClass(FindOptions.class);
 
-    when(client.countObservable(COLLECTION_NAME, query)).thenReturn(Observable.just(42L));
+    when(client.rxCount(COLLECTION_NAME, query)).thenReturn(Single.just(42L));
 
-    when(client.findWithOptionsObservable(eq(COLLECTION_NAME), eq(query), optionsCaptor.capture()))
-        .thenReturn(Observable.just(Arrays.asList(document)));
+    when(client.rxFindWithOptions(eq(COLLECTION_NAME), eq(query), optionsCaptor.capture()))
+        .thenReturn(Single.just(Arrays.asList(document)));
 
     dao.getList(1, 10, "createdAt", SortOrder.DESC).subscribe(container -> {
       assertEquals(Long.valueOf(42L), container.getCount());
@@ -70,7 +70,7 @@ public class MongoDaoTest {
       assertEquals(CREATED_AT_DATE, object.getCreatedAt());
     });
 
-    verify(client).findWithOptionsObservable(eq(COLLECTION_NAME), eq(query), optionsCaptor.capture());
+    verify(client).rxFindWithOptions(eq(COLLECTION_NAME), eq(query), optionsCaptor.capture());
 
     final FindOptions options = optionsCaptor.getValue();
     assertEquals(10, options.getLimit());
@@ -86,7 +86,7 @@ public class MongoDaoTest {
 
     final JsonObject fields = new JsonObject();
 
-    when(client.findOneObservable(COLLECTION_NAME, query, fields)).thenReturn(Observable.just(document));
+    when(client.rxFindOne(COLLECTION_NAME, query, fields)).thenReturn(Single.just(document));
 
     dao.getById(ID).subscribe(objectOptional -> {
       assertTrue(objectOptional.isPresent());
@@ -95,7 +95,7 @@ public class MongoDaoTest {
       assertEquals(CREATED_AT_DATE, object.getCreatedAt());
     });
 
-    verify(client).findOneObservable(COLLECTION_NAME, query, fields);
+    verify(client).rxFindOne(COLLECTION_NAME, query, fields);
   }
 
   @Test
@@ -104,20 +104,20 @@ public class MongoDaoTest {
 
     final JsonObject fields = new JsonObject();
 
-    when(client.findOneObservable(COLLECTION_NAME, query, fields)).thenReturn(Observable.just(null));
+    when(client.rxFindOne(COLLECTION_NAME, query, fields)).thenReturn(Single.just(null));
 
     dao.getById(ID).subscribe(objectOptional -> {
       assertFalse(objectOptional.isPresent());
     });
 
-    verify(client).findOneObservable(COLLECTION_NAME, query, fields);
+    verify(client).rxFindOne(COLLECTION_NAME, query, fields);
   }
 
   @Test
   public void testAdd() {
     final ArgumentCaptor<JsonObject> documentCaptor = ArgumentCaptor.forClass(JsonObject.class);
 
-    when(client.insertObservable(eq(COLLECTION_NAME), any(JsonObject.class))).thenReturn(Observable.just(ID));
+    when(client.rxInsert(eq(COLLECTION_NAME), any(JsonObject.class))).thenReturn(Single.just(ID));
 
     final MongoObject object = new MongoObject();
     object.set_id("some value");
@@ -130,7 +130,7 @@ public class MongoDaoTest {
       assertFalse(savedObject.getCreatedAt().equals(CREATED_AT_DATE));
     });
 
-    verify(client).insertObservable(eq(COLLECTION_NAME), documentCaptor.capture());
+    verify(client).rxInsert(eq(COLLECTION_NAME), documentCaptor.capture());
     final JsonObject savedDocument = documentCaptor.getValue();
     assertFalse(savedDocument.containsKey("_id"));
     assertTrue(savedDocument.containsKey("createdAt"));
@@ -146,14 +146,14 @@ public class MongoDaoTest {
     final MongoClientUpdateResult result = Mockito.mock(MongoClientUpdateResult.class);
     when(result.getDocMatched()).thenReturn(1L);
 
-    when(client.updateCollectionObservable(COLLECTION_NAME, query, update)).thenReturn(Observable.just(result));
+    when(client.rxUpdateCollection(COLLECTION_NAME, query, update)).thenReturn(Single.just(result));
 
     final MongoObject object = new MongoObject();
     object.set_id(ID);
     object.setCreatedAt(CREATED_AT_DATE);
     dao.update(object).subscribe(updated -> assertTrue(updated));
 
-    verify(client).updateCollectionObservable(COLLECTION_NAME, query, update);
+    verify(client).rxUpdateCollection(COLLECTION_NAME, query, update);
   }
 
   @Test
@@ -163,11 +163,11 @@ public class MongoDaoTest {
     final MongoClientDeleteResult result = Mockito.mock(MongoClientDeleteResult.class);
     when(result.getRemovedCount()).thenReturn(1L);
 
-    when(client.removeDocumentObservable(COLLECTION_NAME, query)).thenReturn(Observable.just(result));
+    when(client.rxRemoveDocument(COLLECTION_NAME, query)).thenReturn(Single.just(result));
 
     dao.delete(ID).subscribe(deleted -> assertTrue(deleted));
 
-    verify(client).removeDocumentObservable(COLLECTION_NAME, query);
+    verify(client).rxRemoveDocument(COLLECTION_NAME, query);
   }
 
 }

@@ -2,10 +2,10 @@ package net.brainified.http.login;
 
 import java.util.Optional;
 
-import rx.Observable;
+import rx.Single;
 
 interface LoginService {
 
-  public Observable<Optional<LoginResponse>> login(LoginRequest loginRequest);
+  public Single<Optional<LoginResponse>> login(LoginRequest loginRequest);
 
 }

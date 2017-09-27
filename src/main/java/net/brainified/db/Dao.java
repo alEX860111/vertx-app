@@ -2,20 +2,20 @@ package net.brainified.db;
 
 import java.util.Optional;
 
-import rx.Observable;
+import rx.Single;
 
 public interface Dao<T> {
 
-  Observable<ItemContainer<T>> getList(Integer page, Integer perpage, String sortKey, SortOrder sortOrder);
+  Single<ItemContainer<T>> getList(Integer page, Integer perpage, String sortKey, SortOrder sortOrder);
 
-  Observable<Optional<T>> getById(String id);
+  Single<Optional<T>> getById(String id);
 
-  Observable<Optional<T>> getByKey(String key, String value);
+  Single<Optional<T>> getByKey(String key, String value);
 
-  Observable<T> add(T object);
+  Single<T> add(T object);
 
-  Observable<Boolean> update(T object);
+  Single<Boolean> update(T object);
 
-  Observable<Boolean> delete(String id);
+  Single<Boolean> delete(String id);
 
 }

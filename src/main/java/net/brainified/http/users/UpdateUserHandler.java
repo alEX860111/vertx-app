@@ -35,7 +35,7 @@ final class UpdateUserHandler implements Handler<RoutingContext> {
     final UpdateUserRequest updateUserRequest = routingContextHelper.getBody(routingContext, UpdateUserRequest.class);
     final String userId = routingContext.request().getParam("id");
 
-    dao.getById(userId).flatMap(userOptional -> {
+    dao.getById(userId).toObservable().flatMap(userOptional -> {
       if (!userOptional.isPresent()) {
         routingContext.response().setStatusCode(404).end();
         return Observable.never();
@@ -49,7 +49,7 @@ final class UpdateUserHandler implements Handler<RoutingContext> {
       }
 
       user.setPasswordHash(service.hash(updateUserRequest.getNewPassword()));
-      return dao.update(user);
+      return dao.update(user).toObservable();
     }).subscribe(updated -> {
       final int statusCode = updated ? 204 : 404;
       routingContext.response().setStatusCode(statusCode).end();

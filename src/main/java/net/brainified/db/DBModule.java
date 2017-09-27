@@ -13,7 +13,6 @@ public final class DBModule extends AbstractModule {
     bind(MongoClient.class).toProvider(MongoClientProvider.class).in(Scopes.SINGLETON);
     bind(new TypeLiteral<Dao<Product>>() {}).to(ProductDao.class);
     bind(new TypeLiteral<Dao<User>>() {}).to(UserDao.class);
-
   }
 
 }

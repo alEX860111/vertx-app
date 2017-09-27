@@ -8,14 +8,14 @@ import org.junit.runner.RunWith;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import rx.Observable;
+import rx.Single;
 
 @RunWith(VertxUnitRunner.class)
 public class DeleteProductHandlerIntegrationTest extends IntegrationTest {
 
   @Test
   public void testDeleteProduct(TestContext context) {
-    when(dao.delete("1")).thenReturn(Observable.just(true));
+    when(dao.delete("1")).thenReturn(Single.just(true));
 
     final Async async = context.async();
 
@@ -27,7 +27,7 @@ public class DeleteProductHandlerIntegrationTest extends IntegrationTest {
 
   @Test
   public void testDeleteProduct_notFound(TestContext context) {
-    when(dao.delete("1")).thenReturn(Observable.just(false));
+    when(dao.delete("1")).thenReturn(Single.just(false));
 
     final Async async = context.async();
 
@@ -39,7 +39,7 @@ public class DeleteProductHandlerIntegrationTest extends IntegrationTest {
 
   @Test
   public void testDeleteProduct_serverError(TestContext context) {
-    when(dao.delete("1")).thenReturn(Observable.error(new RuntimeException("error")));
+    when(dao.delete("1")).thenReturn(Single.error(new RuntimeException("error")));
 
     final Async async = context.async();
 

@@ -10,7 +10,7 @@ import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.FindOptions;
 import io.vertx.rxjava.ext.mongo.MongoClient;
-import rx.Observable;
+import rx.Single;
 
 class MongoDao<T extends MongoObject> implements Dao<T> {
 
@@ -27,7 +27,7 @@ class MongoDao<T extends MongoObject> implements Dao<T> {
   }
 
   @Override
-  public Observable<ItemContainer<T>> getList(final Integer page, final Integer perpage, final String sortKey, final SortOrder sortOrder) {
+  public Single<ItemContainer<T>> getList(final Integer page, final Integer perpage, final String sortKey, final SortOrder sortOrder) {
     final JsonObject query = new JsonObject();
     final JsonObject sort = new JsonObject().put(sortKey, sortOrder.getValue());
 
@@ -36,10 +36,10 @@ class MongoDao<T extends MongoObject> implements Dao<T> {
         .setSkip((page - 1) * perpage)
         .setSort(sort);
 
-    final Observable<Long> countObservable = client.countObservable(collectionName, query);
-    final Observable<List<JsonObject>> documentsObservable = client.findWithOptionsObservable(collectionName, query, options);
+    final Single<Long> countObservable = client.rxCount(collectionName, query);
+    final Single<List<JsonObject>> documentsObservable = client.rxFindWithOptions(collectionName, query, options);
 
-    return Observable.zip(countObservable, documentsObservable, (count, documents) -> {
+    return Single.zip(countObservable, documentsObservable, (count, documents) -> {
       final List<T> items = documents
           .stream()
           .map(document -> Json.mapper.convertValue(document, clazz))
@@ -50,21 +50,21 @@ class MongoDao<T extends MongoObject> implements Dao<T> {
   }
 
   @Override
-  public Observable<Optional<T>> getById(final String id) {
+  public Single<Optional<T>> getById(final String id) {
     final JsonObject query = new JsonObject().put("_id", id);
     return getOne(query);
   }
 
   @Override
-  public Observable<Optional<T>> getByKey(final String key, final String value) {
+  public Single<Optional<T>> getByKey(final String key, final String value) {
     final JsonObject query = new JsonObject().put(key, value);
     return getOne(query);
   }
 
-  private Observable<Optional<T>> getOne(final JsonObject query) {
+  private Single<Optional<T>> getOne(final JsonObject query) {
     final JsonObject fields = new JsonObject();
 
-    return client.findOneObservable(collectionName, query, fields).map(document -> {
+    return client.rxFindOne(collectionName, query, fields).map(document -> {
       if (Objects.isNull(document)) {
         return Optional.empty();
       }
@@ -74,20 +74,20 @@ class MongoDao<T extends MongoObject> implements Dao<T> {
   }
 
   @Override
-  public Observable<T> add(final T object) {
+  public Single<T> add(final T object) {
     object.setCreatedAt(Instant.now().toString());
 
     final JsonObject document = new JsonObject(Json.encode(object));
     document.remove("_id");
 
-    return client.insertObservable(collectionName, document).map(id -> {
+    return client.rxInsert(collectionName, document).map(id -> {
       object.set_id(id);
       return object;
     });
   }
 
   @Override
-  public Observable<Boolean> update(final T object) {
+  public Single<Boolean> update(final T object) {
     final JsonObject query = new JsonObject().put("_id", object.get_id());
 
     final JsonObject document = new JsonObject(Json.encodePrettily(object));
@@ -96,7 +96,7 @@ class MongoDao<T extends MongoObject> implements Dao<T> {
 
     final JsonObject update = new JsonObject().put("$set", document);
 
-    return client.updateCollectionObservable(collectionName, query, update).map(result -> {
+    return client.rxUpdateCollection(collectionName, query, update).map(result -> {
       if (result.getDocMatched() == 1) {
         return true;
       }
@@ -109,9 +109,9 @@ class MongoDao<T extends MongoObject> implements Dao<T> {
   }
 
   @Override
-  public Observable<Boolean> delete(final String id) {
+  public Single<Boolean> delete(final String id) {
     final JsonObject query = new JsonObject().put("_id", id);
-    return client.removeDocumentObservable(collectionName, query).map(result -> {
+    return client.rxRemoveDocument(collectionName, query).map(result -> {
       if (result.getRemovedCount() == 1) {
         return true;
       }
