@@ -9,6 +9,7 @@ import com.google.common.base.Preconditions;
 
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.rxjava.ext.web.handler.StaticHandler;
 import io.vertx.rxjava.core.Vertx;
 import io.vertx.rxjava.ext.web.Router;
 import io.vertx.rxjava.ext.web.RoutingContext;
@@ -53,6 +54,7 @@ final class RouterProvider implements Provider<Router> {
     router.route().handler(corsHandler);
     router.route().handler(BodyHandler.create());
     router.route().failureHandler(failureHandler);
+    router.route(HttpMethod.GET, "/images/*").handler(StaticHandler.create("src/main/resources/images"));
 
     handlers.forEach(handler -> registerHandler(router, handler));
 

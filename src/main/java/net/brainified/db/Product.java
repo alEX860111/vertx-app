@@ -22,6 +22,8 @@ public final class Product extends MongoObject {
 
   private Double price;
 
+  private Image image;
+
   public String getName() {
     return name;
   }
@@ -36,6 +38,14 @@ public final class Product extends MongoObject {
 
   public void setPrice(Double price) {
     this.price = price;
+  }
+
+  public Image getImage() {
+    return image;
+  }
+
+  public void setImage(Image image) {
+    this.image = image;
   }
 
 }
